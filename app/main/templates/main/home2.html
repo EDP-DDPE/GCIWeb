@@ -1,0 +1,50 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Sistema de Cadastro de Documentos</h1>
+            <p class="lead">Gerencie documentos emitidos com integração ao OneDrive e SQL Server</p>
+            <hr class="my-4">
+            <p>Use as opções do menu para cadastrar novos documentos, gerenciar status ou visualizar a lista completa.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-plus fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Cadastrar Documento</h5>
+                <p class="card-text">Adicione novos documentos com upload automático para OneDrive</p>
+                <a href="{{ url_for('cadastrar_documento') }}" class="btn btn-primary">Cadastrar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-edit fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Gerenciar Status</h5>
+                <p class="card-text">Atualize o status e datas dos documentos cadastrados</p>
+                <a href="{{ url_for('gerenciar_status') }}" class="btn btn-success">Gerenciar</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-list fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Listar Documentos</h5>
+                <p class="card-text">Visualize todos os documentos cadastrados no sistema</p>
+                <a href="{{ url_for('listar_documentos') }}" class="btn btn-info">Listar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

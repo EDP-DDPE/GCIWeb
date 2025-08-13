@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+  .login-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+  .login-card h1 {
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+  .login-card p {
+    margin-bottom: 1.5rem;
+    color: #6b7280;
+  }
+  .login-btn {
+    display: inline-block;
+    padding: 0.8rem 1.2rem;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+  .login-btn:hover {
+    background-color: #1e40af;
+  }
+</style>
+
+<div class="login-page">
+  <div class="login-card">
+    <h1>Bem-vindo</h1>
+    <p>Use sua conta corporativa para acessar o sistema.</p>
+    <a href="{{ url_for('auth.login') }}" class="login-btn">
+      Entrar com Microsoft
+    </a>
+  </div>
+</div>
+{% endblock %}

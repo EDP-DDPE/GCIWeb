@@ -1,0 +1,144 @@
+<!-- templates/status.html -->
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Status - Sistema de Documentos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-edit me-2"></i>Gerenciar Status do Documento</h2>
+        <hr>
+    </div>
+</div>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="form-section">
+        <h4><i class="fas fa-search me-2"></i>Identificação</h4>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.protocolo.label(class="form-label") }}
+                <div class="input-group">
+                    {{ form.protocolo(class="form-control") }}
+                    <button type="button" class="btn btn-outline-secondary" id="buscarProtocolo">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                {% if form.protocolo.errors %}
+                    <div class="text-danger">
+                        {% for error in form.protocolo.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.status.label(class="form-label") }}
+                {{ form.status(class="form-select") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h4><i class="fas fa-calendar me-2"></i>Datas</h4>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.dt_criacao.label(class="form-label") }}
+                {{ form.dt_criacao(class="form-control") }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.dt_concl.label(class="form-label") }}
+                {{ form.dt_concl(class="form-control") }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.dt_transgressao.label(class="form-label") }}
+                {{ form.dt_transgressao(class="form-control") }}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.dt_fim.label(class="form-label") }}
+                {{ form.dt_fim(class="form-control") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="fas fa-save me-2"></i>Atualizar Status
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-times me-2"></i>Cancelar
+        </a>
+    </div>
+</form>
+
+<!-- Card para mostrar dados do documento encontrado -->
+<div class="row mt-4" id="documentoInfo" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-file-alt me-2"></i>Informações do Documento</h5>
+            </div>
+            <div class="card-body" id="documentoDetalhes">
+                <!-- Dados serão carregados via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('buscarProtocolo').addEventListener('click', function() {
+    const protocolo = document.getElementById('protocolo').value;
+    if (!protocolo) {
+        alert('Digite um protocolo para buscar');
+        return;
+    }
+
+    fetch(`/api/protocolo/${protocolo}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                document.getElementById('documentoInfo').style.display = 'none';
+            } else {
+                // Preencher campos de data se existirem
+                if (data.dt_criacao) document.getElementById('dt_criacao').value = data.dt_criacao;
+                if (data.dt_concl) document.getElementById('dt_concl').value = data.dt_concl;
+                if (data.dt_transgressao) document.getElementById('dt_transgressao').value = data.dt_transgressao;
+                if (data.status) document.getElementById('status').value = data.status;
+                if (data.dt_fim) document.getElementById('dt_fim').value = data.dt_fim;
+
+                // Mostrar informações do documento
+                const detalhesHtml = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Número do Documento:</strong> ${data.num_doc || 'N/A'}</p>
+                            <p><strong>Cliente:</strong> ${data.nome_cliente || 'N/A'}</p>
+                            <p><strong>CNPJ:</strong> ${data.cnpj || 'N/A'}</p>
+                            <p><strong>Instalação:</strong> ${data.instalacao || 'N/A'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Município:</strong> ${data.municipio || 'N/A'}</p>
+                            <p><strong>Área Responsável:</strong> ${data.area_resp || 'N/A'}</p>
+                            <p><strong>Elaborador:</strong> ${data.elaborador_doc || 'N/A'}</p>
+                            <p><strong>Eng. Responsável:</strong> ${data.eng_responsavel || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('documentoDetalhes').innerHTML = detalhesHtml;
+                document.getElementById('documentoInfo').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao buscar documento');
+        });
+});
+</script>
+{% endblock %}
