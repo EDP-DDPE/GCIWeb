@@ -12,7 +12,7 @@ class DocumentoForm(FlaskForm):
     nome_cliente = StringField('Nome do Cliente', validators=[DataRequired()])
     cnpj = StringField('CNPJ', validators=[DataRequired()])
     instalacao = StringField('Instalação', validators=[DataRequired()])
-
+    pass
     tipo_viab = SelectField('Tipo de Viabilidade',
                             choices=[('', 'Selecione...'), ('tecnica', 'Técnica'), ('comercial', 'Comercial'),
                                      ('completa', 'Completa')])
