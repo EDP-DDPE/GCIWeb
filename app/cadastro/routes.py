@@ -3,10 +3,10 @@ from .forms import DocumentoForm
 
 cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
 
-
 @cadastro_bp.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
     form = DocumentoForm()
     if request.method == 'POST':
         print('ok')
-    return render_template('cadastrar.html', form=form)
+
+    return render_template('cadastro/cadastrar.html', form=form)

@@ -13,6 +13,7 @@ from app.auth.routes import create_auth_blueprint
 def create_app(test_config=None):
 
     load_dotenv()
+
     app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'))
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET"),
