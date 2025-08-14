@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 import requests
+from app.database import db_manager
 
 main_bp = Blueprint("main", __name__, template_folder='templates')
 
@@ -33,3 +34,15 @@ def me():
         timeout=15,
     )
     return (resp.text, resp.status_code, {"Content-Type": "application/json"})
+
+
+@main_bp.route('/health')
+def health_check():
+    """Health check da aplicação"""
+
+    db_ok = db_manager.test_connection()
+
+    return jsonify({
+        'status': 'healthy' if db_ok else 'unhealthy',
+        'database': 'connected' if db_ok else 'disconnected'
+    }), 200 if db_ok else 503
