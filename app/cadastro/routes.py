@@ -9,4 +9,5 @@ def cadastro():
     if request.method == 'POST':
         print('teste2')
 
+
     return render_template('cadastro/cadastrar.html', form=form)
