@@ -1,15 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from app.models import db, Estudo, get_dashboard_stats
 
-listar_bp = Blueprint("listar", __name__, template_folder="templates")
+api_bp = Blueprint("api", __name__)
 
-
-@listar_bp.route("/listar", methods=["GET", "POST"])
-def listar():
-    documentos=[]
-    return render_template('listar/listar.html', documentos=documentos)
-
-
-@listar_bp.route('/api/estudos')
+@api_bp.route('/api/estudos')
 def listar_estudos():
     """Lista estudos com paginação otimizada"""
 
@@ -63,7 +57,7 @@ def listar_estudos():
         }), 500
 
 
-@listar_bp.route('/api/estudos/<int:estudo_id>')
+@api_bp.route('/api/estudos/<int:estudo_id>')
 def obter_estudo(estudo_id):
     """Obtém um estudo específico com todos os relacionamentos"""
 
@@ -171,3 +165,40 @@ def obter_estudo(estudo_id):
             'error': 'Erro ao obter estudo',
             'message': str(e)
         }), 500
+
+
+@api_bp.route('/api/dashboard/stats')
+def dashboard_stats():
+    """Estatísticas para o dashboard - queries otimizadas"""
+
+    try:
+        stats = get_dashboard_stats()
+
+        return jsonify({
+            'total_estudos': stats['total_estudos'],
+            'estudos_por_regional': [
+                {'regional': regional, 'total': total}
+                for regional, total in stats['estudos_por_regional']
+            ],
+            'estudos_por_status': [
+                {'status': status, 'total': total}
+                for status, total in stats['estudos_por_status']
+            ]
+        })
+
+    except Exception as e:
+        return jsonify({
+            'error': 'Erro ao obter estatísticas',
+            'message': str(e)
+        }), 500
+
+
+@api_bp.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return jsonify({'error': 'Erro interno do servidor'}), 500
+
+
+@api_bp.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Endpoint não encontrado'}), 404
