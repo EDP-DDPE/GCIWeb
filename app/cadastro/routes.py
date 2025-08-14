@@ -7,6 +7,6 @@ cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
 def cadastro():
     form = DocumentoForm()
     if request.method == 'POST':
-        print('teste 3')
+        print('teste1')
 
     return render_template('cadastro/cadastrar.html', form=form)
