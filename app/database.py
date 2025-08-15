@@ -112,7 +112,7 @@ class DatabaseManager:
             app.config[key] = value
         
         # Inicializar SQLAlchemy
-        from models import db
+        from app.models import db
         self.db = db
         self.db.init_app(app)
         

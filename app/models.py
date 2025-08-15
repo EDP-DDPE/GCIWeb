@@ -189,6 +189,7 @@ class TipoPedido(db.Model):
 
 
 class Estudo(db.Model):
+
     __tablename__ = 'estudos'
     __table_args__ = {'schema': 'gciweb'}
 
@@ -236,13 +237,6 @@ class Estudo(db.Model):
                                      cascade='all, delete-orphan', order_by='StatusEstudo.data.desc()')
     alternativas = db.relationship('Alternativa', back_populates='estudo', lazy='select', cascade='all, delete-orphan')
 
-    @property
-    def ultimo_status(self):
-        """Retorna o último status do estudo sem executar uma nova query"""
-        if self.status_estudos:
-            return self.status_estudos[0]
-        return None
-
     @classmethod
     def get_with_all_relations(cls, estudo_id):
         """Método para carregar um estudo com todos os relacionamentos necessários de uma vez"""
@@ -257,9 +251,17 @@ class Estudo(db.Model):
             joinedload(cls.tipo_analise),
             joinedload(cls.tipo_pedido),
             selectinload(cls.anexos),
-            selectinload(cls.status_estudos),
-            selectinload(cls.alternativas).joinedload(Alternativa.circuito)
+            selectinload(cls.status_estudos).joinedload(StatusEstudo.status_tipo),
+            selectinload(cls.alternativas).joinedload(Alternativa.circuito),
+            selectinload(cls.alternativas).selectinload(Alternativa.obras)
         ).filter_by(id_estudo=estudo_id).first()
+
+    @property
+    def ultimo_status(self):
+        """Retorna o último status do estudo sem executar uma nova query"""
+        if self.status_estudos:
+            return self.status_estudos[0]
+        return None
 
     @classmethod
     def get_list_with_basic_relations(cls):
@@ -308,15 +310,16 @@ class StatusEstudo(db.Model):
 
     id_status = db.Column(db.BigInteger, primary_key=True)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
-    status = db.Column(db.String(100), nullable=False)
+    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False, index=True)
     observacao = db.Column(db.Text)
     id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
     id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
 
     # Relacionamentos
+
     estudo = db.relationship('Estudo', back_populates='status_estudos', lazy='joined')
     criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
-
+    status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
 
 class Kit(db.Model):
     __tablename__ = 'kits'
@@ -350,18 +353,23 @@ class Alternativa(db.Model):
     flag_menor_custo_global = db.Column(db.Boolean, nullable=False, default=False)
     flag_alternativa_escolhida = db.Column(db.Boolean, nullable=False, default=False)
     custo_modular = db.Column(db.Numeric(15, 2), nullable=False)
-    id_obra = db.Column(db.BigInteger, db.ForeignKey('gciweb.obras.id_obra'))
     id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
     blob_image = db.Column(db.Text)
     observacao = db.Column(db.Text)
     ERD = db.Column(db.Numeric(10, 3))
     demanda_disponivel_ponto = db.Column(db.Numeric(10, 2))
 
-    # Relacionamentos
+    # Relacionamentos simples - sem ambiguidade
     circuito = db.relationship('Circuito', back_populates='alternativas', lazy='joined')
     estudo = db.relationship('Estudo', back_populates='alternativas', lazy='joined')
-    obra = db.relationship('Obra', back_populates='alternativa', lazy='joined')
-    obras = db.relationship('Obra', foreign_keys='Obra.id_alternativa', back_populates='alternativa', lazy='select')
+
+    # Relacionamento 1:N - Uma alternativa pode ter várias obras
+    obras = db.relationship(
+        'Obra',
+        back_populates='alternativa',
+        lazy='select',
+        cascade='all, delete-orphan'
+    )
 
 
 class Obra(db.Model):
@@ -376,10 +384,12 @@ class Obra(db.Model):
     id_kit = db.Column(db.BigInteger, db.ForeignKey('gciweb.kits.id_kit'), nullable=False)
     id_alternativa = db.Column(db.BigInteger, db.ForeignKey('gciweb.alternativas.id_alternativa'), nullable=False)
 
-    # Relacionamentos
+    # Relacionamentos simples - sem ambiguidade
     regional = db.relationship('Regional', back_populates='obras', lazy='joined')
     kit = db.relationship('Kit', back_populates='obras', lazy='joined')
-    alternativa = db.relationship('Alternativa', foreign_keys=[id_alternativa], back_populates='obras', lazy='joined')
+
+    # Relacionamento N:1 - Várias obras podem pertencer a uma alternativa
+    alternativa = db.relationship('Alternativa', back_populates='obras', lazy='joined')
 
 
 class StatusTipo(db.Model):
@@ -390,6 +400,8 @@ class StatusTipo(db.Model):
     status = db.Column(db.String(100), nullable=False)
     descricao = db.Column(db.Text)
     ativo = db.Column(db.Boolean, nullable=False, default=True)
+
+    status_estudos = db.relationship('StatusEstudo', back_populates='status_tipo', lazy='select')
 
 
 # Funções utilitárias para queries otimizadas

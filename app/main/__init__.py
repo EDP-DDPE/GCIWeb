@@ -22,7 +22,8 @@ def create_app(test_config=None):
         SESSION_PERMANENT=False,
         SESSION_USE_SIGNER=True,
         SESSION_FILE_THRESHOLD=100,
-        DATABASE=os.path.join(app.instance_path, 'SQLSERVER')
+        DATABASE=os.path.join(app.instance_path, 'SQLSERVER'),
+        JSON_AS_ASCII=False
     )
 
     # if test_config is None:
@@ -75,6 +76,7 @@ def create_app(test_config=None):
     from .routes import main_bp
     from app.cadastro.routes import cadastro_bp
     from app.listar.routes import listar_bp
+    from app.api.routes import api_bp
 
     app.register_blueprint(create_auth_blueprint(redirect_path="/callback"), url_prefix="/auth")
     # REDIRECT_URI deve ser http://localhost:5000/auth/callback
@@ -82,6 +84,7 @@ def create_app(test_config=None):
     app.register_blueprint(cadastro_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(listar_bp)
+    app.register_blueprint(api_bp)
 
     # with app.app_context():
     #     print("\n[DEBUG] Rotas registradas:")
