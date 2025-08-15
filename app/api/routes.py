@@ -1,7 +1,17 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from app.models import db, Estudo, get_dashboard_stats
+from app.models import db, Estudo, get_dashboard_stats, EDP
 
 api_bp = Blueprint("api", __name__)
+
+
+@api_bp.route('/api/teste')
+def teste():
+    edp = Estudo.query.all()
+    return jsonify(
+        [{
+            'nome': e.nome_projeto
+        } for e in edp]
+    )
 
 @api_bp.route('/api/estudos')
 def listar_estudos():
@@ -18,7 +28,8 @@ def listar_estudos():
             db.joinedload(Estudo.municipio),
             db.joinedload(Estudo.tipo_viabilidade),
             db.joinedload(Estudo.criado_por)
-        ).paginate(
+        ).order_by(Estudo.data_criacao.desc())\
+        .paginate(
             page=page,
             per_page=per_page,
             error_out=False
@@ -135,7 +146,7 @@ def obter_estudo(estudo_id):
                 {
                     'id': status.id_status,
                     'data': status.data.isoformat() if status.data else None,
-                    'status': status.status,
+                    'status': status.status_tipo.status if status.status_tipo else None,
                     'observacao': status.observacao,
                     'criado_por': status.criado_por.nome if status.criado_por else None
                 }

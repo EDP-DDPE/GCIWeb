@@ -1,3 +1,4 @@
+from app.models import db
 from app.main import create_app
 from app.database import db_manager
 
@@ -6,7 +7,6 @@ if __name__ == "__main__":
     # Context da aplicação para comandos
     with app.app_context():
         print("🚀 Iniciando aplicação GCI Web...")
-
         # Testar conexão
         if db_manager.test_connection():
             print("✅ Conexão com SQL Server OK!")
@@ -16,12 +16,12 @@ if __name__ == "__main__":
             print(f"📊 Servidor: {db_info.get('server_name', 'N/A')}")
             print(f"🗄️  Banco: {db_info.get('database_name', 'N/A')}")
 
-            # Criar tabelas se necessário (cuidado em produção!)
-            # try:
-            #     db.create_all()
-            #     print("📋 Tabelas verificadas/criadas!")
-            # except Exception as e:
-            #     print(f"⚠️  Aviso ao verificar tabelas: {e}")
+            #Criar tabelas se necessário (cuidado em produção!)
+            try:
+                #db.create_all()
+                print("📋 Tabelas verificadas/criadas!")
+            except Exception as e:
+                print(f"⚠️  Aviso ao verificar tabelas: {e}")
 
         else:
             print("❌ Falha na conexão com SQL Server!")
