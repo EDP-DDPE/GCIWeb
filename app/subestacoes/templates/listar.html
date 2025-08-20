@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Lista de Estudos</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Nº Documento</th>
+                <th>Projeto</th>
+                <th>Empresa</th>
+                <th>Município</th>
+                <th>Responsável</th>
+                <th>Data Criação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documentos %}
+            <tr>
+                <td>{{ doc.id }}</td>
+                <td>{{ doc.num_doc }}</td>
+                <td>{{ doc.nome_projeto }}</td>
+                <td>{{ doc.empresa }}</td>
+                <td>{{ doc.municipio }}</td>
+                <td>{{ doc.criado_por }}</td>
+                <td>{{ doc.data_criacao }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
