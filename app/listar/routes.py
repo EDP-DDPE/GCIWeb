@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from app.models import listar_estudos, obter_estudo, Estudo
+
 listar_bp = Blueprint("listar", __name__, template_folder="templates")
 
 

@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired, Optional, NumberRange
 from datetime import date
 
 
-ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'}
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'dwg', 'kmz', 'kml'}
 
 
 class DocumentoForm(FlaskForm):
@@ -106,6 +106,13 @@ class EstudoForm(FlaskForm):
         self.tipo_viab.choices = [(0, 'Selecione um tipo...')]
         self.tipo_analise.choices = [(0, 'Selecione um tipo...')]
         self.tipo_pedido.choices = [(0, 'Selecione um tipo...')]
+
+#TODO Adicionar campo com Livre e Cativo (Alterar modelagem SQL, models, forms e o html)
+#TODO Alterar a demanda antes e migrar para Estudos
+#TODO Separar demanda de carga e geração
+#TODO Adionar data desejada pelo cliente, data prevista de energização pela EDP, adicionar data de inicio do processo
+#TODO ALterar data transgressão para prazo interno
+#TODO Salvar anexos por protocolo
 
 
 class AlternativaForm(FlaskForm):
