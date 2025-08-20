@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo
+from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio
 
 api_bp = Blueprint("api", __name__)
 
@@ -12,6 +12,32 @@ def teste():
             'nome': e.nome_projeto
         } for e in edp]
     )
+
+@api_bp.route('/api/municipios/<int:municipio_id>')
+def api_obter_municipio(municipio_id):
+    try:
+        # Método otimizado que carrega tudo de uma vez
+        municipio = Municipio.query.get_or_404(municipio_id)
+
+        if not municipio:
+            return jsonify({'error': 'Municipio não encontrado'}), 404
+
+        municipio_data = {
+            'id': municipio.id_municipio,
+            'nome': municipio.municipio,
+            'edp': municipio.id_edp
+
+        }
+
+        return jsonify(municipio_data)
+
+    except Exception as e:
+        return {
+            'error': 'Erro ao obter municipio',
+            'message': str(e)
+        }, 500
+
+
 
 
 @api_bp.route('/api/estudos')

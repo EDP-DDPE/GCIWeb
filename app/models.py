@@ -407,28 +407,28 @@ class StatusTipo(db.Model):
 
 # Funções utilitárias para queries otimizadas
 
-def get_estudos_com_paginacao(page=1, per_page=20, filters=None):
-    """
-    Função otimizada para paginação de estudos evitando N+1
-    """
-    query = Estudo.query.options(
-        joinedload(Estudo.regional),
-        joinedload(Estudo.empresa),
-        joinedload(Estudo.municipio),
-        joinedload(Estudo.tipo_viabilidade),
-        joinedload(Estudo.criado_por)
-    )
-
-    if filters:
-        # Aplicar filtros conforme necessário
-        if 'regional_id' in filters:
-            query = query.filter(Estudo.id_regional == filters['regional_id'])
-        if 'data_inicio' in filters and 'data_fim' in filters:
-            query = query.filter(Estudo.data_criacao.between(filters['data_inicio'], filters['data_fim']))
-
-    return query.order_by(Estudo.data_criacao.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+# def get_estudos_com_paginacao(page=1, per_page=20, filters=None):
+#     """
+#     Função otimizada para paginação de estudos evitando N+1
+#     """
+#     query = Estudo.query.options(
+#         joinedload(Estudo.regional),
+#         joinedload(Estudo.empresa),
+#         joinedload(Estudo.municipio),
+#         joinedload(Estudo.tipo_viabilidade),
+#         joinedload(Estudo.criado_por)
+#     )
+#
+#     if filters:
+#         # Aplicar filtros conforme necessário
+#         if 'regional_id' in filters:
+#             query = query.filter(Estudo.id_regional == filters['regional_id'])
+#         if 'data_inicio' in filters and 'data_fim' in filters:
+#             query = query.filter(Estudo.data_criacao.between(filters['data_inicio'], filters['data_fim']))
+#
+#     return query.order_by(Estudo.data_criacao.desc()).paginate(
+#         page=page, per_page=per_page, error_out=False
+#     )
 
 
 def listar_estudos(page, per_page):

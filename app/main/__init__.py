@@ -22,6 +22,7 @@ def create_app(test_config=None):
         SESSION_PERMANENT=False,
         SESSION_USE_SIGNER=True,
         SESSION_FILE_THRESHOLD=100,
+        UPLOAD_FOLDER='uploads',  # ou caminho desejado
         DATABASE=os.path.join(app.instance_path, 'SQLSERVER'),
         JSON_AS_ASCII=False
     )

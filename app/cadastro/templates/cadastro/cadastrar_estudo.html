@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Estudo - GCI Web{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>
+                    Cadastrar Novo Estudo
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="form-estudo">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Seção: Informações Básicas -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-info-circle me-2"></i>Informações Básicas</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.num_doc.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.num_doc(class="form-control") }}
+                                    {% if form.num_doc.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.num_doc.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.protocolo.label(class="form-label") }}
+                                    {{ form.protocolo(class="form-control") }}
+                                    {% if form.protocolo.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.protocolo.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form.nome_projeto.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.nome_projeto(class="form-control", rows="2") }}
+                                    {% if form.nome_projeto.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.nome_projeto.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    {{ form.descricao.label(class="form-label") }}
+                                    {{ form.descricao(class="form-control", rows="3") }}
+                                    {% if form.descricao.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.descricao.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.instalacao.label(class="form-label") }}
+                                    {{ form.instalacao(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.n_alternativas.label(class="form-label") }}
+                                    {{ form.n_alternativas(class="form-control", min="0") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Demandas Solicitadas -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-bolt me-2"></i>Demandas Solicitadas</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dem_solicit_fp.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    <div class="input-group">
+                                        {{ form.dem_solicit_fp(class="form-control", step="0.01", min="0") }}
+                                        <span class="input-group-text">kW</span>
+                                    </div>
+                                    {% if form.dem_solicit_fp.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.dem_solicit_fp.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dem_solicit_p.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    <div class="input-group">
+                                        {{ form.dem_solicit_p(class="form-control", step="0.01", min="0") }}
+                                        <span class="input-group-text">kW</span>
+                                    </div>
+                                    {% if form.dem_solicit_p.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.dem_solicit_p.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Localização -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-map-marker-alt me-2"></i>Localização</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.edp.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.edp(class="form-select", id="edp-select") }}
+                                    {% if form.edp.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.edp.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.regional.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.regional(class="form-select", id="regional-select") }}
+                                    {% if form.regional.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.regional.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.municipio.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.municipio(class="form-select", id="municipio-select") }}
+                                    {% if form.municipio.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.municipio.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.latitude_cliente.label(class="form-label") }}
+                                    {{ form.latitude_cliente(class="form-control", step="0.00000001", placeholder="-23.550520") }}
+                                    <small class="text-muted">Formato decimal (ex: -23.550520)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.longitude_cliente.label(class="form-label") }}
+                                    {{ form.longitude_cliente(class="form-control", step="0.00000001", placeholder="-46.633309") }}
+                                    <small class="text-muted">Formato decimal (ex: -46.633309)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Classificação -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-tags me-2"></i>Classificação</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.tipo_viab.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.tipo_viab(class="form-select") }}
+                                    {% if form.tipo_viab.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.tipo_viab.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.tipo_analise.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.tipo_analise(class="form-select") }}
+                                    {% if form.tipo_analise.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.tipo_analise.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.tipo_pedido.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.tipo_pedido(class="form-select") }}
+                                    {% if form.tipo_pedido.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.tipo_pedido.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Responsáveis -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-users me-2"></i>Responsáveis</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.empresa.label(class="form-label") }}
+                                    {{ form.empresa(class="form-select") }}
+                                    <small class="text-muted">Empresa solicitante (opcional)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.resp_regiao.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
+                                    {% if form.resp_regiao.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.resp_regiao.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Datas -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-calendar me-2"></i>Datas</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.data_registro.label(class="form-label") }}
+                                    <span class="required">*</span>
+                                    {{ form.data_registro(class="form-control") }}
+                                    {% if form.data_registro.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.data_registro.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.data_transgressao.label(class="form-label") }}
+                                    {{ form.data_transgressao(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form.data_vencimento.label(class="form-label") }}
+                                    {{ form.data_vencimento(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção: Observações e Anexo -->
+                    <div class="form-section">
+                        <h5><i class="fas fa-paperclip me-2"></i>Observações e Anexo</h5>
+                        <div class="mb-3">
+                            {{ form.observacao.label(class="form-label") }}
+                            {{ form.observacao(class="form-control", rows="4") }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.arquivo.label(class="form-label") }}
+                            {{ form.arquivo(class="form-control", accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png") }}
+                            {% if form.arquivo.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.arquivo.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">
+                                Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <!-- Botões -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('cadastro.listar_estudos') }}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="btn-submit">
+                            <i class="fas fa-save me-2"></i>
+                            <span class="btn-text">Cadastrar Estudo</span>
+                            <span class="loading">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Salvando...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Filtros dinâmicos baseados na EDP selecionada
+    $('#edp-select').change(function() {
+        var edpId = $(this).val();
+        if (edpId) {
+            // Carregar municípios
+            $.get('/api/municipios/' + edpId, function(data) {
+                var municipioSelect = $('#municipio-select');
+                municipioSelect.empty().append('<option value="0">Selecione um município...</option>');
+                $.each(data.municipios, function(index, municipio) {
+                    municipioSelect.append('<option value="' + municipio.id + '">' + municipio.nome + '</option>');
+                });
+                municipioSelect.trigger('change');
+            });
+            
+            // Carregar regionais
+            $.get('/api/regionais/' + edpId, function(data) {
+                var regionalSelect = $('#regional-select');
+                regionalSelect.empty().append('<option value="0">Selecione uma regional...</option>');
+                $.each(data.regionais, function(index, regional) {
+                    regionalSelect.append('<option value="' + regional.id + '">' + regional.nome + '</option>');
+                });
+                regionalSelect.trigger('change');
+            });
+        } else {
+            $('#municipio-select').empty().append('<option value="0">Selecione um município...</option>').trigger('change');
+            $('#regional-select').empty().append('<option value="0">Selecione uma regional...</option>').trigger('change');
+        }
+    });
+    
+    // Carregar responsáveis baseado na regional
+    $('#regional-select').change(function() {
+        var regionalId = $(this).val();
+        if (regionalId) {
+            $.get('/api/resp_regioes/' + regionalId, function(data) {
+                var respSelect = $('#resp-regiao-select');
+                respSelect.empty().append('<option value="0">Selecione um responsável...</option>');
+                $.each(data.responsaveis, function(index, resp) {
+                    respSelect.append('<option value="' + resp.id + '">' + resp.nome + '</option>');
+                });
+                respSelect.trigger('change');
+            });
+        } else {
+            $('#resp-regiao-select').empty().append('<option value="0">Selecione um responsável...</option>').trigger('change');
+        }
+    });
+    
+    // Loading state no submit
+    $('#form-estudo').submit(function() {
+        var btn = $('#btn-submit');
+        btn.prop('disabled', true);
+        btn.find('.btn-text').hide();
+        btn.find('.loading').addClass('active');
+    });
+    
+    // Validação de coordenadas
+    $('#latitude_cliente, #longitude_cliente').on('input', function() {
+        var val = parseFloat($(this).val());
+        var field = $(this).attr('id');
+        
+        if (field === 'latitude_cliente' && (val < -90 || val > 90)) {
+            $(this).addClass('is-invalid');
+        } else if (field === 'longitude_cliente' && (val < -180 || val > 180)) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+});
+</script>
+{% endblock %}
