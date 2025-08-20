@@ -433,7 +433,6 @@ class StatusTipo(db.Model):
 
 def listar_estudos(page, per_page):
     """Lista estudos com paginação otimizada"""
-
     try:
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
