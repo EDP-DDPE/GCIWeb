@@ -1,10 +1,13 @@
+create schema gciweb
+Go
+
 -- Schema otimizado para SQL SERVER com BIGINT IDENTITY
 -- Todos os tipos de dados são nativos do SQL Server 2016+
 -- Sistema centralizado, BIGINT é mais adequado que UNIQUEIDENTIFIER
 
 CREATE TABLE "gciweb"."edp"(
     "id_edp" BIGINT IDENTITY(1,1) NOT NULL,
-    "empresa" VARCHAR(255) NOT NULL
+    "empresa" VARCHAR(2) NOT NULL
 );
 ALTER TABLE "gciweb"."edp" ADD CONSTRAINT "gciweb_edp_id_edp_primary" PRIMARY KEY("id_edp");
 
@@ -21,6 +24,16 @@ CREATE TABLE "gciweb"."usuarios"(
     "bloqueado" BIT NOT NULL DEFAULT 0
 );
 ALTER TABLE "gciweb"."usuarios" ADD CONSTRAINT "gciweb_usuarios_id_usuario_primary" PRIMARY KEY("id_usuario");
+
+CREATE TABLE "gciweb"."resp_regioes"(
+	"id_resp_regiao" BIGINT IDENTITY(1,1) NOT NULL,
+	"id_regional" BIGINT NOT NULL,
+	"id_usuario" BIGINT NOT NULL,
+	"ano_ref" INT NOT NULL
+);
+
+ALTER TABLE "gciweb"."resp_regioes" ADD CONSTRAINT "gciweb_resp_regioes_id_resp_regiao_primary" PRIMARY KEY("id_resp_regiao");
+
 
 CREATE TABLE "gciweb"."empresas"(
     "id_empresa" BIGINT IDENTITY(1,1) NOT NULL,
@@ -109,13 +122,15 @@ CREATE TABLE "gciweb"."estudos"(
     "descricao" TEXT NULL,
     "instalacao" BIGINT NULL,
     "n_alternativas" INT NOT NULL DEFAULT 0,
+	"dem_solicit_fp" DECIMAL(10,2) NOT NULL, -- Melhor para demandas
+    "dem_solicit_p" DECIMAL(10,2) NOT NULL,
     "latitude_cliente" DECIMAL(10,8) NULL, -- Melhor para coordenadas
     "longitude_cliente" DECIMAL(11,8) NULL, -- Melhor para coordenadas
     "observacao" TEXT NULL,
     "id_edp" BIGINT NOT NULL,
     "id_regional" BIGINT NOT NULL,
     "id_criado_por" BIGINT NOT NULL,
-    "id_eng_responsavel" BIGINT NOT NULL,
+    "id_resp_regiao" BIGINT NOT NULL,
     "id_empresa" BIGINT NULL,
     "id_municipio" BIGINT NOT NULL,
     "id_tipo_viab" BIGINT NOT NULL,
@@ -149,14 +164,16 @@ CREATE TABLE "gciweb"."socios"(
 );
 ALTER TABLE "gciweb"."socios" ADD CONSTRAINT "gciweb_socios_id_socios_primary" PRIMARY KEY("id_socios");
 
+
 CREATE TABLE "gciweb"."status_estudo"(
     "id_status" BIGINT IDENTITY(1,1) NOT NULL,
     "data" DATETIME NOT NULL DEFAULT GETDATE(),
-    "status" VARCHAR(100) NOT NULL, -- Reduzido tamanho
+    "id_status_tipo" BIGINT NOT NULL,
     "observacao" TEXT NULL,
     "id_estudo" BIGINT NOT NULL,
     "id_criado_por" BIGINT NOT NULL
 );
+
 ALTER TABLE "gciweb"."status_estudo" ADD CONSTRAINT "gciweb_status_estudo_id_status_primary" PRIMARY KEY("id_status");
 
 CREATE TABLE "gciweb"."kits"(
@@ -219,10 +236,13 @@ ALTER TABLE "gciweb"."subestacoes" ADD CONSTRAINT "gciweb_subestacoes_id_municip
 ALTER TABLE "gciweb"."circuitos" ADD CONSTRAINT "gciweb_circuitos_id_subestacao_foreign" FOREIGN KEY("id_subestacao") REFERENCES "gciweb"."subestacoes"("id_subestacao");
 ALTER TABLE "gciweb"."circuitos" ADD CONSTRAINT "gciweb_circuitos_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp");
 
+ALTER TABLE "gciweb"."resp_regioes" ADD CONSTRAINT "gciweb_resp_regioes_id_usuario_foreign" FOREIGN KEY("id_usuario") REFERENCES "gciweb"."usuarios"("id_usuario");
+ALTER TABLE "gciweb"."resp_regioes" ADD CONSTRAINT "gciweb_regioes_id_regional_foreign" FOREIGN KEY("id_regional") REFERENCES "gciweb"."regionais"("id_regional");
+
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_regional_foreign" FOREIGN KEY("id_regional") REFERENCES "gciweb"."regionais"("id_regional");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_criado_por_foreign" FOREIGN KEY("id_criado_por") REFERENCES "gciweb"."usuarios"("id_usuario");
-ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_eng_responsavel_foreign" FOREIGN KEY("id_eng_responsavel") REFERENCES "gciweb"."usuarios"("id_usuario");
+ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_eng_responsavel_foreign" FOREIGN KEY("id_resp_regiao") REFERENCES "gciweb"."resp_regioes"("id_resp_regiao");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_empresa_foreign" FOREIGN KEY("id_empresa") REFERENCES "gciweb"."empresas"("id_empresa");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_municipio_foreign" FOREIGN KEY("id_municipio") REFERENCES "gciweb"."municipios"("id_municipio");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_viab_foreign" FOREIGN KEY("id_tipo_viab") REFERENCES "gciweb"."tipo_viabilidade"("id_tipo_viab");
@@ -233,6 +253,7 @@ ALTER TABLE "gciweb"."anexos" ADD CONSTRAINT "gciweb_anexos_id_estudo_foreign" F
 ALTER TABLE "gciweb"."socios" ADD CONSTRAINT "gciweb_socios_id_empresa_foreign" FOREIGN KEY("id_empresa") REFERENCES "gciweb"."empresas"("id_empresa");
 ALTER TABLE "gciweb"."status_estudo" ADD CONSTRAINT "gciweb_status_estudo_id_estudo_foreign" FOREIGN KEY("id_estudo") REFERENCES "gciweb"."estudos"("id_estudo");
 ALTER TABLE "gciweb"."status_estudo" ADD CONSTRAINT "gciweb_status_estudo_id_criado_por_foreign" FOREIGN KEY("id_criado_por") REFERENCES "gciweb"."usuarios"("id_usuario");
+ALTER TABLE "gciweb"."status_estudo" ADD CONSTRAINT "gciweb_status_estudo_id_status_tipo_foreign" FOREIGN KEY("id_status_tipo") REFERENCES "gciweb"."status_tipos"("id_status_tipo");
 
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_circuito_foreign" FOREIGN KEY("id_circuito") REFERENCES "gciweb"."circuitos"("id_circuito");
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_estudo_foreign" FOREIGN KEY("id_estudo") REFERENCES "gciweb"."estudos"("id_estudo");
@@ -243,7 +264,7 @@ ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_obra_
 
 -- ÍNDICES ADICIONAIS PARA PERFORMANCE
 CREATE INDEX "idx_estudos_empresa" ON "gciweb"."estudos"("id_empresa");
-CREATE INDEX "idx_estudos_eng_responsavel" ON "gciweb"."estudos"("id_eng_responsavel");
+CREATE INDEX "idx_estudos_eng_responsavel" ON "gciweb"."estudos"("id_resp_regiao");
 CREATE INDEX "idx_estudos_regional" ON "gciweb"."estudos"("id_regional");
 CREATE INDEX "idx_alternativas_estudo" ON "gciweb"."alternativas"("id_estudo");
 CREATE INDEX "idx_status_estudo_data" ON "gciweb"."status_estudo"("data");
