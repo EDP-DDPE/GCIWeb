@@ -117,15 +117,23 @@ ALTER TABLE "gciweb"."tipo_pedido" ADD CONSTRAINT "gciweb_tipo_pedido_id_tipo_pe
 CREATE TABLE "gciweb"."estudos"(
     "id_estudo" BIGINT IDENTITY(1,1) NOT NULL,
     "num_doc" VARCHAR(255) NOT NULL,
-    "protocolo" BIGINT NULL, -- Corrigido nome da coluna
+    "protocolo" BIGINT NULL,
     "nome_projeto" TEXT NOT NULL,
     "descricao" TEXT NULL,
     "instalacao" BIGINT NULL,
     "n_alternativas" INT NOT NULL DEFAULT 0,
-	"dem_solicit_fp" DECIMAL(10,2) NOT NULL, -- Melhor para demandas
-    "dem_solicit_p" DECIMAL(10,2) NOT NULL,
+    -- Demandas atual e solicitada pelo cliente
+    "dem_carga_atual_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_carga_atual_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+	"dem_carga_solicit_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_carga_solicit_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_atual_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_atual_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+	"dem_ger_solicit_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_solicit_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "latitude_cliente" DECIMAL(10,8) NULL, -- Melhor para coordenadas
     "longitude_cliente" DECIMAL(11,8) NULL, -- Melhor para coordenadas
+    "livre" BIT NULL,
     "observacao" TEXT NULL,
     "id_edp" BIGINT NOT NULL,
     "id_regional" BIGINT NOT NULL,
@@ -136,10 +144,13 @@ CREATE TABLE "gciweb"."estudos"(
     "id_tipo_viab" BIGINT NOT NULL,
     "id_tipo_analise" BIGINT NOT NULL,
     "id_tipo_pedido" BIGINT NOT NULL,
-    "data_registro" DATE NOT NULL,
-    "data_criacao" DATETIME NOT NULL DEFAULT GETDATE(),
-    "data_transgressao" DATE NULL,
-    "data_vencimento" DATE NULL
+    "data_registro" DATE NOT NULL DEFAULT GETDATE(),
+    "data_abertura_cliente" DATE NULL ,
+    "data_desejada_cliente" DATE NULL,
+    "data_vencimento_cliente" DATE NULL,
+    "data_prevista_conexao" DATE NULL,
+    "data_vencimento_ddpe" DATE NULL
+
 );
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_estudo_primary" PRIMARY KEY("id_estudo");
 CREATE INDEX "gciweb_estudos_num_doc_index" ON "gciweb"."estudos"("num_doc");
@@ -191,10 +202,10 @@ CREATE TABLE "gciweb"."alternativas"(
     "id_alternativa" BIGINT IDENTITY(1,1) NOT NULL,
     "id_circuito" BIGINT NOT NULL,
     "descricao" TEXT NOT NULL,
-    "dem_fp_ant" DECIMAL(10,2) NOT NULL, -- Melhor para demandas
-    "dem_p_ant" DECIMAL(10,2) NOT NULL,
-    "dem_fp_dep" DECIMAL(10,2) NOT NULL,
-    "dem_p_dep" DECIMAL(10,2) NOT NULL,
+    "dem_carga_fp_dep" DECIMAL(10,2) NOT NULL,
+    "dem_carga_p_dep" DECIMAL(10,2) NOT NULL,
+    "dem_ger_fp_dep" DECIMAL(10,2) NOT NULL,
+    "dem_ger_p_dep" DECIMAL(10,2) NOT NULL,
     "latitude_ponto_conexao" DECIMAL(10,8) NULL,
     "longitude_ponto_conexao" DECIMAL(11,8) NULL,
     "flag_menor_custo_global" BIT NOT NULL DEFAULT 0,
