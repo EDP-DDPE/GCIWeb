@@ -8,4 +8,7 @@
     ## Feito
 #TODO ALterar data transgressão para prazo interno
     ## Feito
-#TODO Salvar anexos por protocolo
+#TODO Salvar anexos por protocolo.
+
+#TODO melhorar relação entre Tipo_pedido, tipo_analise
+
