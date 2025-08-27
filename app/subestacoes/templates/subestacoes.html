@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Lista de Subestações</h2>
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>SIGLA</th>
+                <th>Município</th>
+                <th>EDP</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in documentos %}
+            <tr>
+                <td>{{ sub.id_subestacao }}</td>
+                <td>{{ sub.nome }}</td>
+                <td>{{ sub.sigla }}</td>
+                <td>{{ sub.municipio.municipio }}</td>
+                <td>{{ sub.edp.empresa }}</td>
+                <td>
+                    <!-- Botão que abre o modal -->
+                    <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#modalSub{{ sub.id_subestacao }}">
+                        Visualizar mais
+                    </button>
+                </td>
+            </tr>
+
+                        <!-- Modal -->
+            <div class="modal fade" id="modalSub{{ sub.id_subestacao }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Detalhes da Subestação</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>ID:</strong> {{ sub.id_subestacao }}</p>
+                            <p><strong>Nome:</strong> {{ sub.nome }}</p>
+                            <p><strong>SIGLA:</strong> {{ sub.sigla }}</p>
+                            <p><strong>Município:</strong> {{ sub.municipio.municipio }}</p>
+                            <p><strong>EDP:</strong> {{ sub.edp.empresa }}</p>
+
+                            <!-- Se quiser mais informações relacionadas -->
+                            <hr>
+                            <h6>Circuitos vinculados:</h6>
+                            <ul>
+                                {% for c in sub.circuitos %}
+                                <li>{{ c.nome_circuito }}</li>
+                                {% else %}
+                                <li><em>Sem circuitos</em></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="{{ url_for('subestacoes.editar_subestacao', id=sub.id_subestacao) }}" class="btn btn-primary">
+                                Editar
+                            </a>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

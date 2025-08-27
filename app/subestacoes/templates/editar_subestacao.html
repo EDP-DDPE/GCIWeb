@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Editar Subestação</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input type="text" class="form-control" name="nome" value="{{ sub.nome }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">SIGLA</label>
+            <input type="text" class="form-control" name="sigla" value="{{ sub.sigla }}" required>
+        </div>
+        <!-- Campos extras se quiser -->
+        <!--
+        <div class="mb-3">
+            <label class="form-label">Município</label>
+            <input type="text" class="form-control" name="id_municipio" value="{{ sub.id_municipio }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">EDP</label>
+            <input type="text" class="form-control" name="id_edp" value="{{ sub.id_edp }}">
+        </div>
+        -->
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a href="{{ url_for('subestacoes.listar_subestacoes') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+{% endblock %}
