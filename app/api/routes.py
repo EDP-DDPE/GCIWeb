@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
-from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio
+from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao
 
 api_bp = Blueprint("api", __name__)
 
@@ -51,6 +51,28 @@ def api_listar_estudos():
 def api_obter_estudo(estudo_id):
     return obter_estudo(estudo_id)
 
+
+@api_bp.route("/api/tipo_analises/<viabilidade>")
+def get_analises(viabilidade):
+    analises = (
+        db.session.query(TipoSolicitacao.analise)
+        .filter_by(viabilidade=viabilidade)
+        .distinct()
+        .order_by(TipoSolicitacao.analise)
+        .all()
+    )
+    return jsonify([a[0] for a in analises])
+
+
+@api_bp.route("/api/tipo_pedidos/<viabilidade>/<analise>")
+def get_pedidos(viabilidade, analise):
+    solicitacoes = (
+        db.session.query(TipoSolicitacao.id_tipo_solicitacao, TipoSolicitacao.pedido)
+        .filter_by(viabilidade=viabilidade, analise=analise)
+        .order_by(TipoSolicitacao.pedido)
+        .all()
+    )
+    return jsonify([{"id": s.id_tipo_solicitacao, "pedido": s.pedido} for s in solicitacoes])
 
 @api_bp.route('/api/dashboard/stats')
 def dashboard_stats():
