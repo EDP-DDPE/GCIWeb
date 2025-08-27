@@ -72,8 +72,8 @@ class EstudoForm(FlaskForm):
 
     # Tipos
     tipo_viab = SelectField('Tipo de Viabilidade', choices=[], coerce=str, validators=[DataRequired()])
-    tipo_analise = SelectField('Tipo de Análise', choices=[], coerce=str, validators=[DataRequired()])
-    tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[DataRequired()])
+    tipo_analise = SelectField('Tipo de Análise', choices=[], coerce=str, validators=[DataRequired()], validate_choice=False)
+    tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[DataRequired()], validate_choice=False)
 
     # Arquivo anexo (opcional no cadastro inicial)
     arquivo = FileField('Anexar Documento',

@@ -111,8 +111,6 @@ def cadastro_estudo():
                 dem_ger_atual_p=form.dem_ger_atual_p.data,
                 dem_ger_solicit_fp=form.dem_ger_solicit_fp.data,
                 dem_ger_solicit_p=form.dem_ger_solicit_p.data,
-                # dem_solicit_fp=form.dem_solicit_fp.data,
-                # dem_solicit_p=form.dem_solicit_p.data,
                 latitude_cliente=form.latitude_cliente.data,
                 longitude_cliente=form.longitude_cliente.data,
                 observacao=form.observacao.data,
@@ -122,9 +120,6 @@ def cadastro_estudo():
                 id_resp_regiao=form.resp_regiao.data,
                 id_empresa=form.empresa.data if form.empresa.data else None,
                 id_municipio=form.municipio.data,
-                # id_tipo_viab=form.tipo_viab.data,
-                # id_tipo_analise=form.tipo_analise.data,
-                # id_tipo_pedido=form.tipo_pedido.data,
                 id_tipo_solicitacao=form.tipo_pedido.data,
                 data_registro=datetime.today(),
                 data_abertura_cliente=form.data_abertura_cliente.data,
@@ -296,32 +291,3 @@ def detalhar_estudo(id_estudo):
                            anexos=anexos)
 
 
-# Rotas AJAX para filtros dinâmicos
-@cadastro_bp.route("/api/municipios/<int:id_edp>")
-def get_municipios_by_edp(id_edp):
-    """API para buscar municípios por EDP"""
-    municipios = Municipio.query.filter_by(id_edp=id_edp).all()
-    return {'municipios': [{'id': m.id_municipio, 'nome': m.municipio} for m in municipios]}
-
-
-@cadastro_bp.route("/api/regionais/<int:id_edp>")
-def get_regionais_by_edp(id_edp):
-    """API para buscar regionais por EDP"""
-    regionais = Regional.query.filter_by(id_edp=id_edp).all()
-    return {'regionais': [{'id': r.id_regional, 'nome': r.regional} for r in regionais]}
-
-
-@cadastro_bp.route("/api/circuitos/<int:id_edp>")
-def get_circuitos_by_edp(id_edp):
-    """API para buscar circuitos por EDP"""
-    circuitos = Circuito.query.filter_by(id_edp=id_edp).join(Subestacao).all()
-    return {'circuitos': [{'id': c.id_circuito, 'nome': f"{c.circuito} - {c.subestacao.nome}"}
-                          for c in circuitos]}
-
-
-@cadastro_bp.route("/api/resp_regioes/<int:id_regional>")
-def get_resp_by_regional(id_regional):
-    """API para buscar responsáveis por regional"""
-    responsaveis = RespRegiao.query.filter_by(id_regional=id_regional).join(Usuario).all()
-    return {'responsaveis': [{'id': r.id_resp_regiao, 'nome': r.usuario.nome}
-                             for r in responsaveis]}
