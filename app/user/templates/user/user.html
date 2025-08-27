@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if not session.user %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="card-title">Bem-vindo!</h3>
+                    <p class="card-text">Faça login com sua conta Microsoft para acessar a aplicação.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                            Entrar com Microsoft
+                        </a>
+                        <a href="{{ url_for('auth.fresh_login') }}" class="btn btn-outline-secondary btn-sm">
+                            Novo Login (Limpo)
+                        </a>
+                        <a href="{{ url_for('auth.clear_session') }}" class="btn btn-outline-warning btn-sm">
+                            Limpar Sessão
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h6>Informações do Usuário</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nome:</strong> {{user.name}}</p>
+                    <p><strong>Email:</strong> {{ session.user.preferred_username }}</p>
+                    <p><strong>Cargo:</strong> {{ graph['jobTitle'] }}</p>
+                    <p><strong>Tudo:</strong> {{ graph }}</p>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

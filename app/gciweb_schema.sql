@@ -96,36 +96,54 @@ CREATE TABLE "gciweb"."circuitos"(
 );
 ALTER TABLE "gciweb"."circuitos" ADD CONSTRAINT "gciweb_circuitos_id_circuito_primary" PRIMARY KEY("id_circuito");
 
-CREATE TABLE "gciweb"."tipo_viabilidade"(
-    "id_tipo_viab" BIGINT IDENTITY(1,1) NOT NULL,
-    "descricao" VARCHAR(255) NOT NULL
-);
-ALTER TABLE "gciweb"."tipo_viabilidade" ADD CONSTRAINT "gciweb_tipo_viabilidade_id_tipo_viab_primary" PRIMARY KEY("id_tipo_viab");
+--CREATE TABLE "gciweb"."tipo_viabilidade"(
+--    "id_tipo_viab" BIGINT IDENTITY(1,1) NOT NULL,
+--    "descricao" VARCHAR(255) NOT NULL
+--);
+--ALTER TABLE "gciweb"."tipo_viabilidade" ADD CONSTRAINT "gciweb_tipo_viabilidade_id_tipo_viab_primary" PRIMARY KEY("id_tipo_viab");
+--
+--CREATE TABLE "gciweb"."tipo_analise"(
+--    "id_tipo_analise" BIGINT IDENTITY(1,1) NOT NULL,
+--    "analise" VARCHAR(255) NOT NULL
+--);
+--ALTER TABLE "gciweb"."tipo_analise" ADD CONSTRAINT "gciweb_tipo_analise_id_tipo_analise_primary" PRIMARY KEY("id_tipo_analise");
+--
+--CREATE TABLE "gciweb"."tipo_pedido"(
+--    "id_tipo_pedido" BIGINT IDENTITY(1,1) NOT NULL,
+--    "descricao" VARCHAR(255) NOT NULL
+--);
+--ALTER TABLE "gciweb"."tipo_pedido" ADD CONSTRAINT "gciweb_tipo_pedido_id_tipo_pedido_primary" PRIMARY KEY("id_tipo_pedido");
 
-CREATE TABLE "gciweb"."tipo_analise"(
-    "id_tipo_analise" BIGINT IDENTITY(1,1) NOT NULL,
-    "analise" VARCHAR(255) NOT NULL
-);
-ALTER TABLE "gciweb"."tipo_analise" ADD CONSTRAINT "gciweb_tipo_analise_id_tipo_analise_primary" PRIMARY KEY("id_tipo_analise");
 
-CREATE TABLE "gciweb"."tipo_pedido"(
-    "id_tipo_pedido" BIGINT IDENTITY(1,1) NOT NULL,
-    "descricao" VARCHAR(255) NOT NULL
+ -- CRIADO TIPO_SOLICITACAO para substituir Tipo_analise, Tipo_pedido e tipo_viabilidade em uma única tabela.
+CREATE TABLE "gciweb"."tipo_solicitacao"(
+    "id_tipo_solicitacao" BIGINT IDENTITY(1,1) NOT NULL,
+    "viabilidade" VARCHAR(255) NOT NULL,
+    "analise" VARCHAR(255) NOT NULL,
+    "pedido" VARCHAR(255) NOT NULL
 );
-ALTER TABLE "gciweb"."tipo_pedido" ADD CONSTRAINT "gciweb_tipo_pedido_id_tipo_pedido_primary" PRIMARY KEY("id_tipo_pedido");
+ALTER TABLE "gciweb"."tipo_solicitacao" ADD CONSTRAINT "gciweb_tipo_solicitacao_id_tipo_solicitacao_primary" PRIMARY KEY("id_tipo_solicitacao");
 
 CREATE TABLE "gciweb"."estudos"(
     "id_estudo" BIGINT IDENTITY(1,1) NOT NULL,
     "num_doc" VARCHAR(255) NOT NULL,
-    "protocolo" BIGINT NULL, -- Corrigido nome da coluna
+    "protocolo" BIGINT NULL,
     "nome_projeto" TEXT NOT NULL,
     "descricao" TEXT NULL,
     "instalacao" BIGINT NULL,
     "n_alternativas" INT NOT NULL DEFAULT 0,
-	"dem_solicit_fp" DECIMAL(10,2) NOT NULL, -- Melhor para demandas
-    "dem_solicit_p" DECIMAL(10,2) NOT NULL,
+    -- Demandas atual e solicitada pelo cliente
+    "dem_carga_atual_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_carga_atual_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+	"dem_carga_solicit_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_carga_solicit_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_atual_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_atual_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
+	"dem_ger_solicit_fp" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "dem_ger_solicit_p" DECIMAL(10,2) NOT NULL DEFAULT 0,
     "latitude_cliente" DECIMAL(10,8) NULL, -- Melhor para coordenadas
     "longitude_cliente" DECIMAL(11,8) NULL, -- Melhor para coordenadas
+    "livre" BIT NULL,
     "observacao" TEXT NULL,
     "id_edp" BIGINT NOT NULL,
     "id_regional" BIGINT NOT NULL,
@@ -133,13 +151,17 @@ CREATE TABLE "gciweb"."estudos"(
     "id_resp_regiao" BIGINT NOT NULL,
     "id_empresa" BIGINT NULL,
     "id_municipio" BIGINT NOT NULL,
-    "id_tipo_viab" BIGINT NOT NULL,
-    "id_tipo_analise" BIGINT NOT NULL,
-    "id_tipo_pedido" BIGINT NOT NULL,
-    "data_registro" DATE NOT NULL,
-    "data_criacao" DATETIME NOT NULL DEFAULT GETDATE(),
-    "data_transgressao" DATE NULL,
-    "data_vencimento" DATE NULL
+    --"id_tipo_viab" BIGINT NOT NULL,
+    --"id_tipo_analise" BIGINT NOT NULL,
+    --"id_tipo_pedido" BIGINT NOT NULL,
+    "id_tipo_solicitacao" BIGINT NOT NULL,
+    "data_registro" DATE NOT NULL DEFAULT GETDATE(),
+    "data_abertura_cliente" DATE NULL ,
+    "data_desejada_cliente" DATE NULL,
+    "data_vencimento_cliente" DATE NULL,
+    "data_prevista_conexao" DATE NULL,
+    "data_vencimento_ddpe" DATE NULL
+
 );
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_estudo_primary" PRIMARY KEY("id_estudo");
 CREATE INDEX "gciweb_estudos_num_doc_index" ON "gciweb"."estudos"("num_doc");
@@ -191,10 +213,10 @@ CREATE TABLE "gciweb"."alternativas"(
     "id_alternativa" BIGINT IDENTITY(1,1) NOT NULL,
     "id_circuito" BIGINT NOT NULL,
     "descricao" TEXT NOT NULL,
-    "dem_fp_ant" DECIMAL(10,2) NOT NULL, -- Melhor para demandas
-    "dem_p_ant" DECIMAL(10,2) NOT NULL,
-    "dem_fp_dep" DECIMAL(10,2) NOT NULL,
-    "dem_p_dep" DECIMAL(10,2) NOT NULL,
+    "dem_carga_fp_dep" DECIMAL(10,2) NOT NULL,
+    "dem_carga_p_dep" DECIMAL(10,2) NOT NULL,
+    "dem_ger_fp_dep" DECIMAL(10,2) NOT NULL,
+    "dem_ger_p_dep" DECIMAL(10,2) NOT NULL,
     "latitude_ponto_conexao" DECIMAL(10,8) NULL,
     "longitude_ponto_conexao" DECIMAL(11,8) NULL,
     "flag_menor_custo_global" BIT NOT NULL DEFAULT 0,
@@ -245,9 +267,10 @@ ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_criado_por_fore
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_eng_responsavel_foreign" FOREIGN KEY("id_resp_regiao") REFERENCES "gciweb"."resp_regioes"("id_resp_regiao");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_empresa_foreign" FOREIGN KEY("id_empresa") REFERENCES "gciweb"."empresas"("id_empresa");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_municipio_foreign" FOREIGN KEY("id_municipio") REFERENCES "gciweb"."municipios"("id_municipio");
-ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_viab_foreign" FOREIGN KEY("id_tipo_viab") REFERENCES "gciweb"."tipo_viabilidade"("id_tipo_viab");
-ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_analise_foreign" FOREIGN KEY("id_tipo_analise") REFERENCES "gciweb"."tipo_analise"("id_tipo_analise");
-ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_pedido_foreign" FOREIGN KEY("id_tipo_pedido") REFERENCES "gciweb"."tipo_pedido"("id_tipo_pedido");
+--ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_viab_foreign" FOREIGN KEY("id_tipo_viab") REFERENCES "gciweb"."tipo_viabilidade"("id_tipo_viab");
+--ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_analise_foreign" FOREIGN KEY("id_tipo_analise") REFERENCES "gciweb"."tipo_analise"("id_tipo_analise");
+--ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_pedido_foreign" FOREIGN KEY("id_tipo_pedido") REFERENCES "gciweb"."tipo_pedido"("id_tipo_pedido");
+ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_solicitacao_foreign" FOREIGN KEY("id_tipo_solicitacao") REFERENCES "gciweb"."tipo_solicitacao"("id_tipo_solicitacao");
 
 ALTER TABLE "gciweb"."anexos" ADD CONSTRAINT "gciweb_anexos_id_estudo_foreign" FOREIGN KEY("id_estudo") REFERENCES "gciweb"."estudos"("id_estudo");
 ALTER TABLE "gciweb"."socios" ADD CONSTRAINT "gciweb_socios_id_empresa_foreign" FOREIGN KEY("id_empresa") REFERENCES "gciweb"."empresas"("id_empresa");

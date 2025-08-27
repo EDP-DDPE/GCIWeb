@@ -1,9 +1,18 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 import requests
 from app.database import db_manager
+import datetime
+import json
 
-main_bp = Blueprint("main", __name__, template_folder='templates')
+main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
+def msg_boas_vidas(nome):
+    if 12 > datetime.datetime.now().hour > 4:
+        return f"Bom dia, {nome}."
+    elif 18 > datetime.datetime.now().hour > 12:
+        return f"Boa tarde, {nome}."
+    else:
+        return f"Bom noite, {nome}."
 
 @main_bp.route("/")
 def home():
@@ -16,24 +25,14 @@ def home():
     #         <a href="/me">Chamar Microsoft Graph /me</a> |
     #         <a href="auth/logout">Sair</a>
     #     """
-
-    return render_template("main/index.html", usuario=usuario)
-
-@main_bp.route("/me")
-def me():
-    """
-    Exemplo de chamada ao Microsoft Graph /me (exige escopo User.Read).
-    """
     token = session.get("access_token")
-    if not token:
-        return redirect(url_for("main.home"))
-
     resp = requests.get(
         "https://graph.microsoft.com/v1.0/me",
         headers={"Authorization": f"Bearer {token}"},
         timeout=15,
     )
-    return (resp.text, resp.status_code, {"Content-Type": "application/json"})
+    nome = json.loads(resp.text)['givenName']
+    return render_template("main/index.html", usuario=usuario, msg=msg_boas_vidas(nome))
 
 
 @main_bp.route('/health')

@@ -1,14 +1,28 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from werkzeug.utils import secure_filename
 from .forms import EstudoForm, AlternativaForm, AnexoForm
-from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoViabilidade,
-                       TipoAnalise, TipoPedido, EDP, RespRegiao, Usuario, Circuito,
-                       Subestacao, Anexo, Alternativa)
+from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
+                        Subestacao, Anexo, Alternativa)
 from datetime import datetime
 import os
 
-
 cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
+
+
+def gerar_proximo_documento():
+    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.id_estudo.desc()).first()
+
+    print(doc_atual[0])
+    if doc_atual[0]:
+        num, ano = str(doc_atual[0]).split('/')
+        ano = int(ano) + 2000
+        if ano == datetime.now().year:
+            num = int(num) + 1
+        else:
+            ano = datetime.now().year
+            num = 1
+        proximo_doc = f"{num:04d}/{str(ano)[-2:]}"
+        return proximo_doc
 
 
 def carregar_choices_estudo(form):
@@ -35,15 +49,19 @@ def carregar_choices_estudo(form):
                                    [(rr.id_resp_regiao, f"{rr.usuario.nome} - {rr.regional.regional}")
                                     for rr in RespRegiao.query.join(Usuario).join(Regional).all()]
 
+        viabilidades = (
+            db.session.query(TipoSolicitacao.viabilidade)
+            .distinct()
+            .order_by(TipoSolicitacao.viabilidade)
+            .all()
+        )
+
         # Tipos
-        form.tipo_viab.choices = [(0, 'Selecione...')] + \
-                                 [(tv.id_tipo_viab, tv.descricao) for tv in TipoViabilidade.query.all()]
+        form.tipo_viab.choices = [('', 'Selecione...')] + \
+                                 [(v[0], v[0]) for v in viabilidades]
 
-        form.tipo_analise.choices = [(0, 'Selecione...')] + \
-                                    [(ta.id_tipo_analise, ta.analise) for ta in TipoAnalise.query.all()]
+        form.num_doc.data = gerar_proximo_documento()
 
-        form.tipo_pedido.choices = [(0, 'Selecione...')] + \
-                                   [(tp.id_tipo_pedido, tp.descricao) for tp in TipoPedido.query.all()]
 
     except Exception as e:
         current_app.logger.error(f"Erro ao carregar choices: {str(e)}")
@@ -78,15 +96,23 @@ def cadastro_estudo():
         try:
             # Criar novo estudo
             novo_estudo = Estudo(
-                num_doc=form.num_doc.data,
+                num_doc=gerar_proximo_documento(),
                 protocolo=int(form.protocolo.data) if form.protocolo.data else None,
                 nome_projeto=form.nome_projeto.data,
                 descricao=form.descricao.data,
                 instalacao=int(
                     form.instalacao.data) if form.instalacao.data and form.instalacao.data.isdigit() else None,
                 n_alternativas=form.n_alternativas.data or 0,
-                dem_solicit_fp=form.dem_solicit_fp.data,
-                dem_solicit_p=form.dem_solicit_p.data,
+                dem_carga_atual_fp=form.dem_carga_atual_fp.data,
+                dem_carga_atual_p=form.dem_carga_atual_p.data,
+                dem_carga_solicit_fp=form.dem_carga_solicit_fp.data,
+                dem_carga_solicit_p=form.dem_carga_solicit_p.data,
+                dem_ger_atual_fp=form.dem_ger_atual_fp.data,
+                dem_ger_atual_p=form.dem_ger_atual_p.data,
+                dem_ger_solicit_fp=form.dem_ger_solicit_fp.data,
+                dem_ger_solicit_p=form.dem_ger_solicit_p.data,
+                # dem_solicit_fp=form.dem_solicit_fp.data,
+                # dem_solicit_p=form.dem_solicit_p.data,
                 latitude_cliente=form.latitude_cliente.data,
                 longitude_cliente=form.longitude_cliente.data,
                 observacao=form.observacao.data,
@@ -96,42 +122,45 @@ def cadastro_estudo():
                 id_resp_regiao=form.resp_regiao.data,
                 id_empresa=form.empresa.data if form.empresa.data else None,
                 id_municipio=form.municipio.data,
-                id_tipo_viab=form.tipo_viab.data,
-                id_tipo_analise=form.tipo_analise.data,
-                id_tipo_pedido=form.tipo_pedido.data,
-                data_registro=form.data_registro.data,
-                data_transgressao=form.data_transgressao.data,
-                data_vencimento=form.data_vencimento.data,
-                data_criacao=datetime.now()
+                # id_tipo_viab=form.tipo_viab.data,
+                # id_tipo_analise=form.tipo_analise.data,
+                # id_tipo_pedido=form.tipo_pedido.data,
+                id_tipo_solicitacao=form.tipo_pedido.data,
+                data_registro=datetime.today(),
+                data_abertura_cliente=form.data_abertura_cliente.data,
+                data_desejada_cliente=form.data_desejada_cliente.data,
+                data_vencimento_cliente=form.data_vencimento_cliente.data,
+                data_prevista_conexao=form.data_prevista_conexao.data,
+                data_vencimento_ddpe=form.data_vencimento_ddpe.data,
             )
 
-            db.session.add(novo_estudo)
-            db.session.flush()  # Para obter o ID do estudo
+            #db.session.add(novo_estudo)
+            #db.session.flush()  # Para obter o ID do estudo
 
-            # Processar arquivo se foi enviado
-            if form.arquivo.data:
-                arquivo = form.arquivo.data
-                nome_arquivo = secure_filename(arquivo.filename)
-
-                # Criar diretório se não existir
-                upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'estudos', str(novo_estudo.id_estudo))
-                os.makedirs(upload_folder, exist_ok=True)
-
-                # Salvar arquivo
-                caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
-                arquivo.save(caminho_arquivo)
-
-                # Criar registro do anexo
-                novo_anexo = Anexo(
-                    nome_arquivo=nome_arquivo,
-                    endereco=caminho_arquivo,
-                    tamanho_arquivo=os.path.getsize(caminho_arquivo),
-                    tipo_mime=arquivo.content_type,
-                    id_estudo=novo_estudo.id_estudo
-                )
-                db.session.add(novo_anexo)
-
-            db.session.commit()
+            # # Processar arquivo se foi enviado
+            # if form.arquivo.data:
+            #     arquivo = form.arquivo.data
+            #     nome_arquivo = secure_filename(arquivo.filename)
+            #
+            #     # Criar diretório se não existir
+            #     upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'estudos', str(novo_estudo.id_estudo))
+            #     os.makedirs(upload_folder, exist_ok=True)
+            #
+            #     # Salvar arquivo
+            #     caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
+            #     arquivo.save(caminho_arquivo)
+            #
+            #     # Criar registro do anexo
+            #     novo_anexo = Anexo(
+            #         nome_arquivo=nome_arquivo,
+            #         endereco=caminho_arquivo,
+            #         tamanho_arquivo=os.path.getsize(caminho_arquivo),
+            #         tipo_mime=arquivo.content_type,
+            #         id_estudo=novo_estudo.id_estudo
+            #     )
+            #     db.session.add(novo_anexo)
+            #
+            # db.session.commit()
             flash(f'Estudo {novo_estudo.num_doc} cadastrado com sucesso!', 'success')
             return redirect(url_for('cadastro.listar_estudos'))
 
@@ -158,8 +187,6 @@ def cadastro_alternativa(id_estudo):
             nova_alternativa = Alternativa(
                 id_circuito=form.circuito.data,
                 descricao=form.descricao.data,
-                dem_fp_ant=form.dem_fp_ant.data,
-                dem_p_ant=form.dem_p_ant.data,
                 dem_fp_dep=form.dem_fp_dep.data,
                 dem_p_dep=form.dem_p_dep.data,
                 latitude_ponto_conexao=form.latitude_ponto_conexao.data,
@@ -249,7 +276,7 @@ def listar_estudos():
     page = request.args.get('page', 1, type=int)
     per_page = 10
 
-    estudos = Estudo.query.order_by(Estudo.data_criacao.desc()).paginate(
+    estudos = Estudo.query.order_by(Estudo.data_registro.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
 

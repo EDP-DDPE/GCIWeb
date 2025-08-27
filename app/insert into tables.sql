@@ -7,6 +7,20 @@ insert into gciweb.municipios(municipio, id_edp) values ('Vitoria', 2);
 
 Go
 
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento Estimado', 'Carga', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento Estimado', 'MMGD', 'Aumento de Demanda')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento Estimado', 'MMGD', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento de Conexão', 'Carga', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento de Conexão', 'Carga', 'Aumento de Demanda')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento de Conexão', 'MMGD', 'Aumento de Demanda')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Orçamento de Conexão', 'MMGD', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Anteprojeto', 'Subestação', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Anteprojeto', 'Linhas', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Anteprojeto', 'Redes', 'Ligação Nova')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Outros', 'ONS', 'Carta')
+insert into gciweb.tipo_solicitacao(viabilidade, analise, pedido) values ('Outros', 'ANEEL', 'Carta')
+
+insert into gciweb.municipios(municipio, id_edp) values ('Cachoeira Paulista', 1)
 
 insert into gciweb.subestacoes(nome, sigla, id_municipio, id_edp) values ('Guarulhos', 'GUR', 1, 1)
 insert into gciweb.subestacoes(nome, sigla, id_municipio, id_edp) values ('Bento Ferreira', 'BFE',3, 2)
@@ -26,21 +40,21 @@ insert into gciweb.regionais(regional, id_edp) values ('Sul', 2)
 Go
 
 
-insert into gciweb.tipo_viabilidade(descricao) values ('Or�amento Estimado')
+insert into gciweb.tipo_viabilidade(descricao) values ('Or�amento Estimado')
 insert into gciweb.tipo_viabilidade(descricao) values ('Estudo de Viabilidade')
 insert into gciweb.tipo_viabilidade(descricao) values ('Anteprojeto')
 
 Go
 
 insert into gciweb.tipo_analise(analise) values ('Carga')
-insert into gciweb.tipo_analise(analise) values ('Gera��o')
+insert into gciweb.tipo_analise(analise) values ('Gera��o')
 insert into gciweb.tipo_analise(analise) values ('POA')
 
 
 Go
 
 insert into gciweb.tipo_pedido(descricao) values ('Aumento de Demanda')
-insert into gciweb.tipo_pedido(descricao) values ('Liga��o Nova')
+insert into gciweb.tipo_pedido(descricao) values ('Liga��o Nova')
 insert into gciweb.tipo_pedido(descricao) values ('MMGD')
 insert into gciweb.tipo_pedido(descricao) values ('Autoprodutor')
 insert into gciweb.tipo_pedido(descricao) values ('Produtor Independente')
@@ -64,7 +78,7 @@ insert into gciweb.socios(nome, cargo, id_empresa) values ('Socio Teste', 'Gesto
 
 Go
 
-insert into gciweb.status_tipos(status, descricao, ativo) values ('Conclu�do', 'Conclu�do', 1)
+insert into gciweb.status_tipos(status, descricao, ativo) values ('Conclu�do', 'Conclu�do', 1)
 insert into gciweb.status_tipos(status, descricao, ativo) values ('Em andamento', 'Em Andamento', 1)
 
 
