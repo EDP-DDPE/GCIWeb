@@ -31,7 +31,13 @@ def home():
         headers={"Authorization": f"Bearer {token}"},
         timeout=15,
     )
-    nome = json.loads(resp.text)['givenName']
+    graph = json.loads(resp.text)
+
+    if "error" in graph:
+        return redirect(url_for("auth.public"))
+
+    nome = graph['givenName']
+
     return render_template("main/index.html", usuario=usuario, msg=msg_boas_vidas(nome))
 
 
