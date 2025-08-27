@@ -22,3 +22,15 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
 }
 
+.card .btn {
+    color: white !important;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body .btn {
+    margin-top: auto; /* empurra o botão pro final */
+}
