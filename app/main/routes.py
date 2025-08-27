@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, jsonif
 import requests
 from app.database import db_manager
 
-main_bp = Blueprint("main", __name__, template_folder='templates')
+main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
 
 @main_bp.route("/")
@@ -18,22 +18,6 @@ def home():
     #     """
 
     return render_template("main/index.html", usuario=usuario)
-
-@main_bp.route("/me")
-def me():
-    """
-    Exemplo de chamada ao Microsoft Graph /me (exige escopo User.Read).
-    """
-    token = session.get("access_token")
-    if not token:
-        return redirect(url_for("main.home"))
-
-    resp = requests.get(
-        "https://graph.microsoft.com/v1.0/me",
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=15,
-    )
-    return (resp.text, resp.status_code, {"Content-Type": "application/json"})
 
 
 @main_bp.route('/health')
