@@ -1,0 +1,9 @@
+# Scripts sempre como texto (Windows usa CRLF)
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Certificados e executáveis como binário (não mexer)
+*.crt -text
+*.pem -text
+*.key -text
+*.exe -text
