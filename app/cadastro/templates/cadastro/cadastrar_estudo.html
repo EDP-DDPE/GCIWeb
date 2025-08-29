@@ -299,7 +299,7 @@
                         <div class="tab-pane fade" id="localizacao" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <div class="mb-3">
                                             {{ form.edp.label(class="form-label") }}
                                             <span class="required">*</span>
@@ -313,7 +313,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
                                         <div class="mb-3">
                                             {{ form.regional.label(class="form-label") }}
                                             <span class="required">*</span>
@@ -327,7 +327,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="mb-3">
                                             {{ form.municipio.label(class="form-label") }}
                                             <span class="required">*</span>
@@ -335,6 +335,20 @@
                                             {% if form.municipio.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.municipio.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            {{ form.resp_regiao.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
+                                            {% if form.resp_regiao.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.resp_regiao.errors %}
                                                         <div>{{ error }}</div>
                                                     {% endfor %}
                                                 </div>
@@ -421,20 +435,6 @@
                                             {{ form.empresa.label(class="form-label") }}
                                             {{ form.empresa(class="form-select") }}
                                             <small class="text-muted">Empresa solicitante (opcional)</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.resp_regiao.label(class="form-label") }}
-                                            <span class="required">*</span>
-                                            {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
-                                            {% if form.resp_regiao.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {% for error in form.resp_regiao.errors %}
-                                                        <div>{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -763,6 +763,7 @@ $(document).ready(function() {
     // Carregar responsáveis baseado na regional
     $('#regional-select').change(function() {
         var regionalId = $(this).val();
+
         if (regionalId) {
             $.get('/api/resp_regioes/' + regionalId, function(data) {
                 var respSelect = $('#resp-regiao-select');
@@ -818,6 +819,7 @@ $(document).ready(function() {
     $('#tipo_analise').change(function(){
         var analise = $(this).val();
         var viabilidade = $('#tipo_viab').val();
+        console.log(analise)
         if(analise){
             $.get('/api/tipo_pedidos/' + viabilidade + '/' + analise, function(data) {
                 var pedidoSelect = $('#tipo_pedido');
