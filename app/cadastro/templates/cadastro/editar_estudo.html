@@ -1,0 +1,869 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Estudo - GCI Web{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>
+                    Editar Novo Estudo
+                </h4>
+            </div>
+            <div class="card-body p-0">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs" id="estudoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="basicas-tab" data-bs-toggle="tab" data-bs-target="#basicas" type="button" role="tab">
+                            <i class="fas fa-info-circle me-1"></i>Básicas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="demandas-tab" data-bs-toggle="tab" data-bs-target="#demandas" type="button" role="tab">
+                            <i class="fas fa-bolt me-1"></i>Demandas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="localizacao-tab" data-bs-toggle="tab" data-bs-target="#localizacao" type="button" role="tab">
+                            <i class="fas fa-map-marker-alt me-1"></i>Localização
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="classificacao-tab" data-bs-toggle="tab" data-bs-target="#classificacao" type="button" role="tab">
+                            <i class="fas fa-tags me-1"></i>Classificação
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="responsaveis-tab" data-bs-toggle="tab" data-bs-target="#responsaveis" type="button" role="tab">
+                            <i class="fas fa-users me-1"></i>Responsáveis
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="datas-tab" data-bs-toggle="tab" data-bs-target="#datas" type="button" role="tab">
+                            <i class="fas fa-calendar me-1"></i>Datas
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="observacoes-tab" data-bs-toggle="tab" data-bs-target="#observacoes" type="button" role="tab">
+                            <i class="fas fa-paperclip me-1"></i>Observações
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="estudoTabsContent">
+                    <form method="POST" enctype="multipart/form-data" id="form-estudo">
+                        {{ form.hidden_tag() }}
+
+                        <!-- Tab 1: Informações Básicas -->
+                        <div class="tab-pane fade show active" id="basicas" role="tabpanel">
+                            <div class="p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.num_doc.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.num_doc(class="form-control") }}
+                                            {% if form.num_doc.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.num_doc.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.protocolo.label(class="form-label") }}
+                                            {{ form.protocolo(class="form-control") }}
+                                            {% if form.protocolo.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.protocolo.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            {{ form.nome_projeto.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.nome_projeto(class="form-control", rows="2") }}
+                                            {% if form.nome_projeto.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.nome_projeto.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            {{ form.descricao.label(class="form-label") }}
+                                            {{ form.descricao(class="form-control", rows="3") }}
+                                            {% if form.descricao.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.descricao.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.instalacao.label(class="form-label") }}
+                                            {{ form.instalacao(class="form-control") }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.n_alternativas.label(class="form-label") }}
+                                            {{ form.n_alternativas(class="form-control", min="0") }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Demandas -->
+                        <div class="tab-pane fade" id="demandas" role="tabpanel">
+                            <div class="p-4">
+                                <!-- Visão: CARGA -->
+                                <h6 class="mt-3 mb-2">Carga</h6>
+                                <div class="row">
+                                    <!-- Antes (Atual) -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2 fw-semibold text-muted">Antes (Atual)</div>
+
+                                        <!-- Demanda Carga Atual FP -->
+                                        <div class="mb-3">
+                                            {{ form.dem_carga_atual_fp.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_carga_atual_fp(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_carga_atual_fp.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_carga_atual_fp.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Demanda Carga Atual P -->
+                                        <div class="mb-3">
+                                            {{ form.dem_carga_atual_p.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_carga_atual_p(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_carga_atual_p.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_carga_atual_p.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Depois (Solicitada) -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2 fw-semibold text-muted">Depois (Solicitada)</div>
+
+                                        <!-- Demanda Carga Solicitada FP -->
+                                        <div class="mb-3">
+                                            {{ form.dem_carga_solicit_fp.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_carga_solicit_fp(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_carga_solicit_fp.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_carga_solicit_fp.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Demanda Carga Solicitada P -->
+                                        <div class="mb-3">
+                                            {{ form.dem_carga_solicit_p.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_carga_solicit_p(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_carga_solicit_p.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_carga_solicit_p.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-3">
+
+                                <!-- Visão: GERAÇÃO -->
+                                <h6 class="mt-3 mb-2">Geração</h6>
+                                <div class="row">
+                                    <!-- Antes (Atual) -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2 fw-semibold text-muted">Antes (Atual)</div>
+
+                                        <!-- Demanda Geração Atual FP -->
+                                        <div class="mb-3">
+                                            {{ form.dem_ger_atual_fp.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_ger_atual_fp(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_ger_atual_fp.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_ger_atual_fp.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Demanda Geração Atual P -->
+                                        <div class="mb-3">
+                                            {{ form.dem_ger_atual_p.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_ger_atual_p(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_ger_atual_p.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_ger_atual_p.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Depois (Solicitada) -->
+                                    <div class="col-md-6">
+                                        <div class="mb-2 fw-semibold text-muted">Depois (Solicitada)</div>
+
+                                        <!-- Demanda Geração Solicitada FP -->
+                                        <div class="mb-3">
+                                            {{ form.dem_ger_solicit_fp.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_ger_solicit_fp(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_ger_solicit_fp.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_ger_solicit_fp.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Demanda Geração Solicitada P -->
+                                        <div class="mb-3">
+                                            {{ form.dem_ger_solicit_p.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            <div class="input-group">
+                                                {{ form.dem_ger_solicit_p(class="form-control", step="0.01", min="0") }}
+                                                <span class="input-group-text">kW</span>
+                                            </div>
+                                            {% if form.dem_ger_solicit_p.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.dem_ger_solicit_p.errors %}<div>{{ error }}</div>{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Localização -->
+                        <div class="tab-pane fade" id="localizacao" role="tabpanel">
+                            <div class="p-4">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            {{ form.edp.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.edp(class="form-select", id="edp-select") }}
+                                            {% if form.edp.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.edp.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            {{ form.regional.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.regional(class="form-select", id="regional-select") }}
+                                            {% if form.regional.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.regional.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            {{ form.municipio.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.municipio(class="form-select", id="municipio-select") }}
+                                            {% if form.municipio.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.municipio.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            {{ form.resp_regiao.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
+                                            {% if form.resp_regiao.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.resp_regiao.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.latitude_cliente.label(class="form-label") }}
+                                            {{ form.latitude_cliente(class="form-control", step="0.00000001", placeholder="-23.550520") }}
+                                            <small class="text-muted">Formato decimal (ex: -23.550520)</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.longitude_cliente.label(class="form-label") }}
+                                            {{ form.longitude_cliente(class="form-control", step="0.00000001", placeholder="-46.633309") }}
+                                            <small class="text-muted">Formato decimal (ex: -46.633309)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Classificação -->
+                        <div class="tab-pane fade" id="classificacao" role="tabpanel">
+                            <div class="p-4">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.tipo_viab.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.tipo_viab(class="form-select", id="tipo_viab") }}
+                                            {% if form.tipo_viab.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.tipo_viab.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.tipo_analise.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.tipo_analise(class="form-select", id="tipo_analise") }}
+                                            {% if form.tipo_analise.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.tipo_analise.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.tipo_pedido.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.tipo_pedido(class="form-select", id="tipo_pedido") }}
+                                            {% if form.tipo_pedido.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.tipo_pedido.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: Responsáveis -->
+                        <div class="tab-pane fade" id="responsaveis" role="tabpanel">
+                            <div class="p-4">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.empresa.label(class="form-label") }}
+                                            {{ form.empresa(class="form-select") }}
+                                            <small class="text-muted">Empresa solicitante (opcional)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 6: Datas -->
+                        <div class="tab-pane fade" id="datas" role="tabpanel">
+                            <div class="p-4">
+                                <div class="row">
+                                    <!-- Data de Registro (somente leitura) -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_registro.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.data_registro(class="form-control", readonly=true) }}
+                                            {% if form.data_registro.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_registro.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Data de Abertura do Cliente -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_abertura_cliente.label(class="form-label") }}
+                                            {{ form.data_abertura_cliente(class="form-control") }}
+                                            {% if form.data_abertura_cliente.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_abertura_cliente.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Desejada do Cliente -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_desejada_cliente.label(class="form-label") }}
+                                            {{ form.data_desejada_cliente(class="form-control") }}
+                                            {% if form.data_desejada_cliente.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_desejada_cliente.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Data de Vencimento do Cliente -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_vencimento_cliente.label(class="form-label") }}
+                                            {{ form.data_vencimento_cliente(class="form-control") }}
+                                            {% if form.data_vencimento_cliente.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_vencimento_cliente.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Data Prevista de Conexão -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_prevista_conexao.label(class="form-label") }}
+                                            {{ form.data_prevista_conexao(class="form-control") }}
+                                            {% if form.data_prevista_conexao.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_prevista_conexao.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Data de Vencimento DDPE -->
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.data_vencimento_ddpe.label(class="form-label") }}
+                                            {{ form.data_vencimento_ddpe(class="form-control") }}
+                                            {% if form.data_vencimento_ddpe.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.data_vencimento_ddpe.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 7: Observações e Anexo -->
+                        <div class="tab-pane fade" id="observacoes" role="tabpanel">
+                            <div class="p-4">
+                                <div class="mb-3">
+                                    {{ form.observacao.label(class="form-label") }}
+                                    {{ form.observacao(class="form-control", rows="4") }}
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form.arquivo.label(class="form-label") }}
+                                    {{ form.arquivo(class="form-control", accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png") }}
+                                    {% if form.arquivo.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.arquivo.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <small class="text-muted">
+                                        Formatos aceitos: PDF, DOC, DOCX, XLS, XLSX, JPG, JPEG, PNG
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões fixos no final -->
+                        <div class="border-top p-3 bg-light">
+                            <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ url_for('cadastro.listar_estudos') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary" id="btn-submit">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span class="btn-text">Cadastrar Estudo</span>
+                                    <span class="loading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>Salvando...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+        padding: 0.5rem 1rem 0;
+        margin-bottom: 0;
+    }
+
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-radius: 0.375rem 0.375rem 0 0;
+        font-weight: 500;
+        color: #6c757d;
+        padding: 0.75rem 1rem;
+        margin-right: 0.25rem;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: 600;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #0d6efd;
+        border-color: #e9ecef #e9ecef #dee2e6;
+    }
+
+    /* FIX PRINCIPAL: Garantir altura fixa para o tab-content */
+    .tab-content {
+        background-color: #fff;
+        min-height: 500px;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        position: relative;
+    }
+
+    /* FIX: Garantir que todas as abas ocupem o mesmo espaço */
+    .tab-pane {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    .tab-pane.active {
+        display: block;
+        opacity: 1;
+    }
+
+    /* Alternativa: usar show/hide sem transição se houver problemas */
+    .tab-pane.fade {
+        transition: none;
+    }
+
+    .tab-pane.fade.show {
+        opacity: 1;
+    }
+
+    .required {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .form-section h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+
+    .loading {
+        display: none;
+    }
+
+    .border-top {
+        border-top: 1px solid #dee2e6 !important;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    @media (max-width: 768px) {
+        .nav-tabs {
+            flex-wrap: wrap;
+            padding: 0.25rem;
+        }
+
+        .nav-tabs .nav-link {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+            margin-right: 0.125rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .tab-content {
+            min-height: 300px;
+        }
+
+        .p-4 {
+            padding: 1.5rem !important;
+        }
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .form-control:required:invalid {
+        border-color: #dc3545;
+    }
+
+    .form-control:required:valid {
+        border-color: #198754;
+    }
+
+    @media (max-width: 576px) {
+        .nav-tabs .nav-link {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+        }
+
+        .nav-tabs .nav-link i {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Filtros dinâmicos baseados na EDP selecionada
+    $('#edp-select').change(function() {
+        var edpId = $(this).val();
+        if (edpId) {
+            // Carregar municípios
+            $.get('/api/municipios/' + edpId, function(data) {
+                var municipioSelect = $('#municipio-select');
+                municipioSelect.empty().append('<option value="0">Selecione um município...</option>');
+                $.each(data.municipios, function(index, municipio) {
+                    municipioSelect.append('<option value="' + municipio.id + '">' + municipio.nome + '</option>');
+                });
+                municipioSelect.trigger('change');
+            });
+            
+            // Carregar regionais
+            $.get('/api/regionais/' + edpId, function(data) {
+                var regionalSelect = $('#regional-select');
+                regionalSelect.empty().append('<option value="0">Selecione uma regional...</option>');
+                $.each(data.regionais, function(index, regional) {
+                    regionalSelect.append('<option value="' + regional.id + '">' + regional.nome + '</option>');
+                });
+                regionalSelect.trigger('change');
+            });
+        } else {
+            $('#municipio-select').empty().append('<option value="0">Selecione um município...</option>').trigger('change');
+            $('#regional-select').empty().append('<option value="0">Selecione uma regional...</option>').trigger('change');
+        }
+    });
+    
+    // Carregar responsáveis baseado na regional
+    $('#regional-select').change(function() {
+        var regionalId = $(this).val();
+
+        if (regionalId) {
+            $.get('/api/resp_regioes/' + regionalId, function(data) {
+                var respSelect = $('#resp-regiao-select');
+                respSelect.empty().append('<option value="0">Selecione um responsável...</option>');
+                $.each(data.responsaveis, function(index, resp) {
+                    respSelect.append('<option value="' + resp.id + '">' + resp.nome + '</option>');
+                });
+                respSelect.trigger('change');
+            });
+        } else {
+            $('#resp-regiao-select').empty().append('<option value="0">Selecione um responsável...</option>').trigger('change');
+        }
+    });
+    
+    // Loading state no submit
+    $('#form-estudo').submit(function() {
+        var btn = $('#btn-submit');
+        btn.prop('disabled', true);
+        btn.find('.btn-text').hide();
+        btn.find('.loading').addClass('active');
+    });
+    
+    // Validação de coordenadas
+    $('#latitude_cliente, #longitude_cliente').on('input', function() {
+        var val = parseFloat($(this).val());
+        var field = $(this).attr('id');
+        
+        if (field === 'latitude_cliente' && (val < -90 || val > 90)) {
+            $(this).addClass('is-invalid');
+        } else if (field === 'longitude_cliente' && (val < -180 || val > 180)) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+
+    //Atualização do tipo_analise
+    $('#tipo_viab').change(function(){
+        var viabilidade = $(this).val();
+        if(viabilidade){
+            $.get('/api/tipo_analises/' + viabilidade, function(data) {
+                var analiseSelect = $('#tipo_analise');
+                analiseSelect.empty().append('<option value="">Selecione um tipo...</option>');
+                $.each(data, function(index, analise) {
+                    analiseSelect.append('<option value="' + analise + '">' + analise + '</option>');
+                });
+                analiseSelect.trigger('change');
+            });
+        }
+    });
+
+    //Atualização do tipo_pedido
+    $('#tipo_analise').change(function(){
+        var analise = $(this).val();
+        var viabilidade = $('#tipo_viab').val();
+        console.log(analise)
+        if(analise){
+            $.get('/api/tipo_pedidos/' + viabilidade + '/' + analise, function(data) {
+                var pedidoSelect = $('#tipo_pedido');
+                pedidoSelect.empty().append('<option value="">Selecione um tipo...</option>');
+                $.each(data, function(index, pedido) {
+                    pedidoSelect.append('<option value="' + pedido.id + '">' + pedido.pedido + '</option>');
+                });
+                pedidoSelect.trigger('change');
+            });
+        }
+    });
+
+    // Ativar tooltips se necessário
+    const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
+    const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+    // Controle do botão de submit
+    const form = document.getElementById('form-estudo');
+    const submitBtn = document.getElementById('btn-submit');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const loadingText = submitBtn.querySelector('.loading');
+
+    $('#form-estudo').submit(function(){
+            btnText.style.display = 'none';
+            loadingText.style.display = 'inline';
+            submitBtn.disabled = true;
+            console.log(`${btnText.textContent} ocultado, carregando...`);
+     });
+
+    // Validação em tempo real para campos obrigatórios
+    const requiredFields = $('#form-estudo [required]');
+    requiredFields.each(function() {
+        $(this).on('blur'), function() {
+            if ($(this).val().trim() === '') {
+                        $(this).addClass('is-invalid');
+                        console.log(`Campo ${this.name} está vazio`);
+                    } else {
+                        $(this).removeClass('is-invalid').addClass('is-valid');
+                        console.log(`Campo ${this.name} válido`);
+            }
+        }
+    });
+
+});
+</script>
+
+{% endblock %}

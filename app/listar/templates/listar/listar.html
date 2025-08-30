@@ -30,6 +30,9 @@
                     <button class="btn btn-sm btn-info" onclick="verDetalhes({{ doc.id }})">
                         Detalhes
                     </button>
+                    <button class="btn btn-sm btn-info" onclick="{{url_for(cadastro.editar_estudo(doc.id))}}">
+                        Editar
+                    </button>
                 </td>
             </tr>
             {% endfor %}
