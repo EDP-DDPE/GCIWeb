@@ -170,6 +170,44 @@ def cadastro_estudo():
     return render_template('cadastro/cadastrar_estudo.html', form=form)
 
 
+@cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
+def editar_estudo(id_estudo):
+    estudo = Estudo.query.get_or_404(id_estudo)
+    form = EstudoForm()
+
+    form.num_doc.data = estudo.num_doc
+    form.protocolo.data = estudo.protocolo
+    form.nome_projeto.data = estudo.nome_projeto
+    form.descricao.data = estudo.descricao
+    form.instalacao.data = estudo.instalacao
+    form.n_alternativas.data = estudo.n_alternativas
+    form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
+    form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
+    form.dem_carga_solicit_fp.data = estudo.dem_carga_solicit_fp
+    form.dem_carga_solicit_p.data = estudo.dem_carga_solicit_p
+    form.dem_ger_atual_fp.data = estudo.dem_ger_atual_fp
+    form.dem_ger_atual_p.data = estudo.dem_ger_atual_p
+    form.dem_ger_solicit_fp.data = estudo.dem_ger_solicit_fp
+    form.dem_ger_solicit_p.data = estudo.dem_ger_solicit_p
+    form.latitude_cliente.data = estudo.latitude_cliente
+    form.longitude_cliente.data = estudo.longitude_cliente
+    form.observacao.data = estudo.observacao
+    form.edp.data = estudo.id_edp
+    form.regional.data = estudo.id_regional
+    form.resp_regiao.data = estudo.id_resp_regiao
+    form.empresa.data = estudo.id_empresa
+    form.municipio.data = estudo.id_municipio
+    form.tipo_pedido.data = estudo.id_tipo_solicitacao
+    form.data_registro.data = estudo.data_registro
+    form.data_abertura_cliente.data = estudo.data_abertura_cliente
+    form.data_desejada_cliente.data = estudo.data_desejada_cliente
+    form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
+    form.data_prevista_conexao.data = estudo.data_prevista_conexao
+    form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
+
+    return render_template('cadastro/editar_estudo.html', form=form)
+
+
 @cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
 def cadastro_alternativa(id_estudo):
     """Rota para cadastro de alternativas de um estudo"""
