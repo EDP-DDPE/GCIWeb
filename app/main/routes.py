@@ -3,6 +3,7 @@ import requests
 from app.database import db_manager
 import datetime
 import json
+from app.auth import requires_permission
 
 main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
@@ -21,6 +22,8 @@ def home():
     if "user" not in session:
         return redirect(url_for("auth.public"))
     usuario = session["user"]
+
+
     # return f"""
     #         <h2>Olá, {claims.get('name')}</h2>
     #         <p>Login: {claims.get('preferred_username')}</p>

@@ -44,6 +44,10 @@ class Usuario(db.Model):
                                       lazy='select')
     status_estudos = db.relationship('StatusEstudo', back_populates='criado_por', lazy='select')
 
+    @classmethod
+    def get_permissions(id_user):
+        pass
+
 
 class RespRegiao(db.Model):
     __tablename__ = 'resp_regioes'
