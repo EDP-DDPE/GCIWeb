@@ -4,6 +4,7 @@ from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
                         Subestacao, Anexo, Alternativa)
 from datetime import datetime
+from app.auth import requires_permission
 import os
 
 cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
@@ -87,6 +88,7 @@ def carregar_choices_alternativa(form, id_edp=None):
 
 
 @cadastro_bp.route("/estudos/cadastro", methods=["GET", "POST"])
+@requires_permission('criar')
 def cadastro_estudo():
     """Rota para cadastro de estudos"""
     form = EstudoForm()
@@ -171,6 +173,7 @@ def cadastro_estudo():
 
 
 @cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
+@requires_permission('editar')
 def editar_estudo(id_estudo):
     estudo = Estudo.query.get_or_404(id_estudo)
     form = EstudoForm()
