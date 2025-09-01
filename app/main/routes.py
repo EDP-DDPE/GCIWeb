@@ -15,6 +15,7 @@ def msg_boas_vidas(nome):
     else:
         return f"Bom noite, {nome}."
 
+
 @main_bp.route("/")
 def home():
     if "user" not in session:
