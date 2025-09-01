@@ -204,7 +204,6 @@ def editar_estudo(id_estudo):
     form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
     form.data_prevista_conexao.data = estudo.data_prevista_conexao
     form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
-
     return render_template('cadastro/editar_estudo.html', form=form)
 
 

@@ -6,6 +6,7 @@ import json
 
 main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
+
 def msg_boas_vidas(nome):
     if 12 > datetime.datetime.now().hour > 4:
         return f"Bom dia, {nome}."
