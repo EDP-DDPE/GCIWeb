@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed, FileRequired
-from wtforms import StringField, FloatField, SelectField, DateField, TextAreaField, IntegerField
-from wtforms.validators import DataRequired, Optional, NumberRange
+from flask_wtf.file import FileAllowed, FileRequired
+from wtforms import StringField, FloatField, SelectField, DateField, TextAreaField, IntegerField, MultipleFileField
+from wtforms.validators import DataRequired, Optional, NumberRange, InputRequired
 from datetime import date
 
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'dwg', 'kmz', 'kml'}
@@ -24,21 +24,21 @@ class EstudoForm(FlaskForm):
 
     # Demandas solicitadas
     dem_carga_atual_fp = FloatField('Demanda Carga atual FP (kW)',
-                                    validators=[DataRequired(), NumberRange(min=0)])
+                                    validators=[InputRequired(), NumberRange(min=0)])
     dem_carga_atual_p = FloatField('Demanda Carga atual P (kW)',
-                                   validators=[DataRequired(), NumberRange(min=0)])
+                                   validators=[InputRequired(), NumberRange(min=0)])
     dem_carga_solicit_fp = FloatField('Demanda Carga Solicitada FP (kW)',
-                                      validators=[DataRequired(), NumberRange(min=0)])
+                                      validators=[InputRequired(), NumberRange(min=0)])
     dem_carga_solicit_p = FloatField('Demanda Carga Solicitada P (kW)',
-                                     validators=[DataRequired(), NumberRange(min=0)])
+                                     validators=[InputRequired(), NumberRange(min=0)])
     dem_ger_atual_fp = FloatField('Demanda Geração atual FP (kW)',
-                                  validators=[DataRequired(), NumberRange(min=0)])
+                                  validators=[InputRequired(), NumberRange(min=0)])
     dem_ger_atual_p = FloatField('Demanda Geração atual P (kW)',
-                                 validators=[DataRequired(), NumberRange(min=0)])
+                                 validators=[InputRequired(), NumberRange(min=0)])
     dem_ger_solicit_fp = FloatField('Demanda Geração Solicitada FP (kW)',
-                                    validators=[DataRequired(), NumberRange(min=0)])
+                                    validators=[InputRequired(), NumberRange(min=0)])
     dem_ger_solicit_p = FloatField('Demanda Geração Solicitada P (kW)',
-                                   validators=[DataRequired(), NumberRange(min=0)])
+                                   validators=[InputRequired(), NumberRange(min=0)])
 
     # Coordenadas do cliente
     latitude_cliente = FloatField('Latitude do Cliente',
@@ -76,7 +76,7 @@ class EstudoForm(FlaskForm):
     tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[DataRequired()], validate_choice=False)
 
     # Arquivo anexo (opcional no cadastro inicial)
-    arquivo = FileField('Anexar Documento',
+    arquivos = MultipleFileField('Anexar Documentos',
                         validators=[FileAllowed(ALLOWED_EXTENSIONS, 'Tipo de arquivo não permitido!')])
 
     def __init__(self, *args, **kwargs):
@@ -132,7 +132,7 @@ class AlternativaForm(FlaskForm):
 
 class AnexoForm(FlaskForm):
     """Formulário para upload de anexos"""
-    arquivo = FileField('Selecionar Arquivo',
+    arquivos = MultipleFileField('Selecionar Arquivos',
                         validators=[DataRequired(),
                                     FileAllowed(ALLOWED_EXTENSIONS, 'Tipo de arquivo não permitido!')])
 

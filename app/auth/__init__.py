@@ -26,7 +26,6 @@ def requires_permission(permission):
 
             # Se for admin, libera tudo
             if usuario.admin:
-                flash("Olá administrador.", "danger")
                 return f(*args, **kwargs)
 
             if usuario.bloqueado:
