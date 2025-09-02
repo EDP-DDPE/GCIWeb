@@ -480,7 +480,7 @@ def listar_estudos(page, per_page):
             db.joinedload(Estudo.municipio),
             db.joinedload(Estudo.tipo_solicitacao),
             db.joinedload(Estudo.criado_por)
-        ).order_by(Estudo.data_registro.desc()) \
+        ).order_by(Estudo.id_estudo.desc()) \
             .paginate(
             page=page,
             per_page=per_page,
@@ -545,8 +545,6 @@ def obter_estudo(estudo_id):
             'dem_ger_atual_p': float(estudo.dem_ger_atual_p),
             'dem_ger_solicit_fp': float(estudo.dem_ger_solicit_fp),
             'dem_ger_solicit_p': float(estudo.dem_ger_solicit_p),
-            # 'dem_solicit_fp': float(estudo.dem_solicit_fp),
-            # 'dem_solicit_p': float(estudo.dem_solicit_p),
             'latitude_cliente': float(estudo.latitude_cliente) if estudo.latitude_cliente else None,
             'longitude_cliente': float(estudo.longitude_cliente) if estudo.longitude_cliente else None,
             'observacao': estudo.observacao,

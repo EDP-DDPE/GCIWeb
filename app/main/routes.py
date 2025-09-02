@@ -4,7 +4,7 @@ from app.database import db_manager
 import datetime
 import json
 from app.auth import requires_permission
-
+# rode no terminal para deploy: caddy run --config Caddyfile
 main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
 

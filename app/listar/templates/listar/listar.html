@@ -31,7 +31,7 @@
                         Detalhes
                     </button>
 
-                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}" class="btn btn-sm btn-info {% if not usuario.editar %}disabled{% endif %}">
+                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}" class="btn btn-sm btn-info {% if not usuario.editar and not usuario.admin%}disabled{% endif %}">
                         Editar
                     </a>
                 </td>
