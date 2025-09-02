@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
                         Subestacao, Anexo, Alternativa, Tensao)
+
 from datetime import datetime
 from app.auth import requires_permission, get_usuario_logado
 import os
@@ -33,11 +34,14 @@ def carregar_choices_estudo(form):
         # Classe de Tensão
         form.tensao.choices = [(0, 'Selecione uma classe de tensão...')] + \
                              [(t.id_tensao, t.tensao) for t in Tensao.query.all()]
+
         # EDP
         form.edp.choices = [(0, 'Selecione uma EDP...')] + \
                            [(e.id_edp, e.empresa) for e in EDP.query.all()]
 
         # Empresas
+
+
         form.empresa.choices = [(0, 'Selecione uma empresa...')]# + \
         #                       [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
 
@@ -48,6 +52,7 @@ def carregar_choices_estudo(form):
         # Regionais (filtrar por EDP se necessário)
         form.regional.choices = [(0, 'Selecione uma regional...')]# + \
         #                        [(r.id_regional, r.regional) for r in Regional.query.all()]
+
 
         # Responsáveis por região
         form.resp_regiao.choices = [(0, 'Selecione um responsável...')] + \
@@ -108,6 +113,7 @@ def cadastro_estudo():
                 protocolo=int(form.protocolo.data) if form.protocolo.data else None,
                 nome_projeto=form.nome_projeto.data,
                 descricao=form.descricao.data,
+
                 tensao=form.tensao.data,
                 instalacao=int(
                     form.instalacao.data) if form.instalacao.data and form.instalacao.data.isdigit() else None,
@@ -317,7 +323,6 @@ def upload_anexo(id_estudo):
         flash('Por favor, corrija os erros no formulário.', 'error')
 
     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
-
 
 # @cadastro_bp.route("/estudos")
 # def listar_estudos():
