@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.utils import secure_filename
 from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
-                        Subestacao, Anexo, Alternativa)
+                        Subestacao, Anexo, Alternativa, Tensao)
+
 from datetime import datetime
 from app.auth import requires_permission, get_usuario_logado
 import os
@@ -29,21 +30,29 @@ def gerar_proximo_documento():
 def carregar_choices_estudo(form):
     """Carrega as opções dos SelectFields do formulário de estudos"""
     try:
+
+        # Classe de Tensão
+        form.tensao.choices = [(0, 'Selecione uma classe de tensão...')] + \
+                             [(t.id_tensao, t.tensao) for t in Tensao.query.all()]
+
         # EDP
         form.edp.choices = [(0, 'Selecione uma EDP...')] + \
                            [(e.id_edp, e.empresa) for e in EDP.query.all()]
 
         # Empresas
-        form.empresa.choices = [(0, 'Selecione uma empresa...')] + \
-                               [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
+
+
+        form.empresa.choices = [(0, 'Selecione uma empresa...')]# + \
+        #                       [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
 
         # Municípios (filtrar por EDP se necessário)
-        form.municipio.choices = [(0, 'Selecione um município...')] + \
-                                 [(m.id_municipio, m.municipio) for m in Municipio.query.all()]
+        form.municipio.choices = [(0, 'Selecione um município...')] # + \
+        #                          [(m.id_municipio, m.municipio) for m in Municipio.query.all()]
 
         # Regionais (filtrar por EDP se necessário)
-        form.regional.choices = [(0, 'Selecione uma regional...')] + \
-                                [(r.id_regional, r.regional) for r in Regional.query.all()]
+        form.regional.choices = [(0, 'Selecione uma regional...')]# + \
+        #                        [(r.id_regional, r.regional) for r in Regional.query.all()]
+
 
         # Responsáveis por região
         form.resp_regiao.choices = [(0, 'Selecione um responsável...')] + \
@@ -104,6 +113,8 @@ def cadastro_estudo():
                 protocolo=int(form.protocolo.data) if form.protocolo.data else None,
                 nome_projeto=form.nome_projeto.data,
                 descricao=form.descricao.data,
+
+                tensao=form.tensao.data,
                 instalacao=int(
                     form.instalacao.data) if form.instalacao.data and form.instalacao.data.isdigit() else None,
                 n_alternativas=form.n_alternativas.data or 0,
@@ -191,6 +202,7 @@ def editar_estudo(id_estudo):
     form.nome_projeto.data = estudo.nome_projeto
     form.descricao.data = estudo.descricao
     form.instalacao.data = estudo.instalacao
+    form.tensao.data = estudo.tensao
     form.n_alternativas.data = estudo.n_alternativas
     form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
     form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
@@ -312,18 +324,17 @@ def upload_anexo(id_estudo):
 
     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
 
-
-@cadastro_bp.route("/estudos")
-def listar_estudos():
-    """Rota para listar estudos"""
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-
-    estudos = Estudo.query.order_by(Estudo.data_registro.desc()).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-
-    return render_template('cadastro/listar_estudos.html', estudos=estudos)
+# @cadastro_bp.route("/estudos")
+# def listar_estudos():
+#     """Rota para listar estudos"""
+#     page = request.args.get('page', 1, type=int)
+#     per_page = 10
+#
+#     estudos = Estudo.query.order_by(Estudo.data_registro.desc()).paginate(
+#         page=page, per_page=per_page, error_out=False
+#     )
+#
+#     return render_template('cadastro/listar_estudos.html', estudos=estudos)
 
 
 @cadastro_bp.route("/estudos/<int:id_estudo>")

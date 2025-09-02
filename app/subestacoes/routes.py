@@ -3,11 +3,11 @@ from app.models import Subestacao, Municipio, EDP
 from sqlalchemy.orm import joinedload
 from sqlalchemy import asc, desc
 
+
 subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates")
 
 @subestacao_bp.route("/subestacoes", methods=["GET", "POST"])
 def listar_subestacoes():
-
     sort = request.args.get("sort", "id_subestacao") # campo padrão
     direction = request.args.get("direction", "asc") # asc ou desc
 
@@ -82,6 +82,7 @@ def editar_subestacao(id):
         db.session.commit()
         flash("Subestação atualizada com sucesso!", "success")
         return redirect(url_for("subestacoes.listar_subestacoes"))
+
 
     return render_template("editar_subestacao.html", sub=sub)
 
