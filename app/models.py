@@ -99,6 +99,16 @@ class Empresa(db.Model):
     estudos = db.relationship('Estudo', back_populates='empresa', lazy='select')
 
 
+class Tensao(db.Model):
+    __tablename__ = 'tensao'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_tensao = db.Column(db.BigInteger, primary_key=True)
+    tensao = db.Column(db.String(2), nullable=False)
+
+    estudos = db.relationship('Estudo', back_populates='tensao', lazy='select')
+
+
 class Regional(db.Model):
     __tablename__ = 'regionais'
     __table_args__ = {'schema': 'gciweb'}
@@ -112,6 +122,7 @@ class Regional(db.Model):
     resp_regioes = db.relationship('RespRegiao', back_populates='regional', lazy='select')
     estudos = db.relationship('Estudo', back_populates='regional', lazy='select')
     obras = db.relationship('Obra', back_populates='regional', lazy='select')
+    municipios = db.relationship('Municipio', back_populates='regional', lazy='select')
 
 
 class Municipio(db.Model):
@@ -121,9 +132,11 @@ class Municipio(db.Model):
     id_municipio = db.Column(db.BigInteger, primary_key=True)
     municipio = db.Column(db.String(255), nullable=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=True)
 
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='municipios', lazy='joined')
+    regional = db.relationship('Regional', back_populates='municipios', lazy='joined')
     subestacoes = db.relationship('Subestacao', back_populates='municipio', lazy='select')
     estudos = db.relationship('Estudo', back_populates='municipio', lazy='select')
 
@@ -135,6 +148,8 @@ class Subestacao(db.Model):
     id_subestacao = db.Column(db.BigInteger, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
     sigla = db.Column(db.String(10), nullable=False)
+    lat = db.Column(db.Numeric(10, 2), nullable=True)
+    long = db.Column(db.Numeric(10, 2), nullable=True)
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
 
@@ -158,40 +173,6 @@ class Circuito(db.Model):
     subestacao = db.relationship('Subestacao', back_populates='circuitos', lazy='joined')
     edp = db.relationship('EDP', back_populates='circuitos', lazy='joined')
     alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select')
-
-### CLASSES REMOVIDAS DEVIDO Á ALTERAÇÃO DO SCHEMA NO SQL
-# class TipoViabilidade(db.Model):
-#     __tablename__ = 'tipo_viabilidade'
-#     __table_args__ = {'schema': 'gciweb'}
-#
-#     id_tipo_viab = db.Column(db.BigInteger, primary_key=True)
-#     descricao = db.Column(db.String(255), nullable=False)
-#
-#     # Relacionamentos
-#     estudos = db.relationship('Estudo', back_populates='tipo_viabilidade', lazy='select')
-#
-#
-# class TipoAnalise(db.Model):
-#     __tablename__ = 'tipo_analise'
-#     __table_args__ = {'schema': 'gciweb'}
-#
-#     id_tipo_analise = db.Column(db.BigInteger, primary_key=True)
-#     analise = db.Column(db.String(255), nullable=False)
-#
-#     # Relacionamentos
-#     estudos = db.relationship('Estudo', back_populates='tipo_analise', lazy='select')
-#
-#
-# class TipoPedido(db.Model):
-#     __tablename__ = 'tipo_pedido'
-#     __table_args__ = {'schema': 'gciweb'}
-#
-#     id_tipo_pedido = db.Column(db.BigInteger, primary_key=True)
-#     descricao = db.Column(db.String(255), nullable=False)
-#
-#     # Relacionamentos
-#     estudos = db.relationship('Estudo', back_populates='tipo_pedido', lazy='select')
-
 
 class TipoSolicitacao(db.Model):
     __tablename__ = 'tipo_solicitacao'
@@ -241,9 +222,7 @@ class Estudo(db.Model):
     id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('gciweb.resp_regioes.id_resp_regiao'), nullable=False)
     id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'))
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
-    #id_tipo_viab = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_viabilidade.id_tipo_viab'), nullable=False)
-    #id_tipo_analise = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_analise.id_tipo_analise'), nullable=False)
-    #id_tipo_pedido = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_pedido.id_tipo_pedido'), nullable=False)
+    id_tensao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tensao.id_tensao'), nullable=False)
     id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'), nullable=False)
     data_registro = db.Column(db.Date, nullable=False)
     data_abertura_cliente = db.Column(db.Date, nullable=False)
@@ -255,14 +234,11 @@ class Estudo(db.Model):
     # Relacionamentos com lazy estratégico
     edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
     regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
-    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados',
-                                 lazy='joined')
+    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados', lazy='joined')
     resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='joined')
     empresa = db.relationship('Empresa', back_populates='estudos', lazy='joined')
     municipio = db.relationship('Municipio', back_populates='estudos', lazy='joined')
-    # tipo_viabilidade = db.relationship('TipoViabilidade', back_populates='estudos', lazy='joined')
-    # tipo_analise = db.relationship('TipoAnalise', back_populates='estudos', lazy='joined')
-    # tipo_pedido = db.relationship('TipoPedido', back_populates='estudos', lazy='joined')
+    tensao = db.relationship('Tensao', back_populates='estudos', lazy='joined')
     tipo_solicitacao = db.relationship('TipoSolicitacao', back_populates='estudos', lazy='joined')
 
     # Relacionamentos 1:N com lazy='select' para evitar carregamento automático
@@ -281,15 +257,12 @@ class Estudo(db.Model):
             joinedload(cls.resp_regiao).joinedload(RespRegiao.usuario),
             joinedload(cls.empresa),
             joinedload(cls.municipio),
-            # joinedload(cls.tipo_viabilidade),
-            # joinedload(cls.tipo_analise),
-            # joinedload(cls.tipo_pedido),
+            joinedload(cls.tensao),
             joinedload(cls.tipo_solicitacao),
             selectinload(cls.anexos),
             selectinload(cls.status_estudos).joinedload(StatusEstudo.status_tipo),
             selectinload(cls.alternativas).joinedload(Alternativa.circuito),
-            selectinload(cls.alternativas).selectinload(Alternativa.obras)
-        ).filter_by(id_estudo=estudo_id).first()
+            selectinload(cls.alternativas).selectinload(Alternativa.obras)).filter_by(id_estudo=estudo_id).first()
 
     @property
     def ultimo_status(self):
@@ -308,7 +281,8 @@ class Estudo(db.Model):
             joinedload(cls.empresa),
             joinedload(cls.municipio),
             joinedload(cls.tipo_solicitacao),
-            joinedload(cls.criado_por)
+            joinedload(cls.criado_por),
+            joinedload(cls.tensao)
         )
 
 

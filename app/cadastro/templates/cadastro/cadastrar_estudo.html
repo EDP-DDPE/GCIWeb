@@ -61,7 +61,7 @@
                         <div class="tab-pane fade show active" id="basicas" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.num_doc.label(class="form-label") }}
                                             <span class="required">*</span>
@@ -75,7 +75,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.protocolo.label(class="form-label") }}
                                             {{ form.protocolo(class="form-control") }}
@@ -88,6 +88,22 @@
                                             {% endif %}
                                         </div>
                                     </div>
+
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form.tensao.label(class="form-label") }}
+                                            <span class="required">*</span>
+                                            {{ form.tensao(class="form-select", id="tensao-select") }}
+                                            {% if form.tensao.errors %}
+                                                <div class="text-danger small mt-1">
+                                                    {% for error in form.tensao.errors %}
+                                                        <div>{{ error }}</div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 <div class="row">
@@ -299,8 +315,8 @@
                         <div class="tab-pane fade" id="localizacao" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
-                                    <div class="col-md-2">
-                                        <div class="mb-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-6">
                                             {{ form.edp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.edp(class="form-select", id="edp-select") }}
@@ -313,8 +329,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-2">
-                                        <div class="mb-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-6">
                                             {{ form.regional.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.regional(class="form-select", id="regional-select") }}
@@ -327,8 +343,10 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-3">
-                                        <div class="mb-3">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-6">
                                             {{ form.municipio.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.municipio(class="form-select", id="municipio-select") }}
@@ -341,8 +359,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-5">
-                                        <div class="mb-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-6">
                                             {{ form.resp_regiao.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
@@ -573,7 +591,7 @@
                         <!-- Botões fixos no final -->
                         <div class="border-top p-3 bg-light">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ url_for('cadastro.listar_estudos') }}" class="btn btn-secondary">
+                                <a href="{{ url_for('listar.listar') }}" class="btn btn-secondary">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-primary" id="btn-submit">

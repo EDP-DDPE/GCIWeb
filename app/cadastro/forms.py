@@ -13,6 +13,7 @@ class EstudoForm(FlaskForm):
     protocolo = StringField('Protocolo', validators=[Optional()])
     nome_projeto = TextAreaField('Nome do Projeto', validators=[DataRequired()])
     descricao = TextAreaField('Descrição', validators=[Optional()])
+    tensao = SelectField('Classe', choices=[], coerce=int, validators=[DataRequired()])
 
     # Campo instalação (pode ser um número ou texto dependendo do uso)
     instalacao = StringField('Instalação', validators=[Optional()])
@@ -83,6 +84,7 @@ class EstudoForm(FlaskForm):
         super(EstudoForm, self).__init__(*args, **kwargs)
         # Adicionar opção vazia para campos opcionais
         self.empresa.choices = [(0, 'Selecione uma empresa...')]
+        self.tensao.choices = [(1, 'Selecione uma classe de tensão...')]
         self.edp.choices = [(1, 'Selecione uma EDP...')]
         self.regional.choices = [(0, 'Selecione uma regional...')]
         self.municipio.choices = [(0, 'Selecione um município...')]
