@@ -3,8 +3,10 @@ import requests
 from app.database import db_manager
 import datetime
 import json
-
+from app.auth import requires_permission
+# rode no terminal para deploy: caddy run --config Caddyfile
 main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
+
 
 def msg_boas_vidas(nome):
     if 12 > datetime.datetime.now().hour > 4:
@@ -14,11 +16,14 @@ def msg_boas_vidas(nome):
     else:
         return f"Bom noite, {nome}."
 
+
 @main_bp.route("/")
 def home():
     if "user" not in session:
         return redirect(url_for("auth.public"))
     usuario = session["user"]
+
+
     # return f"""
     #         <h2>Olá, {claims.get('name')}</h2>
     #         <p>Login: {claims.get('preferred_username')}</p>
