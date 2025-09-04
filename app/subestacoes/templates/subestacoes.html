@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Lista de Subestações</h2>
+        <a href="{{ url_for('subestacoes.nova_subestacao') }}" class="btn btn-success">
+            Adicionar Subestação
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Conteúdo principal (tabela) -->
+        <div class="col-md-9">
+            <table class="table table-bordered table-hover" id="tabelaSubestacoes">
+                <thead class="table-light">
+                    <tr>
+                        <th>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>ID</span>
+                                <form method="get" style="display:inline;">
+                                    <input type="hidden" name="sort" value="id">
+                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='id' and direction=='asc' else 'asc' }}">
+                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por ID">
+                                        {% if sort=='id' %}
+                                            {% if direction=='asc' %}
+                                                <i class="fas fa-sort-up"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort-down"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-sort"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Nome</span>
+                                <form method="get" style="display:inline;">
+                                    <input type="hidden" name="sort" value="nome">
+                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='nome' and direction=='asc' else 'asc' }}">
+                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por Nome">
+                                        {% if sort=='nome' %}
+                                            {% if direction=='asc' %}
+                                                <i class="fas fa-sort-up"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort-down"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-sort"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>SIGLA</span>
+                                <form method="get" style="display:inline;">
+                                    <input type="hidden" name="sort" value="sigla">
+                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='sigla' and direction=='asc' else 'asc' }}">
+                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por SIGLA">
+                                        {% if sort=='sigla' %}
+                                            {% if direction=='asc' %}
+                                                <i class="fas fa-sort-up"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort-down"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-sort"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Município</span>
+                                <form method="get" style="display:inline;">
+                                    <input type="hidden" name="sort" value="municipio">
+                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='municipio' and direction=='asc' else 'asc' }}">
+                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por Município">
+                                        {% if sort=='municipio' %}
+                                            {% if direction=='asc' %}
+                                                <i class="fas fa-sort-up"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort-down"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-sort"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>EDP</span>
+                                <form method="get" style="display:inline;">
+                                    <input type="hidden" name="sort" value="edp">
+                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='edp' and direction=='asc' else 'asc' }}">
+                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por EDP">
+                                        {% if sort=='edp' %}
+                                            {% if direction=='asc' %}
+                                                <i class="fas fa-sort-up"></i>
+                                            {% else %}
+                                                <i class="fas fa-sort-down"></i>
+                                            {% endif %}
+                                        {% else %}
+                                            <i class="fas fa-sort"></i>
+                                        {% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                        </th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="corpoTabela">
+                    {% for sub in documentos %}
+                    <tr class="linha-subestacao" 
+                        data-id="{{ sub.id_subestacao }}"
+                        data-nome="{{ sub.nome|lower }}" 
+                        data-sigla="{{ sub.sigla|lower }}" 
+                        data-municipio="{{ sub.municipio.municipio|lower }}" 
+                        data-edp="{{ sub.edp.empresa|lower }}">
+                        <td>{{ sub.id_subestacao }}</td>
+                        <td>{{ sub.nome }}</td>
+                        <td>{{ sub.sigla }}</td>
+                        <td>{{ sub.municipio.municipio }}</td>
+                        <td>{{ sub.edp.empresa }}</td>
+                        <td class="text-center">
+                            <button class="btn btn-link p-1 text-muted btn-visualizar me-2" data-bs-toggle="modal" data-bs-target="#modalSub{{ sub.id_subestacao }}" title="Visualizar detalhes">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <a href="{{ url_for('subestacoes.editar_subestacao', id=sub.id_subestacao) }}" class="btn btn-link p-1 text-muted btn-editar" title="Editar subestação">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="modalSub{{ sub.id_subestacao }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Detalhes da Subestação</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>ID:</strong> {{ sub.id_subestacao }}</p>
+                                    <p><strong>Nome:</strong> {{ sub.nome }}</p>
+                                    <p><strong>SIGLA:</strong> {{ sub.sigla }}</p>
+                                    <p><strong>Município:</strong> {{ sub.municipio.municipio }}</p>
+                                    <p><strong>EDP:</strong> {{ sub.edp.empresa }}</p>
+
+                                    <hr>
+                                    <h6>Circuitos vinculados:</h6>
+                                    <ul>
+                                        {% for c in sub.circuitos %}
+                                        <li>{{ c.nome_circuito }}</li>
+                                        {% else %}
+                                        <li><em>Sem circuitos</em></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Mensagem quando não há resultados -->
+            <div id="nenhumResultado" class="alert alert-info text-center" style="display: none;">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhuma subestação encontrada com os filtros aplicados.
+            </div>
+        </div>
+
+        <!-- Sidebar de filtros (fixa à direita) -->
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 mb-3 bg-white rounded" style="position: sticky; top: 1rem;">
+                <h5 class="mb-3">
+                    <i class="fas fa-filter me-2"></i>Filtros
+                </h5>
+                <div class="d-flex flex-column gap-3">
+                    <div class="form-group">
+                        <label class="form-label small text-muted">Nome</label>
+                        <input type="text" id="filtroNome" class="form-control filtro-campo" placeholder="Digite o nome...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label small text-muted">Sigla</label>
+                        <input type="text" id="filtroSigla" class="form-control filtro-campo" placeholder="Digite a sigla...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label small text-muted">Município</label>
+                        <input type="text" id="filtroMunicipio" class="form-control filtro-campo" placeholder="Digite o município...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label small text-muted">EDP</label>
+                        <input type="text" id="filtroEdp" class="form-control filtro-campo" placeholder="Digite a EDP...">
+                    </div>
+                    
+                    <hr class="my-2">
+                    
+                    <button type="button" id="limparFiltros" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-1"></i>Limpar Filtros
+                    </button>
+                    
+                    <div id="contadorResultados" class="small text-muted text-center mt-2">
+                        Total: <span id="totalLinhas">{{ documentos|length }}</span> subestação(ões)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtros = {
+        nome: document.getElementById('filtroNome'),
+        sigla: document.getElementById('filtroSigla'),
+        municipio: document.getElementById('filtroMunicipio'),
+        edp: document.getElementById('filtroEdp')
+    };
+    
+    const linhas = document.querySelectorAll('.linha-subestacao');
+    const nenhumResultado = document.getElementById('nenhumResultado');
+    const totalLinhas = document.getElementById('totalLinhas');
+    const limparFiltros = document.getElementById('limparFiltros');
+
+    // Função para normalizar texto (remover acentos)
+    function normalizeText(text) {
+        return text.toLowerCase()
+                   .normalize('NFD')
+                   .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    // Função para aplicar filtros
+    function aplicarFiltros() {
+        let linhasVisiveis = 0;
+        
+        linhas.forEach(linha => {
+            const dados = {
+                nome: normalizeText(linha.dataset.nome),
+                sigla: normalizeText(linha.dataset.sigla),
+                municipio: normalizeText(linha.dataset.municipio),
+                edp: normalizeText(linha.dataset.edp)
+            };
+            
+            let mostrarLinha = true;
+            
+            // Verificar cada filtro
+            Object.keys(filtros).forEach(campo => {
+                const valorFiltro = normalizeText(filtros[campo].value.trim());
+                if (valorFiltro && !dados[campo].includes(valorFiltro)) {
+                    mostrarLinha = false;
+                }
+            });
+            
+            // Mostrar/ocultar linha
+            if (mostrarLinha) {
+                linha.style.display = '';
+                linhasVisiveis++;
+            } else {
+                linha.style.display = 'none';
+            }
+        });
+        
+        // Atualizar contador e mensagem
+        totalLinhas.textContent = linhasVisiveis;
+        
+        if (linhasVisiveis === 0) {
+            nenhumResultado.style.display = 'block';
+        } else {
+            nenhumResultado.style.display = 'none';
+        }
+    }
+
+    // Adicionar eventos de input para filtrar em tempo real
+    Object.values(filtros).forEach(input => {
+        input.addEventListener('input', function() {
+            // Debounce para melhorar performance
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(aplicarFiltros, 300);
+        });
+        
+        // Filtrar também ao colar texto
+        input.addEventListener('paste', function() {
+            setTimeout(aplicarFiltros, 100);
+        });
+    });
+
+    // Botão limpar filtros
+    limparFiltros.addEventListener('click', function() {
+        Object.values(filtros).forEach(input => {
+            input.value = '';
+        });
+        aplicarFiltros();
+    });
+
+    // Adicionar indicador visual quando há filtros ativos
+    function atualizarIndicadorFiltros() {
+        const algumFiltroAtivo = Object.values(filtros).some(input => input.value.trim() !== '');
+        const titulo = document.querySelector('.card h5');
+        
+        if (algumFiltroAtivo) {
+            titulo.innerHTML = '<i class="fas fa-filter me-2 text-primary"></i>Filtros <small class="badge bg-primary">Ativo</small>';
+        } else {
+            titulo.innerHTML = '<i class="fas fa-filter me-2"></i>Filtros';
+        }
+    }
+
+    // Atualizar indicador quando houver mudanças
+    Object.values(filtros).forEach(input => {
+        input.addEventListener('input', atualizarIndicadorFiltros);
+    });
+    
+    limparFiltros.addEventListener('click', atualizarIndicadorFiltros);
+});
+</script>
+
+<style>
+.filtro-campo {
+    transition: border-color 0.3s ease;
+}
+
+.filtro-campo:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.linha-subestacao {
+    transition: opacity 0.3s ease;
+}
+
+#contadorResultados {
+    border-top: 1px solid #dee2e6;
+    padding-top: 10px;
+}
+
+.badge {
+    font-size: 0.6em;
+    vertical-align: top;
+}
+
+/* Estilo dos botões de ordenação discretos */
+.btn-sort {
+    border: none !important;
+    background: transparent !important;
+    color: #adb5bd;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-sort:hover {
+    color: #495057 !important;
+    background: transparent !important;
+    transform: scale(1.1);
+}
+
+.btn-sort:focus {
+    box-shadow: none;
+    color: #495057;
+    text-decoration: none;
+}
+
+/* Estilo para colunas ordenáveis */
+th.d-flex {
+    cursor: pointer;
+}
+
+th span {
+    font-weight: 600;
+}
+
+/* Estilo dos botões de ação mais discretos */
+.btn-visualizar,
+.btn-editar {
+    border: none !important;
+    background: transparent !important;
+    color: #6c757d;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-visualizar:hover {
+    color: #0d6efd !important;
+    background: transparent !important;
+    transform: scale(1.1);
+}
+
+.btn-editar:hover {
+    color: #198754 !important;
+    background: transparent !important;
+    transform: scale(1.1);
+}
+
+.btn-visualizar:focus,
+.btn-editar:focus {
+    box-shadow: none;
+    text-decoration: none;
+}
+
+.btn-editar:focus {
+    color: #198754;
+}
+
+.btn-visualizar:focus {
+    color: #0d6efd;
+}
+</style>
+{% endblock %}

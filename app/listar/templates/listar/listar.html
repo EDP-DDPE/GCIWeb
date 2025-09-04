@@ -25,11 +25,15 @@
                 <td>{{ doc.empresa }}</td>
                 <td>{{ doc.municipio }}</td>
                 <td>{{ doc.criado_por }}</td>
-                <td>{{ doc.data_criacao }}</td>
+                <td>{{ doc.data_registro }}</td>
                 <td>
                     <button class="btn btn-sm btn-info" onclick="verDetalhes({{ doc.id }})">
                         Detalhes
                     </button>
+
+                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}" class="btn btn-sm btn-info {% if not usuario.editar and not usuario.admin%}disabled{% endif %}">
+                        Editar
+                    </a>
                 </td>
             </tr>
             {% endfor %}
@@ -110,10 +114,9 @@ function verDetalhes(estudoId) {
                                 <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
                             </div>
                             <div class="card-body">
-                                <p><strong>Tipo Viabilidade:</strong> ${data.tipo_viabilidade?.descricao || 'N/A'}</p>
+                                <p><strong>Tipo Viabilidade:</strong> ${data.tipo_pedido?.viabilidade || 'N/A'}</p>
                                 <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
                                 <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
-                                <p><strong>Data Criação:</strong> ${data.data_criacao || 'N/A'}</p>
                                 <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
                                 <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
                                 <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
@@ -128,8 +131,8 @@ function verDetalhes(estudoId) {
                                 <i class="fas fa-chart-bar me-2"></i>Demandas
                             </div>
                             <div class="card-body">
-                                <p><strong>Demanda FP:</strong> ${data.dem_solicit_fp || 'N/A'}</p>
-                                <p><strong>Demanda P:</strong> ${data.dem_solicit_p || 'N/A'}</p>
+                                <p><strong>Demanda FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
+                                <p><strong>Demanda P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
                             </div>
                         </div>
                     </div>

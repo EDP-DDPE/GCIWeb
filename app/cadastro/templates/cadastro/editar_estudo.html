@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Cadastrar Estudo - GCI Web{% endblock %}
+{% block title %}Editar Estudo - GCI Web{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -9,7 +9,7 @@
             <div class="card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-plus-circle me-2 text-primary"></i>
-                    Cadastrar Novo Estudo
+                    Editar Estudo
                 </h4>
             </div>
             <div class="card-body p-0">
@@ -61,8 +61,7 @@
                         <div class="tab-pane fade show active" id="basicas" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
-
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.num_doc.label(class="form-label") }}
                                             <span class="required">*</span>
@@ -76,8 +75,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
-
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.protocolo.label(class="form-label") }}
                                             {{ form.protocolo(class="form-control") }}
@@ -90,22 +88,6 @@
                                             {% endif %}
                                         </div>
                                     </div>
-
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            {{ form.tensao.label(class="form-label") }}
-                                            <span class="required">*</span>
-                                            {{ form.tensao(class="form-select", id="tensao-select") }}
-                                            {% if form.tensao.errors %}
-                                                <div class="text-danger small mt-1">
-                                                    {% for error in form.tensao.errors %}
-                                                        <div>{{ error }}</div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-
                                 </div>
 
                                 <div class="row">
@@ -317,9 +299,8 @@
                         <div class="tab-pane fade" id="localizacao" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
-
-                                    <div class="col-md-6">
-                                        <div class="mb-6">
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
                                             {{ form.edp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.edp(class="form-select", id="edp-select") }}
@@ -332,9 +313,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6">
-                                        <div class="mb-6">
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
                                             {{ form.regional.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.regional(class="form-select", id="regional-select") }}
@@ -347,11 +327,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-6">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
                                             {{ form.municipio.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.municipio(class="form-select", id="municipio-select") }}
@@ -364,8 +341,8 @@
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-6">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
                                             {{ form.resp_regiao.label(class="form-label") }}
                                             <span class="required">*</span>
                                             {{ form.resp_regiao(class="form-select", id="resp-regiao-select") }}
@@ -381,23 +358,17 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-12">
-                                        <div id="map"></div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.latitude_cliente.label(class="form-label") }}
-                                            {{ form.latitude_cliente(class="form-control", id="latitude", step="0.00000001", placeholder="-23.550520") }}
+                                            {{ form.latitude_cliente(class="form-control", step="0.00000001", placeholder="-23.550520") }}
                                             <small class="text-muted">Formato decimal (ex: -23.550520)</small>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.longitude_cliente.label(class="form-label") }}
-                                            {{ form.longitude_cliente(class="form-control", id="longitude", step="0.00000001", placeholder="-46.633309") }}
+                                            {{ form.longitude_cliente(class="form-control", step="0.00000001", placeholder="-46.633309") }}
                                             <small class="text-muted">Formato decimal (ex: -46.633309)</small>
                                         </div>
                                     </div>
@@ -577,11 +548,11 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    {{ form.arquivos.label(class="form-label") }}
-                                    {{ form.arquivos(class="form-control",  multiple=True, accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png") }}
-                                    {% if form.arquivos.errors %}
+                                    {{ form.arquivo.label(class="form-label") }}
+                                    {{ form.arquivo(class="form-control", accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png") }}
+                                    {% if form.arquivo.errors %}
                                         <div class="text-danger small mt-1">
-                                            {% for error in form.arquivos.errors %}
+                                            {% for error in form.arquivo.errors %}
                                                 <div>{{ error }}</div>
                                             {% endfor %}
                                         </div>
@@ -596,7 +567,7 @@
                         <!-- Botões fixos no final -->
                         <div class="border-top p-3 bg-light">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ url_for('listar.listar') }}" class="btn btn-secondary">
+                                <a href="{{ url_for('cadastro.listar_estudos') }}" class="btn btn-secondary">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-primary" id="btn-submit">
@@ -758,290 +729,8 @@
 {% endblock %}
 
 {% block extra_js %}
-
-
 <script>
-
-function removerAcentos(str) {
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
-
 $(document).ready(function() {
-
-    // Valores iniciais do banco ou padrão
-    var initialLat = parseFloat($('#latitude').val()) || -23.550520;
-    var initialLng = parseFloat($('#longitude').val()) || -46.633309;
-
-    var map = L.map('map').setView([initialLat, initialLng], 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    var marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
-
-    // Tenta centralizar no local atual do usuário se os campos estiverem vazios
-    if (!$('#latitude').val() || !$('#longitude').val()) {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var lat = position.coords.latitude;
-                var lng = position.coords.longitude;
-
-                $('#latitude').val(lat.toFixed(8));
-                $('#longitude').val(lng.toFixed(8));
-
-                marker.setLatLng([lat, lng]);
-                map.setView([lat, lng], 15);
-            });
-        }
-    }
-
-    // Atualiza campos ao arrastar marcador
-    marker.on('dragend', function(e) {
-        var pos = marker.getLatLng();
-        $('#latitude').val(pos.lat.toFixed(8));
-        $('#longitude').val(pos.lng.toFixed(8));
-    });
-
-    // Atualiza marcador e campos ao clicar no mapa
-    map.on('click', function(e) {
-        marker.setLatLng(e.latlng);
-        $('#latitude').val(e.latlng.lat.toFixed(8));
-        $('#longitude').val(e.latlng.lng.toFixed(8));
-    });
-
-    // Função para atualizar marcador a partir dos inputs
-    function updateMarkerFromInput() {
-        var lat = parseFloat($('#latitude').val());
-        var lng = parseFloat($('#longitude').val());
-        if (!isNaN(lat) && !isNaN(lng)) {
-            marker.setLatLng([lat, lng]);
-            map.setView([lat, lng], 13);
-        }
-    }
-
-    $('#latitude, #longitude').on('change', updateMarkerFromInput);
-
-    // Corrige mapa ao abrir a aba
-    $('#localizacao-tab').on('shown.bs.tab', function() {
-        map.invalidateSize();
-    });
-
-    $('#municipio-select').change(function() {
-        var nomeMunicipio = $('#municipio-select option:selected').text();
-        var nomeEstado = $('#edp-select option:selected').text();
-
-        if (nomeMunicipio) {
-            // Buscar todos os municípios do Brasil
-            $.getJSON('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + nomeEstado + '/municipios', function(data) {
-                // Procurar pelo município escolhido (comparação case-insensitive)
-                var municipio = data.find(function(m) {
-                    return removerAcentos(m.nome) === removerAcentos(nomeMunicipio);
-                });
-                console.log(municipio);
-                if (municipio) {
-
-                    $.getJSON('https://servicodados.ibge.gov.br/api/v4/malhas/municipios/' + municipio.id + '/metadados', function(data) {
-                        var data = data[0]
-                        console.log(data.centroide.longitude);
-                        var lat = (data.centroide.latitude !== undefined ? data.centroide.latitude : -23.550520);
-                        var lng = (data.centroide.longitude !== undefined ? data.centroide.longitude : -46.633309);
-
-                        var popupContent = `
-                            <div style="
-                                width: 280px;
-                                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                                color: #333;
-                                line-height: 1.4;
-                                background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-                                border-radius: 12px;
-                                padding: 0;
-                                overflow: hidden;
-                                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-                            ">
-                                <!-- Header -->
-                                <div style="
-                                    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-                                    color: white;
-                                    padding: 16px;
-                                    text-align: center;
-                                    position: relative;
-                                ">
-                                    <div style="
-                                        position: absolute;
-                                        top: -10px;
-                                        right: -10px;
-                                        width: 40px;
-                                        height: 40px;
-                                        background: rgba(255,255,255,0.2);
-                                        border-radius: 50%;
-                                        opacity: 0.3;
-                                    "></div>
-                                    <h3 style="
-                                        margin: 0;
-                                        font-size: 18px;
-                                        font-weight: 600;
-                                        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-                                    ">📍 ${municipio.nome}</h3>
-                                    <p style="
-                                        margin: 4px 0 0 0;
-                                        font-size: 13px;
-                                        opacity: 0.9;
-                                        font-weight: 400;
-                                    ">${municipio.microrregiao.mesorregiao.UF.nome}</p>
-                                </div>
-
-                                <!-- Content -->
-                                <div style="padding: 16px;">
-                                    <!-- Info Grid -->
-                                    <div style="
-                                        display: grid;
-                                        gap: 12px;
-                                        margin-bottom: 16px;
-                                    ">
-                                        <div style="
-                                            display: grid;
-                                            grid-template-columns: 1fr 1fr;
-                                            gap: 8px;
-                                        ">
-                                            <div style="
-                                                background: white;
-                                                padding: 10px;
-                                                border-radius: 6px;
-                                                text-align: center;
-                                                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                                            ">
-                                                <div style="
-                                                    font-size: 10px;
-                                                    color: #6b7280;
-                                                    text-transform: uppercase;
-                                                    font-weight: 600;
-                                                    margin-bottom: 2px;
-                                                ">Latitude</div>
-                                                <div style="
-                                                    font-size: 12px;
-                                                    color: #374151;
-                                                    font-weight: 500;
-                                                    font-family: 'Courier New', monospace;
-                                                ">${lat.toFixed(6)}</div>
-                                            </div>
-                                            <div style="
-                                                background: white;
-                                                padding: 10px;
-                                                border-radius: 6px;
-                                                text-align: center;
-                                                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                                            ">
-                                                <div style="
-                                                    font-size: 10px;
-                                                    color: #6b7280;
-                                                    text-transform: uppercase;
-                                                    font-weight: 600;
-                                                    margin-bottom: 2px;
-                                                ">Longitude</div>
-                                                <div style="
-                                                    font-size: 12px;
-                                                    color: #374151;
-                                                    font-weight: 500;
-                                                    font-family: 'Courier New', monospace;
-                                                ">${lng.toFixed(6)}</div>
-                                            </div>
-                                        </div>
-
-                                        <div style="
-                                            background: white;
-                                            padding: 12px;
-                                            border-radius: 8px;
-                                            border-left: 4px solid #f59e0b;
-                                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                                        ">
-                                            <div style="
-                                                font-size: 11px;
-                                                color: #6b7280;
-                                                text-transform: uppercase;
-                                                font-weight: 600;
-                                                margin-bottom: 2px;
-                                                letter-spacing: 0.5px;
-                                            ">Área Total</div>
-                                            <div style="
-                                                font-size: 14px;
-                                                color: #374151;
-                                                font-weight: 600;
-                                            ">${data.area.dimensao.toLocaleString('pt-BR')} ${data.area.unidade.nome}</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Região Limítrofe -->
-                                    <div style="
-                                        background: white;
-                                        padding: 12px;
-                                        border-radius: 8px;
-                                        border-left: 4px solid #8b5cf6;
-                                        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-                                    ">
-                                        <div style="
-                                            font-size: 11px;
-                                            color: #6b7280;
-                                            text-transform: uppercase;
-                                            font-weight: 600;
-                                            margin-bottom: 8px;
-                                            letter-spacing: 0.5px;
-                                            display: flex;
-                                            align-items: center;
-                                            gap: 4px;
-                                        ">
-                                            <span>🗺️</span> Região Limítrofe
-                                        </div>
-                                        <div style="
-                                            max-height: 100px;
-                                            overflow-y: auto;
-                                            padding-right: 4px;
-                                        ">
-                                            ${data["regiao-limitrofe"].map((p, index) => `
-                                                <div style="
-                                                    background: #f8fafc;
-                                                    padding: 6px 8px;
-                                                    margin-bottom: 4px;
-                                                    border-radius: 4px;
-                                                    font-size: 11px;
-                                                    color: #475569;
-                                                    border: 1px solid #e2e8f0;
-                                                ">
-                                                    <span style="font-weight: 500;">Ponto ${index + 1}:</span>
-                                                    <span style="font-family: 'Courier New', monospace;">
-                                                        ${p.latitude.toFixed(4)}, ${p.longitude.toFixed(4)}
-                                                    </span>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-
-                        // Atualiza marcador e mapa
-                        marker.setLatLng([lat, lng]);
-                        marker.bindPopup(popupContent);
-                        marker.openPopup();
-                        map.setView([lat, lng], 12);
-
-                        // Atualiza campos do formulário
-                        $('#latitude').val(lat.toFixed(8));
-                        $('#longitude').val(lng.toFixed(8));
-
-                    }).fail(function() {
-                        console.error("Erro ao buscar metadados do municipio");
-                        });
-
-                } else {
-                    console.error("Município não encontrado na API do IBGE");
-                }
-            }).fail(function() {
-                console.error("Erro ao buscar municípios");
-            });
-        }
-    });
-
     // Filtros dinâmicos baseados na EDP selecionada
     $('#edp-select').change(function() {
         var edpId = $(this).val();

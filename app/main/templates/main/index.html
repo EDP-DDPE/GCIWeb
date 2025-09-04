@@ -2,7 +2,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% if not session.user %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<!--<style>-->
+<!--    body {-->
+<!--        background-image: url("{{ url_for('static', filename='/images/background.png') }}");-->
+<!--        background-size: cover;-->
+<!--        background-repeat: no-repeat;-->
+<!--        background-position: center;-->
+<!--    }-->
+<!--</style>-->
+
+<div class="fundo-index">
+    <h1 class="text-center mb-4">{{msg}}</h1>
+    <h1 class="text-center mb-4">Bem-vindo ao GCI Web!</h1>
+
+    {% if not session.user %}
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
@@ -24,59 +40,16 @@
             </div>
         </div>
     </div>
-{% else %}
-    <div class="row">
-        <div class="col-md-8">
-           <!-- <h2>Dashboard</h2>
-            --<p>Login: {{ session.user.preferred_username }}</p> -->
 
-
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Perfil Microsoft</h5>
-                            <p class="card-text">Visualize informações do Microsoft Graph.</p>
-                            <a href="{{ url_for('main.me') }}" class="btn btn-info">Ver Perfil</a>
-                        </div>
-                    </div>
-
-
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h6>Informações do Usuário</h6>
-                </div>
-                <div class="card-body">
-                    <p><strong>Nome:</strong> {{ session.user.name }}</p>
-                    <p><strong>Email:</strong> {{ session.user.preferred_username }}</p>
-                    {% if session.user.job_title %}
-                    <p><strong>Cargo:</strong> {{ session.user.job_title }}</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
 {% endif %}
-
-<div class="row">
-    <div class="col-12">
-        <div class="jumbotron bg-light p-5 rounded">
-            <h1 class="display-4">Sistema de Cadastro de Documentos</h1>
-            <p class="lead">Gerencie documentos emitidos com integração ao OneDrive e SQL Server</p>
-            <hr class="my-4">
-            <p>Use as opções do menu para cadastrar novos documentos, gerenciar status ou visualizar a lista completa.</p>
-        </div>
-    </div>
-</div>
 
 <div class="row mt-4">
     <div class="col-md-4 mb-3">
         <div class="card h-100">
             <div class="card-body text-center">
                 <i class="fas fa-plus fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Cadastrar Documento</h5>
-                <p class="card-text">Adicione novos documentos com upload automático para OneDrive</p>
+                <h5 class="card-title">Novo Estudo</h5>
+                <p class="card-text">Adicione um novo documento</p>
                 <a href="{{ url_for('cadastro.cadastro_estudo') }}" class="btn btn-primary">Cadastrar</a>
             </div>
         </div>
@@ -87,7 +60,7 @@
             <div class="card-body text-center">
                 <i class="fas fa-edit fa-3x text-success mb-3"></i>
                 <h5 class="card-title">Gerenciar Status</h5>
-                <p class="card-text">Atualize o status e datas dos documentos cadastrados</p>
+                <p class="card-text">Atualize o status dos estudos cadastrados</p>
                 <a href="" class="btn btn-success">Gerenciar</a>
             </div>
         </div>
@@ -99,9 +72,15 @@
                 <i class="fas fa-list fa-3x text-info mb-3"></i>
                 <h5 class="card-title">Listar Documentos</h5>
                 <p class="card-text">Visualize todos os documentos cadastrados no sistema</p>
-                <a href="{{ url_for('listar.listar') }}" class="btn btn-info">Listar</a>
+                <a href="{{url_for('listar.listar')}}" class="btn btn-info">Listar</a>
             </div>
         </div>
     </div>
 </div>
+
+
+</div>
+
+
+
 {% endblock %}

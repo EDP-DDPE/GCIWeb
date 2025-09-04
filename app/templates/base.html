@@ -12,7 +12,17 @@
     <!-- Select2 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
 
+    <!-- Mapa do Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <style>
+        #map {
+                height: 500px;
+                width: 100%;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
         .navbar-brand {
             font-weight: bold;
             color: #0d6efd !important;
@@ -90,7 +100,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('cadastro.listar_estudos') }}">
+            <a class="navbar-brand" href="{{ url_for('main.home') }}">
                 <i class="fas fa-bolt me-2"></i>GCI Web
             </a>
 
@@ -108,7 +118,7 @@
                             <li><a class="dropdown-item" href="{{ url_for('cadastro.cadastro_estudo') }}">
                                 <i class="fas fa-plus me-2"></i>Novo Estudo
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('cadastro.listar_estudos') }}">
+                            <li><a class="dropdown-item" href="{{ url_for('listar.listar') }}">
                                 <i class="fas fa-list me-2"></i>Listar Estudos
                             </a></li>
                         </ul>
@@ -118,12 +128,15 @@
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-1"></i>Usuário
+                            <i class="fas fa-user me-1"></i>
+                            {% if session.user %}
+                                {{session.user.name}}
+                            {% endif %}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>Perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('user.user') }}"><i class="fas fa-user-cog me-2"></i>Perfil</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -162,7 +175,7 @@
     <!-- Footer -->
     <footer class="bg-light text-center text-muted py-3 mt-5">
         <div class="container">
-            <small>&copy; 2024 GCI Web - Sistema de Gestão de Estudos Elétricos</small>
+            <small>&copy; 2025 GCI Web - Gestão de Controle Interno</small>
         </div>
     </footer>
 

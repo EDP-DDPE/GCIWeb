@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, func
+from sqlalchemy import text, func, UniqueConstraint
 from sqlalchemy.orm import joinedload, selectinload
 from datetime import datetime
 from flask import jsonify, request
@@ -43,6 +43,10 @@ class Usuario(db.Model):
     estudos_criados = db.relationship('Estudo', foreign_keys='Estudo.id_criado_por', back_populates='criado_por',
                                       lazy='select')
     status_estudos = db.relationship('StatusEstudo', back_populates='criado_por', lazy='select')
+
+    @classmethod
+    def get_permissions(id_user):
+        pass
 
 
 class RespRegiao(db.Model):
@@ -95,6 +99,16 @@ class Empresa(db.Model):
     estudos = db.relationship('Estudo', back_populates='empresa', lazy='select')
 
 
+class Tensao(db.Model):
+    __tablename__ = 'tensao'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_tensao = db.Column(db.BigInteger, primary_key=True)
+    tensao = db.Column(db.String(2), nullable=False)
+
+    estudos = db.relationship('Estudo', back_populates='tensao', lazy='select')
+
+
 class Regional(db.Model):
     __tablename__ = 'regionais'
     __table_args__ = {'schema': 'gciweb'}
@@ -108,6 +122,7 @@ class Regional(db.Model):
     resp_regioes = db.relationship('RespRegiao', back_populates='regional', lazy='select')
     estudos = db.relationship('Estudo', back_populates='regional', lazy='select')
     obras = db.relationship('Obra', back_populates='regional', lazy='select')
+    municipios = db.relationship('Municipio', back_populates='regional', lazy='select')
 
 
 class Municipio(db.Model):
@@ -117,9 +132,11 @@ class Municipio(db.Model):
     id_municipio = db.Column(db.BigInteger, primary_key=True)
     municipio = db.Column(db.String(255), nullable=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=True)
 
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='municipios', lazy='joined')
+    regional = db.relationship('Regional', back_populates='municipios', lazy='joined')
     subestacoes = db.relationship('Subestacao', back_populates='municipio', lazy='select')
     estudos = db.relationship('Estudo', back_populates='municipio', lazy='select')
 
@@ -131,6 +148,8 @@ class Subestacao(db.Model):
     id_subestacao = db.Column(db.BigInteger, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
     sigla = db.Column(db.String(10), nullable=False)
+    lat = db.Column(db.Numeric(10, 2), nullable=True)
+    long = db.Column(db.Numeric(10, 2), nullable=True)
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
 
@@ -155,38 +174,19 @@ class Circuito(db.Model):
     edp = db.relationship('EDP', back_populates='circuitos', lazy='joined')
     alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select')
 
+class TipoSolicitacao(db.Model):
+    __tablename__ = 'tipo_solicitacao'
+    __table_args__ = (
+        UniqueConstraint('viabilidade', 'analise', 'pedido', name='UQ_tipo_solicitacao_combinacao'),
+        {'schema': 'gciweb'}
+    )
 
-class TipoViabilidade(db.Model):
-    __tablename__ = 'tipo_viabilidade'
-    __table_args__ = {'schema': 'gciweb'}
-
-    id_tipo_viab = db.Column(db.BigInteger, primary_key=True)
-    descricao = db.Column(db.String(255), nullable=False)
-
-    # Relacionamentos
-    estudos = db.relationship('Estudo', back_populates='tipo_viabilidade', lazy='select')
-
-
-class TipoAnalise(db.Model):
-    __tablename__ = 'tipo_analise'
-    __table_args__ = {'schema': 'gciweb'}
-
-    id_tipo_analise = db.Column(db.BigInteger, primary_key=True)
+    id_tipo_solicitacao = db.Column(db.BigInteger, primary_key=True)
+    viabilidade = db.Column(db.String(255), nullable=False)
     analise = db.Column(db.String(255), nullable=False)
+    pedido = db.Column(db.String(255), nullable=False)
 
-    # Relacionamentos
-    estudos = db.relationship('Estudo', back_populates='tipo_analise', lazy='select')
-
-
-class TipoPedido(db.Model):
-    __tablename__ = 'tipo_pedido'
-    __table_args__ = {'schema': 'gciweb'}
-
-    id_tipo_pedido = db.Column(db.BigInteger, primary_key=True)
-    descricao = db.Column(db.String(255), nullable=False)
-
-    # Relacionamentos
-    estudos = db.relationship('Estudo', back_populates='tipo_pedido', lazy='select')
+    estudos = db.relationship("Estudo", back_populates="tipo_solicitacao")
 
 
 class Estudo(db.Model):
@@ -201,36 +201,45 @@ class Estudo(db.Model):
     descricao = db.Column(db.Text)
     instalacao = db.Column(db.BigInteger)
     n_alternativas = db.Column(db.Integer, nullable=False, default=0)
-    dem_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
-    dem_solicit_p = db.Column(db.Numeric(10, 2), nullable=False)
+    # dem_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
+    # dem_solicit_p = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_carga_atual_fp = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_carga_atual_p = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_carga_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_carga_solicit_p = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_ger_atual_fp = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_ger_atual_p = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_ger_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
+    dem_ger_solicit_p = db.Column(db.Numeric(10, 2), nullable=False)
+
     latitude_cliente = db.Column(db.Numeric(10, 8))
     longitude_cliente = db.Column(db.Numeric(11, 8))
     observacao = db.Column(db.Text)
+
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
     id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=False)
     id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
     id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('gciweb.resp_regioes.id_resp_regiao'), nullable=False)
     id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'))
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
-    id_tipo_viab = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_viabilidade.id_tipo_viab'), nullable=False)
-    id_tipo_analise = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_analise.id_tipo_analise'), nullable=False)
-    id_tipo_pedido = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_pedido.id_tipo_pedido'), nullable=False)
+    id_tensao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tensao.id_tensao'), nullable=False)
+    id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'), nullable=False)
     data_registro = db.Column(db.Date, nullable=False)
-    data_criacao = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
-    data_transgressao = db.Column(db.Date)
-    data_vencimento = db.Column(db.Date)
+    data_abertura_cliente = db.Column(db.Date, nullable=False)
+    data_desejada_cliente = db.Column(db.Date, nullable=False)
+    data_vencimento_cliente = db.Column(db.Date, nullable=False)
+    data_prevista_conexao = db.Column(db.Date, nullable=False)
+    data_vencimento_ddpe = db.Column(db.Date, nullable=False)
 
     # Relacionamentos com lazy estratégico
     edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
     regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
-    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados',
-                                 lazy='joined')
+    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados', lazy='joined')
     resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='joined')
     empresa = db.relationship('Empresa', back_populates='estudos', lazy='joined')
     municipio = db.relationship('Municipio', back_populates='estudos', lazy='joined')
-    tipo_viabilidade = db.relationship('TipoViabilidade', back_populates='estudos', lazy='joined')
-    tipo_analise = db.relationship('TipoAnalise', back_populates='estudos', lazy='joined')
-    tipo_pedido = db.relationship('TipoPedido', back_populates='estudos', lazy='joined')
+    tensao = db.relationship('Tensao', back_populates='estudos', lazy='joined')
+    tipo_solicitacao = db.relationship('TipoSolicitacao', back_populates='estudos', lazy='joined')
 
     # Relacionamentos 1:N com lazy='select' para evitar carregamento automático
     anexos = db.relationship('Anexo', back_populates='estudo', lazy='select', cascade='all, delete-orphan')
@@ -248,14 +257,12 @@ class Estudo(db.Model):
             joinedload(cls.resp_regiao).joinedload(RespRegiao.usuario),
             joinedload(cls.empresa),
             joinedload(cls.municipio),
-            joinedload(cls.tipo_viabilidade),
-            joinedload(cls.tipo_analise),
-            joinedload(cls.tipo_pedido),
+            joinedload(cls.tensao),
+            joinedload(cls.tipo_solicitacao),
             selectinload(cls.anexos),
             selectinload(cls.status_estudos).joinedload(StatusEstudo.status_tipo),
             selectinload(cls.alternativas).joinedload(Alternativa.circuito),
-            selectinload(cls.alternativas).selectinload(Alternativa.obras)
-        ).filter_by(id_estudo=estudo_id).first()
+            selectinload(cls.alternativas).selectinload(Alternativa.obras)).filter_by(id_estudo=estudo_id).first()
 
     @property
     def ultimo_status(self):
@@ -264,6 +271,8 @@ class Estudo(db.Model):
             return self.status_estudos[0]
         return None
 
+
+
     @classmethod
     def get_list_with_basic_relations(cls):
         """Método otimizado para listar estudos com relacionamentos básicos"""
@@ -271,8 +280,9 @@ class Estudo(db.Model):
             joinedload(cls.regional),
             joinedload(cls.empresa),
             joinedload(cls.municipio),
-            joinedload(cls.tipo_viabilidade),
-            joinedload(cls.criado_por)
+            joinedload(cls.tipo_solicitacao),
+            joinedload(cls.criado_por),
+            joinedload(cls.tensao)
         )
 
 
@@ -433,7 +443,6 @@ class StatusTipo(db.Model):
 
 def listar_estudos(page, per_page):
     """Lista estudos com paginação otimizada"""
-
     try:
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
@@ -443,9 +452,9 @@ def listar_estudos(page, per_page):
             db.joinedload(Estudo.regional),
             db.joinedload(Estudo.empresa),
             db.joinedload(Estudo.municipio),
-            db.joinedload(Estudo.tipo_viabilidade),
+            db.joinedload(Estudo.tipo_solicitacao),
             db.joinedload(Estudo.criado_por)
-        ).order_by(Estudo.data_criacao.desc()) \
+        ).order_by(Estudo.id_estudo.desc()) \
             .paginate(
             page=page,
             per_page=per_page,
@@ -461,9 +470,9 @@ def listar_estudos(page, per_page):
                 'regional': estudo.regional.regional if estudo.regional else None,
                 'empresa': estudo.empresa.nome_empresa if estudo.empresa else None,
                 'municipio': estudo.municipio.municipio if estudo.municipio else None,
-                'tipo_viabilidade': estudo.tipo_viabilidade.descricao if estudo.tipo_viabilidade else None,
+                'tipo_solicitacao': estudo.tipo_solicitacao.viabilidade if estudo.tipo_solicitacao else None,
                 'criado_por': estudo.criado_por.nome if estudo.criado_por else None,
-                'data_criacao': estudo.data_criacao.isoformat() if estudo.data_criacao else None
+                'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None
             })
 
         return {
@@ -501,13 +510,19 @@ def obter_estudo(estudo_id):
             'protocolo': estudo.protocolo,
             'nome_projeto': estudo.nome_projeto,
             'descricao': estudo.descricao,
-            'dem_solicit_fp': float(estudo.dem_solicit_fp),
-            'dem_solicit_p': float(estudo.dem_solicit_p),
+
+            'dem_carga_atual_fp': float(estudo.dem_carga_atual_fp),
+            'dem_carga_atual_p': float(estudo.dem_carga_atual_p),
+            'dem_carga_solicit_fp': float(estudo.dem_carga_solicit_fp),
+            'dem_carga_solicit_p': float(estudo.dem_carga_solicit_p),
+            'dem_ger_atual_fp': float(estudo.dem_ger_atual_fp),
+            'dem_ger_atual_p': float(estudo.dem_ger_atual_p),
+            'dem_ger_solicit_fp': float(estudo.dem_ger_solicit_fp),
+            'dem_ger_solicit_p': float(estudo.dem_ger_solicit_p),
             'latitude_cliente': float(estudo.latitude_cliente) if estudo.latitude_cliente else None,
             'longitude_cliente': float(estudo.longitude_cliente) if estudo.longitude_cliente else None,
             'observacao': estudo.observacao,
             'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None,
-            'data_criacao': estudo.data_criacao.isoformat() if estudo.data_criacao else None,
 
             # Relacionamentos (já carregados, sem N+1)
             'regional': {
@@ -526,10 +541,10 @@ def obter_estudo(estudo_id):
                 'nome': estudo.municipio.municipio
             } if estudo.municipio else None,
 
-            'tipo_viabilidade': {
-                'id': estudo.tipo_viabilidade.id_tipo_viab,
-                'descricao': estudo.tipo_viabilidade.descricao
-            } if estudo.tipo_viabilidade else None,
+            'tipo_solicitacao': {
+                'id': estudo.tipo_solicitacao.id_tipo_solicitacao,
+                'viabilidade': estudo.tipo_solicitacao.viabilidade
+            } if estudo.tipo_solicitacao else None,
 
             'criado_por': {
                 'id': estudo.criado_por.id_usuario,
