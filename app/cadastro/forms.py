@@ -17,7 +17,12 @@ class EstudoForm(FlaskForm):
     tensao = SelectField('Classe', choices=[], coerce=int, validators=[DataRequired()])
 
     # Campo instalação (pode ser um número ou texto dependendo do uso)
-    instalacao = StringField('Instalação', validators=[Optional()])
+    instalacao = IntegerField('Instalação', validators=[Optional()])
+    CPNJ = IntegerField('CNPJ', validators=[Optional()])
+    CPF = IntegerField('CPF', validators=[Optional()])
+    nome_empresa = StringField('Empresa', validators=[Optional()], render_kw={"readonly": True})
+    demanda = FloatField('Demanda Contratual', validators=[Optional()], render_kw={"readonly": True})
+
 
     # Número de alternativas
     n_alternativas = IntegerField('Número de Alternativas',

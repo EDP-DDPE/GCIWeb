@@ -142,12 +142,51 @@
                                 </div>
 
                                 <div class="row">
+                                    <!-- Instalação -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.instalacao.label(class="form-label") }}
-                                            {{ form.instalacao(class="form-control") }}
+                                            {{ form.instalacao(class="form-control", id="instalacao") }}
                                         </div>
                                     </div>
+
+                                    <!-- CNPJ -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.CPNJ.label(class="form-label") }}
+                                            {{ form.CPNJ(class="form-control", id="CNPJ") }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- CPF -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.CPF.label(class="form-label") }}
+                                            {{ form.CPF(class="form-control", id="CPF") }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Empresa -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.nome_empresa.label(class="form-label") }}
+                                            {{ form.nome_empresa(class="form-control", id="nome_empresa", readonly=true) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Demanda Contratual -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.demanda.label(class="form-label") }}
+                                            {{ form.demanda(class="form-control", id="demanda_contratual", readonly=true) }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Número de Alternativas -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.n_alternativas.label(class="form-label") }}
@@ -1041,6 +1080,34 @@ $(document).ready(function() {
             });
         }
     });
+    // Pesquisa cliente por numero de Instalacao
+    $('#instalacao').change(function() {
+        var instalacao_value=$(this).val();
+        if (instalacao_value) {
+            $.get('/api/cliente/' + instalacao_value, function(data) {
+                console.log(data)
+                if (data.cnpj) {
+                    $('#CNPJ').val(data.cnpj).closest('.mb-3').show();
+                    $.get('/api/consulta/' + data.cnpj, function(data2) {
+                        if (data2.id_empresa = 0) {
+                            flash('Nova empresa cadastrada.')
+                        }
+                    })
+                } else {
+                    $('#CNPJ').val('').closest('.mb-3').hide();
+                }
+
+                if (data.cpf) {
+                    $('#CPF').val(data.CPF).closest('.mb-3').show();
+                } else {
+                    $('#CPF').val('').closest('.mb-3').hide();
+                }
+                $('#nome_empresa').val(data.nome || '');
+                $('#demanda_contratual').val(data.carga || '');
+            })
+        }
+    })
+
 
     // Filtros dinâmicos baseados na EDP selecionada
     $('#edp-select').change(function() {
