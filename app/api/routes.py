@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
-    Regional, Circuito, RespRegiao, Usuario, Subestacao
+    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao
 
 api_bp = Blueprint("api", __name__)
 
@@ -13,6 +13,7 @@ def teste():
             'nome': e.nome_projeto
         } for e in edp]
     )
+
 
 # @api_bp.route('/api/municipios/<int:municipio_id>')
 # def api_obter_municipio(municipio_id):
@@ -39,8 +40,6 @@ def teste():
 #         }, 500
 
 
-
-
 @api_bp.route('/api/estudos')
 def api_listar_estudos():
     page = request.args.get('page', 1, type=int)
@@ -65,6 +64,22 @@ def get_analises(viabilidade):
     return jsonify([a[0] for a in analises])
 
 
+@api_bp.route("/api/cliente/<instalacao>")
+def get_cliente_by_instalacao(instalacao):
+    cliente = Instalacao.query.filter(Instalacao.INSTALACAO.contains(instalacao)).first()
+    return jsonify({
+            'regiao': cliente.EMPRESA,
+            'instalacao': cliente.INSTALACAO,
+            'cnpj': cliente.CNPJ,
+            'CPF': cliente.CPF,
+            'nivel_tensao': cliente.TIPO_CLIENTE,
+            'carga': cliente.CARGA,
+            'nome': cliente.NOME_PARCEIRO,
+            'cep': cliente.CEP
+    })
+
+
+
 @api_bp.route("/api/tipo_pedidos/<viabilidade>/<analise>")
 def get_pedidos(viabilidade, analise):
     solicitacoes = (
@@ -74,6 +89,7 @@ def get_pedidos(viabilidade, analise):
         .all()
     )
     return jsonify([{"id": s.id_tipo_solicitacao, "pedido": s.pedido} for s in solicitacoes])
+
 
 @api_bp.route('/api/dashboard/stats')
 def dashboard_stats():
