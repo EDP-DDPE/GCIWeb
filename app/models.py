@@ -193,6 +193,7 @@ class Circuito(db.Model):
     edp = db.relationship('EDP', back_populates='circuitos', lazy='joined')
     alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select')
 
+
 class TipoSolicitacao(db.Model):
     __tablename__ = 'tipo_solicitacao'
     __table_args__ = (
@@ -350,6 +351,7 @@ class StatusEstudo(db.Model):
     estudo = db.relationship('Estudo', back_populates='status_estudos', lazy='joined')
     criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
     status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
+
 
 class Kit(db.Model):
     __tablename__ = 'kits'
