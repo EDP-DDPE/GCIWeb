@@ -11,17 +11,18 @@ class EstudoForm(FlaskForm):
     # Campos básicos do estudo
     num_doc = StringField('Número do Documento', validators=[DataRequired()], render_kw={"readonly": True})
     protocolo = StringField('Protocolo', validators=[Optional()])
-    nome_projeto = TextAreaField('Nome do Projeto', validators=[DataRequired()])
+    nome_projeto = TextAreaField('Nome do Projeto', validators=[InputRequired()])
     descricao = TextAreaField('Descrição', validators=[Optional()])
 
-    tensao = SelectField('Classe', choices=[], coerce=int, validators=[DataRequired()])
+    tensao = SelectField('Classe', choices=[], coerce=int, validators=[InputRequired()])
 
     # Campo instalação (pode ser um número ou texto dependendo do uso)
     instalacao = IntegerField('Instalação', validators=[Optional()])
-    CPNJ = IntegerField('CNPJ', validators=[Optional()])
+    CPNJ = StringField('CNPJ', validators=[Optional()])
     CPF = IntegerField('CPF', validators=[Optional()])
     nome_empresa = StringField('Empresa', validators=[Optional()], render_kw={"readonly": True})
     demanda = FloatField('Demanda Contratual', validators=[Optional()], render_kw={"readonly": True})
+    id_empresa = IntegerField('id_empresa', validators=[Optional()], render_kw={'style': 'display: none;'})
 
 
     # Número de alternativas
@@ -71,16 +72,16 @@ class EstudoForm(FlaskForm):
     # data_vencimento = DateField('Data de Vencimento', validators=[Optional()])
 
     # SelectFields para relacionamentos
-    edp = SelectField('EDP', coerce=int, validators=[DataRequired()])
+    edp = SelectField('EDP', coerce=int, validators=[InputRequired()])
     empresa = SelectField('Empresa', coerce=int, validators=[Optional()])
-    regional = SelectField('Regional', coerce=int, validators=[DataRequired()])
-    municipio = SelectField('Município', coerce=int, validators=[DataRequired()])
-    resp_regiao = SelectField('Responsável da Região', coerce=int, validators=[DataRequired()])
+    regional = SelectField('Regional', coerce=int, validators=[InputRequired()])
+    municipio = SelectField('Município', coerce=int, validators=[InputRequired()])
+    resp_regiao = SelectField('Responsável da Região', coerce=int, validators=[InputRequired()])
 
     # Tipos
-    tipo_viab = SelectField('Tipo de Viabilidade', choices=[], coerce=str, validators=[DataRequired()])
-    tipo_analise = SelectField('Tipo de Análise', choices=[], coerce=str, validators=[DataRequired()], validate_choice=False)
-    tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[DataRequired()], validate_choice=False)
+    tipo_viab = SelectField('Tipo de Viabilidade', choices=[], coerce=str, validators=[InputRequired()])
+    tipo_analise = SelectField('Tipo de Análise', choices=[], coerce=str, validators=[InputRequired()], validate_choice=False)
+    tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[InputRequired()], validate_choice=False)
 
     # Arquivo anexo (opcional no cadastro inicial)
     arquivos = MultipleFileField('Anexar Documentos',
@@ -132,7 +133,7 @@ class AlternativaForm(FlaskForm):
     observacao = TextAreaField('Observações', validators=[Optional()])
 
     # Relacionamentos
-    circuito = SelectField('Circuito', coerce=int, validators=[DataRequired()])
+    circuito = SelectField('Circuito', coerce=int, validators=[InputRequired()])
 
     def __init__(self, *args, **kwargs):
         super(AlternativaForm, self).__init__(*args, **kwargs)

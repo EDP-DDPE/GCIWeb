@@ -133,7 +133,7 @@ def cadastro_estudo():
                 id_regional=form.regional.data,
                 id_criado_por=usuario.id_usuario,  # Assumindo que o ID do usuário está na sessão
                 id_resp_regiao=form.resp_regiao.data,
-                id_empresa=form.empresa.data if form.empresa.data else None,
+                id_empresa=form.id_empresa.data,
                 id_municipio=form.municipio.data,
                 id_tipo_solicitacao=form.tipo_pedido.data,
                 data_registro=datetime.today(),

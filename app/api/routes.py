@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, Response
 from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
     Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio
 import requests
@@ -29,6 +29,7 @@ def iso_para_sql_datetime(iso_str: str) -> str:
 def only_digits(s: str) -> str:
     """Remove tudo que não for número"""
     return re.sub(r'\D', '', s)
+
 
 def get_cnpj(c: str) -> dict:
     """
@@ -101,32 +102,38 @@ def get_analises(viabilidade):
 
 @api_bp.route("/api/cliente/<instalacao>")
 def get_cliente_by_instalacao(instalacao):
-    cliente = Instalacao.query.filter(Instalacao.INSTALACAO.contains(instalacao)).first()
-    return jsonify({
-        'regiao': cliente.EMPRESA,
-        'instalacao': cliente.INSTALACAO,
-        'cnpj': cliente.CNPJ,
-        'CPF': cliente.CPF,
-        'nivel_tensao': cliente.TIPO_CLIENTE,
-        'carga': cliente.CARGA,
-        'nome': cliente.NOME_PARCEIRO,
-        'cep': cliente.CEP
-    })
+    try:
+        cliente = Instalacao.query.filter(Instalacao.INSTALACAO.contains(instalacao)).first()
+        return jsonify({
+            'regiao': cliente.EMPRESA,
+            'instalacao': cliente.INSTALACAO,
+            'cnpj': cliente.CNPJ,
+            'CPF': cliente.CPF,
+            'nivel_tensao': cliente.TIPO_CLIENTE,
+            'carga': cliente.CARGA,
+            'nome': cliente.NOME_PARCEIRO,
+            'cep': cliente.CEP
+        })
+    except Exception as e:
+        return Response(status=204)
 
 
-@api_bp.route("/api/cliente/<cnpj>")
+@api_bp.route("/api/cliente/cnpj/<cnpj>")
 def get_cliente_by_cnpj(cnpj):
-    cliente = Instalacao.query.filter(Instalacao.CNPJ.contains(cnpj)).first()
-    return jsonify({
-        'regiao': cliente.EMPRESA,
-        'instalacao': cliente.INSTALACAO,
-        'cnpj': cliente.CNPJ,
-        'CPF': cliente.CPF,
-        'nivel_tensao': cliente.TIPO_CLIENTE,
-        'carga': cliente.CARGA,
-        'nome': cliente.NOME_PARCEIRO,
-        'cep': cliente.CEP
-    })
+    try:
+        cliente = Instalacao.query.filter(Instalacao.CNPJ.contains(cnpj)).first()
+        return jsonify({
+            'regiao': cliente.EMPRESA,
+            'instalacao': cliente.INSTALACAO,
+            'cnpj': cliente.CNPJ,
+            'CPF': cliente.CPF,
+            'nivel_tensao': cliente.TIPO_CLIENTE,
+            'carga': cliente.CARGA,
+            'nome': cliente.NOME_PARCEIRO,
+            'cep': cliente.CEP
+        })
+    except Exception as e:
+        return Response(status=204)
 
 
 @api_bp.route("/api/cliente/<cpf>")
@@ -187,14 +194,15 @@ def cadastra_cnpj(cnpj):
                 )
                 db.session.add(novo_socio)
             db.session.commit()
-            return jsonify({'id_empresa': 0})
+            return jsonify({'id_empresa': nova_empresa.id_empresa, 'nome': data['nome']})
         except Exception as e:
             print(str(e))
             db.session.rollback()
             return jsonify({'id_empresa': -1})
     else:
         return jsonify({
-            'id_empresa': empresa.id_empresa
+            'id_empresa': empresa.id_empresa,
+            'nome': empresa.nome_empresa
         })
 
 
