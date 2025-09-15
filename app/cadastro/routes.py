@@ -176,7 +176,7 @@ def cadastro_estudo():
 
             db.session.commit()
             flash(f'Estudo {novo_estudo.num_doc} cadastrado com sucesso!', 'success')
-            return redirect(url_for('listar.listar'))
+            return redirect(url_for('alternativas.listar', id_estudo=novo_estudo.id_estudo))
 
         except Exception as e:
             db.session.rollback()

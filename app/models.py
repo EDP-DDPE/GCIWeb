@@ -291,6 +291,15 @@ class Estudo(db.Model):
             return self.status_estudos[0]
         return None
 
+    def __repr__(self):
+        string = f'''
+        Código: {self.num_doc},
+        Projeto: {self.nome_projeto},
+        Descrição: {self.descricao},
+        Município: {self.municipio.municipio},
+        Data DDPE: {self.data_vencimento_ddpe}
+        '''
+        return string
 
 
     @classmethod

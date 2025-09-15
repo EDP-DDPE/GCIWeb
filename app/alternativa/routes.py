@@ -14,7 +14,7 @@ def format_date(value, fmt='%d/%m/%Y'):
     return value.strftime(fmt)
 
 
-@alternativa_bp.route('/alternativas/listar/<id_estudo>')
+@alternativa_bp.route('/estudo/<id_estudo>/alternativas/')
 @requires_permission('visualizar')
 def listar(id_estudo):
     """Página principal de alternativas com filtros opcionais"""
@@ -34,7 +34,11 @@ def listar(id_estudo):
     )
 
     # Dados para filtros
-    estudo = Estudo.query.filter(Estudo.id_estudo == id_estudo).first()
+    estudo = Estudo.get_with_all_relations(id_estudo)
+
+    print(estudo)
+
+    #estudo = Estudo.query.filter(Estudo.id_estudo == id_estudo).first()
 
     form = AlternativaForm()
 
