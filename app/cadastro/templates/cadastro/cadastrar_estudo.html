@@ -1167,11 +1167,11 @@ $(document).ready(function() {
     // Carregar responsáveis baseado na regional
     $('#regional-select').change(function() {
         var regionalId = $(this).val();
-
+        console.log(regionalId)
         if (regionalId) {
             $.get('/api/resp_regioes/' + regionalId, function(data) {
                 var respSelect = $('#resp-regiao-select');
-                respSelect.empty().append('<option value="0">Selecione um responsável...</option>');
+                respSelect.empty().append('<option value="">Selecione um responsável...</option>');
                 $.each(data.responsaveis, function(index, resp) {
                     respSelect.append('<option value="' + resp.id + '">' + resp.nome + '</option>');
                 });
@@ -1253,40 +1253,11 @@ $(document).ready(function() {
 <!--     });-->
 
     // Validação em tempo real para campos obrigatórios
-    const requiredFields = $('#form-estudo [required]');
-    requiredFields.each(function() {
-        $(this).on('blur'), function() {
-            if ($(this).val().trim() === '') {
-                        $(this).addClass('is-invalid');
-                        console.log(`Campo ${this.name} está vazio`);
-                    } else {
-                        $(this).removeClass('is-invalid').addClass('is-valid');
-                        console.log(`Campo ${this.name} válido`);
-            }
-        }
-    });
+    const $tabs = $('#estudoTabs button');
+    const $tabPanes = $('.tab-pane');
+    let currentIndex = 0;
 
-    var $tabs = $('#estudoTabs button');
-    var $tabPanes = $('.tab-pane');
-    var currentIndex = 0;
-
-    function validateTab(index) {
-        var isValid = true;
-        var $tab = $tabPanes.eq(index);
-        var $requiredFields = $tab.find('input[required], select[required], textarea[required]');
-
-        $requiredFields.each(function () {
-            if (!$(this).val().trim()) {
-                $(this).addClass("is-invalid");
-                isValid = false;
-            } else {
-                $(this).removeClass("is-invalid");
-            }
-        });
-
-        return isValid;
-    }
-
+    // Atualiza o botão de acordo com a aba
     function updateButton() {
         if (currentIndex === $tabs.length - 1) {
             $("#btn-submit").text("Cadastrar Estudo").attr("type", "submit");
@@ -1295,12 +1266,65 @@ $(document).ready(function() {
         }
     }
 
+    // Validação de uma aba
+    function validateTab(index) {
+        let isValid = true;
+        const $tab = $tabPanes.eq(index);
+        const $requiredFields = $tab.find('input[required], select[required], textarea[required]');
 
+        $requiredFields.each(function () {
+            const $field = $(this);
+            const value = $field.val();
+
+            if ($field.is('select')) {
+                if (!value || value === "0" || value === "") {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                    isValid = false;
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            } else {
+                if (!value || value.trim() === '') {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                    isValid = false;
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            }
+        });
+
+        return isValid;
+    }
+
+    // Salva o estado de cada aba (mantém selects e inputs)
+    function saveTabValues(index) {
+        const $tab = $tabPanes.eq(index);
+        $tab.find('input, select, textarea').each(function () {
+            const $field = $(this);
+            $field.data('saved-value', $field.val());
+        });
+    }
+
+    function restoreTabValues(index) {
+        const $tab = $tabPanes.eq(index);
+        $tab.find('input, select, textarea').each(function () {
+            const $field = $(this);
+            if ($field.data('saved-value') !== undefined) {
+                $field.val($field.data('saved-value')).trigger('change');
+            }
+        });
+    }
+
+    // Clique no botão Próximo / Cadastrar
     $("#btn-submit").click(function () {
         if (!validateTab(currentIndex)) return;
 
+        // Salva os valores da aba atual antes de avançar
+        saveTabValues(currentIndex);
+
         if (currentIndex < $tabs.length - 1) {
             currentIndex++;
+            restoreTabValues(currentIndex);
             $tabs.eq(currentIndex).tab("show");
             updateButton();
         }
@@ -1308,18 +1332,44 @@ $(document).ready(function() {
 
     // Controle manual de abas
     $tabs.on("show.bs.tab", function (e) {
-        var newIndex = $(e.target).parent().index();
+        const newIndex = $(e.target).parent().index();
 
-        // Se está tentando avançar, valida antes
         if (newIndex > currentIndex && !validateTab(currentIndex)) {
-            e.preventDefault(); // cancela a troca
+            e.preventDefault(); // cancela a troca se aba anterior não estiver válida
             return false;
         }
+
+        // Salva e restaura valores para manter selects e inputs
+        saveTabValues(currentIndex);
+        restoreTabValues(newIndex);
 
         currentIndex = newIndex;
         updateButton();
     });
 
+    // Validação em tempo real (blur)
+    $('#form-estudo [required]').each(function () {
+        $(this).on('blur change', function () {
+            const $field = $(this);
+            const value = $field.val();
+
+            if ($field.is('select')) {
+                if (!value || value === "0" || value === "") {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            } else {
+                if (!value || value.trim() === '') {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            }
+        });
+    });
+
+    updateButton();
 });
 
 
