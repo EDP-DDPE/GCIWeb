@@ -41,17 +41,16 @@ def carregar_choices_estudo(form):
 
         # Empresas
 
-
-        form.empresa.choices = [(0, 'Selecione uma empresa...')]# + \
-        #                       [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
+        form.empresa.choices = [(0, 'Selecione uma empresa...')] + \
+                              [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
 
         # Municípios (filtrar por EDP se necessário)
-        form.municipio.choices = [(0, 'Selecione um município...')] # + \
-        #                          [(m.id_municipio, m.municipio) for m in Municipio.query.all()]
+        form.municipio.choices = [(0, 'Selecione um município...')] + \
+                                 [(m.id_municipio, m.municipio) for m in Municipio.query.all()]
 
         # Regionais (filtrar por EDP se necessário)
-        form.regional.choices = [(0, 'Selecione uma regional...')]# + \
-        #                        [(r.id_regional, r.regional) for r in Regional.query.all()]
+        form.regional.choices = [(0, 'Selecione uma regional...')] + \
+                               [(r.id_regional, r.regional) for r in Regional.query.all()]
 
 
         # Responsáveis por região
@@ -114,9 +113,8 @@ def cadastro_estudo():
                 nome_projeto=form.nome_projeto.data,
                 descricao=form.descricao.data,
 
-                tensao=form.tensao.data,
-                instalacao=int(
-                    form.instalacao.data) if form.instalacao.data and form.instalacao.data.isdigit() else None,
+                id_tensao=form.tensao.data,
+                instalacao=int(form.instalacao.data),
                 n_alternativas=form.n_alternativas.data or 0,
                 dem_carga_atual_fp=form.dem_carga_atual_fp.data or 0,
                 dem_carga_atual_p=form.dem_carga_atual_p.data or 0,
@@ -133,7 +131,7 @@ def cadastro_estudo():
                 id_regional=form.regional.data,
                 id_criado_por=usuario.id_usuario,  # Assumindo que o ID do usuário está na sessão
                 id_resp_regiao=form.resp_regiao.data,
-                id_empresa=form.empresa.data if form.empresa.data else None,
+                id_empresa=form.id_empresa.data,
                 id_municipio=form.municipio.data,
                 id_tipo_solicitacao=form.tipo_pedido.data,
                 data_registro=datetime.today(),
@@ -178,7 +176,7 @@ def cadastro_estudo():
 
             db.session.commit()
             flash(f'Estudo {novo_estudo.num_doc} cadastrado com sucesso!', 'success')
-            return redirect(url_for('listar.listar'))
+            return redirect(url_for('alternativas.listar', id_estudo=novo_estudo.id_estudo))
 
         except Exception as e:
             db.session.rollback()

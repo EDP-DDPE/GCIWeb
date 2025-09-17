@@ -23,6 +23,25 @@ class EDP(db.Model):
     estudos = db.relationship('Estudo', back_populates='edp', lazy='select')
 
 
+class Instalacao(db.Model):
+    __tablename__ = 'INSTALACOES'
+    __table_args__ = {'schema': 'gciweb'}
+
+    ID_INSTALACAO = db.Column(db.BigInteger, primary_key=True)
+    EMPRESA = db.Column(db.Text, nullable=True)
+    INSTALACAO = db.Column(db.Text, nullable=True)
+    CNPJ = db.Column(db.Text, nullable=True)
+    CPF = db.Column(db.Text, nullable=True)
+    STATUS_INSTALACAO = db.Column(db.Text, nullable=True)
+    DESCRICAO_STATUS = db.Column(db.Text, nullable=True)
+    DESCRICAO_CLASSE = db.Column(db.Text, nullable=True)
+    TARIFA = db.Column(db.Text, nullable=True)
+    CARGA = db.Column(db.Numeric(10, 2), nullable=True)
+    TIPO_CLIENTE = db.Column(db.Text, nullable=True)
+    NOME_PARCEIRO = db.Column(db.Text, nullable=True)
+    CEP = db.Column(db.Text, nullable=True)
+
+
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
     __table_args__ = {'schema': 'gciweb'}
@@ -174,6 +193,7 @@ class Circuito(db.Model):
     edp = db.relationship('EDP', back_populates='circuitos', lazy='joined')
     alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select')
 
+
 class TipoSolicitacao(db.Model):
     __tablename__ = 'tipo_solicitacao'
     __table_args__ = (
@@ -271,6 +291,15 @@ class Estudo(db.Model):
             return self.status_estudos[0]
         return None
 
+    def __repr__(self):
+        string = f'''
+        Código: {self.num_doc},
+        Projeto: {self.nome_projeto},
+        Descrição: {self.descricao},
+        Município: {self.municipio.municipio},
+        Data DDPE: {self.data_vencimento_ddpe}
+        '''
+        return string
 
 
     @classmethod
@@ -331,6 +360,7 @@ class StatusEstudo(db.Model):
     estudo = db.relationship('Estudo', back_populates='status_estudos', lazy='joined')
     criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
     status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
+
 
 class Kit(db.Model):
     __tablename__ = 'kits'

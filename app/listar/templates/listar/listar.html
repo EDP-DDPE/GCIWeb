@@ -27,12 +27,25 @@
                 <td>{{ doc.criado_por }}</td>
                 <td>{{ doc.data_registro }}</td>
                 <td>
-                    <button class="btn btn-sm btn-info" onclick="verDetalhes({{ doc.id }})">
-                        Detalhes
+                    <button class="btn btn-sm btn-info"
+                            onclick="verDetalhes({{ doc.id }})"
+                            data-bs-toggle="tooltip"
+                            title="Ver detalhes">
+                        <i class="bi bi-eye"></i>
                     </button>
 
-                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}" class="btn btn-sm btn-info {% if not usuario.editar and not usuario.admin%}disabled{% endif %}">
-                        Editar
+                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}"
+                       class="btn btn-sm btn-warning {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                       data-bs-toggle="tooltip"
+                       title="Editar estudo">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <a href="{{ url_for('alternativa.listar', id_estudo=doc.id) }}"
+                       class="btn btn-sm btn-success {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                       data-bs-toggle="tooltip"
+                       title="Gerenciar alternativas">
+                        <i class="bi bi-list-check"></i>
                     </a>
                 </td>
             </tr>
