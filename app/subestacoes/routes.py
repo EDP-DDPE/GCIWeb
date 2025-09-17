@@ -1,22 +1,12 @@
-from flask import Blueprint, render_template, request
-from app.models import Subestacao, Municipio, EDP
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from app.models import db,Subestacao, Municipio, EDP
 from sqlalchemy.orm import joinedload
 from sqlalchemy import asc, desc
-
 
 subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates")
 
 @subestacao_bp.route("/subestacoes", methods=["GET", "POST"])
 def listar_subestacoes():
-    sort = request.args.get("sort", "id_subestacao") # campo padrão
-    direction = request.args.get("direction", "asc") # asc ou desc
-
-    # valores de filtro
-    nome_filtro = request.args.get("nome", "")
-    sigla_filtro = request.args.get("sigla", "")
-    municipio_filtro = request.args.get("municipio", "")
-    edp_filtro = request.args.get("edp", "")
-
     query = (
         Subestacao.query.options(
             joinedload(Subestacao.municipio),
@@ -24,67 +14,46 @@ def listar_subestacoes():
             joinedload(Subestacao.circuitos)
         )
     )
-
-    # filtros
-    if nome_filtro:
-        query = query.filter(Subestacao.nome.ilike(f"%{nome_filtro}%"))
-    if sigla_filtro:
-        query = query.filter(Subestacao.sigla.ilike(f"%{sigla_filtro}%"))
-    if municipio_filtro:
-        query = query.join(Subestacao.municipio).filter(Municipio.municipio.ilike(f"%{municipio_filtro}%"))
-    if edp_filtro:
-        query = query.join(Subestacao.edp).filter(EDP.empresa.ilike(f"%{edp_filtro}%"))
-
-    #Mapeia colunas válidas
-    sort_columns = {
-        "id": Subestacao.id_subestacao,
-        "nome": Subestacao.nome,
-        "sigla": Subestacao.sigla
-    }
-
-        # colunas de relacionamento exigem join
-    if sort == "municipio":
-        query = query.join(Subestacao.municipio)
-        col = Municipio.municipio
-    elif sort == "edp":
-        query = query.join(Subestacao.edp)
-        col = EDP.empresa
-    else:
-        col = sort_columns.get(sort, Subestacao.id_subestacao)
-
-    if sort in sort_columns:
-        col = sort_columns[sort]
-        if direction == "desc":
-            query = query.order_by(desc(col))
-        else:
-            query = query.order_by(asc(col))
-
-    dados = query.all()
-
+ 
+    total_subestacoes = Subestacao.query.count()
+    lista = query.order_by(Subestacao.id_subestacao.asc()).all()
+    
     return render_template(
         "subestacoes.html",
-        documentos = dados,
-        sort = sort,
-        direction = direction
+        subestacoes=lista,
+        total_subestacoes=total_subestacoes
     )
 
 @subestacao_bp.route("/subestacoes/<int:id>/editar", methods=["GET", "POST"])
 def editar_subestacao(id):
     sub = Subestacao.query.get_or_404(id)
+    municipios = Municipio.query.all()
+    edps = EDP.query.all()
 
     if request.method == "POST":
+        if "delete" in request.form:
+            db.session.delete(sub)
+            db.session.commit()
+            flash("Subestação apagada com sucesso!", "success")
+            return redirect(url_for("subestacoes.listar_subestacoes"))
+
+        # Atualizar subestação
         sub.nome = request.form["nome"]
         sub.sigla = request.form["sigla"]
-        # se quiser permitir mudar município ou edp:
-        # sub.id_municipio = request.form["id_municipio"]
-        # sub.id_edp = request.form["id_edp"]
-
+        sub.id_municipio = request.form["id_municipio"]
+        sub.id_edp = request.form["id_edp"]
+        sub.lat = request.form["lat"]
+        sub.long = request.form["long"]
         db.session.commit()
         flash("Subestação atualizada com sucesso!", "success")
         return redirect(url_for("subestacoes.listar_subestacoes"))
 
-
-    return render_template("editar_subestacao.html", sub=sub)
+    return render_template(
+        "editar_subestacao.html",
+        sub=sub,
+        municipios=municipios,
+        edps=edps
+    )
 
 @subestacao_bp.route("/subestacoes/nova", methods=["GET", "POST"])
 def nova_subestacao():

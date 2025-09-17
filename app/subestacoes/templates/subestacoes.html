@@ -18,101 +18,41 @@
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>ID</span>
-                                <form method="get" style="display:inline;">
-                                    <input type="hidden" name="sort" value="id">
-                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='id' and direction=='asc' else 'asc' }}">
-                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por ID">
-                                        {% if sort=='id' %}
-                                            {% if direction=='asc' %}
-                                                <i class="fas fa-sort-up"></i>
-                                            {% else %}
-                                                <i class="fas fa-sort-down"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-sort"></i>
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="id" data-direction="asc" title="Ordenar por ID">
+                                    <i class="fas fa-sort"></i>
+                                </a>
                             </div>
                         </th>
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Nome</span>
-                                <form method="get" style="display:inline;">
-                                    <input type="hidden" name="sort" value="nome">
-                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='nome' and direction=='asc' else 'asc' }}">
-                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por Nome">
-                                        {% if sort=='nome' %}
-                                            {% if direction=='asc' %}
-                                                <i class="fas fa-sort-up"></i>
-                                            {% else %}
-                                                <i class="fas fa-sort-down"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-sort"></i>
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="nome" data-direction="asc" title="Ordenar por Nome">
+                                    <i class="fas fa-sort"></i>
+                                </a>
                             </div>
                         </th>
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>SIGLA</span>
-                                <form method="get" style="display:inline;">
-                                    <input type="hidden" name="sort" value="sigla">
-                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='sigla' and direction=='asc' else 'asc' }}">
-                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por SIGLA">
-                                        {% if sort=='sigla' %}
-                                            {% if direction=='asc' %}
-                                                <i class="fas fa-sort-up"></i>
-                                            {% else %}
-                                                <i class="fas fa-sort-down"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-sort"></i>
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="sigla" data-direction="asc" title="Ordenar por SIGLA">
+                                    <i class="fas fa-sort"></i>
+                                </a>
                             </div>
                         </th>
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Município</span>
-                                <form method="get" style="display:inline;">
-                                    <input type="hidden" name="sort" value="municipio">
-                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='municipio' and direction=='asc' else 'asc' }}">
-                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por Município">
-                                        {% if sort=='municipio' %}
-                                            {% if direction=='asc' %}
-                                                <i class="fas fa-sort-up"></i>
-                                            {% else %}
-                                                <i class="fas fa-sort-down"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-sort"></i>
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="municipio" data-direction="asc" title="Ordenar por Município">
+                                    <i class="fas fa-sort"></i>
+                                </a>
                             </div>
                         </th>
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>EDP</span>
-                                <form method="get" style="display:inline;">
-                                    <input type="hidden" name="sort" value="edp">
-                                    <input type="hidden" name="direction" value="{{ 'desc' if sort=='edp' and direction=='asc' else 'asc' }}">
-                                    <button type="submit" class="btn btn-link p-0 text-muted btn-sort" title="Ordenar por EDP">
-                                        {% if sort=='edp' %}
-                                            {% if direction=='asc' %}
-                                                <i class="fas fa-sort-up"></i>
-                                            {% else %}
-                                                <i class="fas fa-sort-down"></i>
-                                            {% endif %}
-                                        {% else %}
-                                            <i class="fas fa-sort"></i>
-                                        {% endif %}
-                                    </button>
-                                </form>
+                                <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="edp" data-direction="asc" title="Ordenar por EDP">
+                                    <i class="fas fa-sort"></i>
+                                </a>
                             </div>
                         </th>
                         <th>Ações</th>
@@ -120,13 +60,15 @@
                 </thead>
 
                 <tbody id="corpoTabela">
-                    {% for sub in documentos %}
+                    {% for sub in subestacoes %}
                     <tr class="linha-subestacao" 
                         data-id="{{ sub.id_subestacao }}"
                         data-nome="{{ sub.nome|lower }}" 
                         data-sigla="{{ sub.sigla|lower }}" 
                         data-municipio="{{ sub.municipio.municipio|lower }}" 
-                        data-edp="{{ sub.edp.empresa|lower }}">
+                        data-edp="{{ sub.edp.empresa|lower }}"
+                        data-lat="{{ sub.lat | lower }}"
+                        data-long="{{ sub.long | lower }}">
                         <td>{{ sub.id_subestacao }}</td>
                         <td>{{ sub.nome }}</td>
                         <td>{{ sub.sigla }}</td>
@@ -142,32 +84,32 @@
                         </td>
                     </tr>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="modalSub{{ sub.id_subestacao }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <!-- Modal de detalhes da subestação -->
+                    <div class="modal fade" id="modalSub{{ sub.id_subestacao }}" tabindex="-1" aria-labelledby="modalLabel{{ sub.id_subestacao }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title">Detalhes da Subestação</h5>
+                                    <h5 class="modal-title" id="modalLabel{{ sub.id_subestacao }}">
+                                        Detalhes da Subestação {{ sub.nome }}
+                                    </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p><strong>ID:</strong> {{ sub.id_subestacao }}</p>
                                     <p><strong>Nome:</strong> {{ sub.nome }}</p>
-                                    <p><strong>SIGLA:</strong> {{ sub.sigla }}</p>
-                                    <p><strong>Município:</strong> {{ sub.municipio.municipio }}</p>
-                                    <p><strong>EDP:</strong> {{ sub.edp.empresa }}</p>
+                                    <p><strong>SIGLA:</strong> {{ sub.sigla }} </p>
+                                    <p><strong>Município:</strong> {{ sub.municipio.municipio }} </p>
+                                    <p><strong>EDP:</strong> {{ sub.edp.empresa }} </p>
+                                    <p><strong>Coordenada X (Graus Decimais):</strong> {{ sub.long }} </p>
+                                    <p><strong>Coordenada Y (Graus Decimais):</strong> {{ sub.lat }} </p>
 
-                                    <hr>
-                                    <h6>Circuitos vinculados:</h6>
-                                    <ul>
-                                        {% for c in sub.circuitos %}
-                                        <li>{{ c.nome_circuito }}</li>
-                                        {% else %}
-                                        <li><em>Sem circuitos</em></li>
-                                        {% endfor %}
-                                    </ul>
+                                    <!-- Contêiner do mapa -->
+                                    <div id="mapaSub{{ sub.id_subestacao }}" style="height: 300px; border-radius: 10px;"></div>
+
                                 </div>
                                 <div class="modal-footer">
+                                    <a href="{{ url_for('subestacoes.editar_subestacao', id=sub.id_subestacao) }}" class="btn btn-primary">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                                 </div>
                             </div>
@@ -218,7 +160,9 @@
                     </button>
                     
                     <div id="contadorResultados" class="small text-muted text-center mt-2">
-                        Total: <span id="totalLinhas">{{ documentos|length }}</span> subestação(ões)
+                        {% set total = subestacoes|length %}
+                        Total: <span id="totalLinhas">{{ total }}</span> 
+                        {% if total == 1 %}subestação{% else %}subestações{% endif %}
                     </div>
                 </div>
             </div>
@@ -236,21 +180,16 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     const linhas = document.querySelectorAll('.linha-subestacao');
+    const tbody = document.getElementById('corpoTabela');
     const nenhumResultado = document.getElementById('nenhumResultado');
-    const totalLinhas = document.getElementById('totalLinhas');
     const limparFiltros = document.getElementById('limparFiltros');
 
-    // Função para normalizar texto (remover acentos)
     function normalizeText(text) {
-        return text.toLowerCase()
-                   .normalize('NFD')
-                   .replace(/[\u0300-\u036f]/g, '');
+        return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    // Função para aplicar filtros
     function aplicarFiltros() {
         let linhasVisiveis = 0;
-        
         linhas.forEach(linha => {
             const dados = {
                 nome: normalizeText(linha.dataset.nome),
@@ -258,76 +197,141 @@ document.addEventListener('DOMContentLoaded', function() {
                 municipio: normalizeText(linha.dataset.municipio),
                 edp: normalizeText(linha.dataset.edp)
             };
-            
-            let mostrarLinha = true;
-            
-            // Verificar cada filtro
+            let mostrar = true;
             Object.keys(filtros).forEach(campo => {
                 const valorFiltro = normalizeText(filtros[campo].value.trim());
                 if (valorFiltro && !dados[campo].includes(valorFiltro)) {
-                    mostrarLinha = false;
+                    mostrar = false;
                 }
             });
-            
-            // Mostrar/ocultar linha
-            if (mostrarLinha) {
-                linha.style.display = '';
-                linhasVisiveis++;
+            linha.style.display = mostrar ? '' : 'none';
+            if (mostrar) linhasVisiveis++;
+        });
+        // Corrigir o texto singular/plural
+        const textoResultado = linhasVisiveis === 1 ? 'subestação' : 'subestações';
+        
+        // Atualizar o texto completo do contador
+        const contadorDiv = document.getElementById('contadorResultados');
+        contadorDiv.innerHTML = `Total: <span id="totalLinhas">${linhasVisiveis}</span> ${textoResultado}`;
+        
+        nenhumResultado.style.display = linhasVisiveis === 0 ? 'block' : 'none';
+    }
+
+    Object.values(filtros).forEach(input => {
+        input.addEventListener('input', () => {
+            clearTimeout(input.timeout);
+            input.timeout = setTimeout(() => {
+                aplicarFiltros();
+                atualizarIndicadorFiltros();
+            }, 300);
+        });
+    });
+
+    limparFiltros.addEventListener('click', () => {
+        Object.values(filtros).forEach(i => i.value = '');
+        aplicarFiltros();
+        atualizarIndicadorFiltros();
+    });
+
+    function atualizarIndicadorFiltros() {
+        const ativo = Object.values(filtros).some(i => i.value.trim() !== '');
+        const titulo = document.querySelector('.card h5');
+        titulo.innerHTML = ativo
+            ? '<i class="fas fa-filter me-2 text-primary"></i>Filtros <small class="badge bg-primary">Ativo</small>'
+            : '<i class="fas fa-filter me-2"></i>Filtros';
+    }
+
+    // === Ordenação client-side ===
+    const sortButtons = document.querySelectorAll('.btn-sort');
+    sortButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const sortKey = this.dataset.sort;
+            let direction = this.dataset.direction;
+            const linhasArray = Array.from(tbody.querySelectorAll('tr'));
+            linhasArray.sort((a, b) => {
+                const valA = a.dataset[sortKey] || "";
+                const valB = b.dataset[sortKey] || "";
+                return direction === "asc"
+                    ? valA.localeCompare(valB, 'pt-BR', {numeric: true})
+                    : valB.localeCompare(valA, 'pt-BR', {numeric: true});
+            });
+            this.dataset.direction = direction === "asc" ? "desc" : "asc";
+            // Resetar todos ícones
+            sortButtons.forEach(b => b.querySelector("i").className = "fas fa-sort");
+
+            // Atualizar ícone do botão clicado
+            const icon = this.querySelector("i");
+            if (this.dataset.direction === "asc") {
+                icon.className = "fas fa-sort-up";
             } else {
-                linha.style.display = 'none';
+                icon.className = "fas fa-sort-down";
+            }
+
+            linhasArray.forEach(l => tbody.appendChild(l));
+        });
+    });
+
+     // ==== INÍCIO: mapa Leaflet nos modais ====
+    const modais = document.querySelectorAll('.modal');
+    
+    modais.forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function() {
+            // Encontra o ID da subestação a partir do ID do modal
+            const modalId = this.id;
+            const idSubestacao = modalId.replace('modalSub', '');
+            
+            // Encontra a linha correspondente na tabela
+            const linha = document.querySelector(`.linha-subestacao[data-id="${idSubestacao}"]`);
+            
+            if (!linha) return;
+            
+            const lat = parseFloat(linha.dataset.long);
+            const lng = parseFloat(linha.dataset.lat);
+            const mapaDiv = document.getElementById(`mapaSub${idSubestacao}`);
+            
+            // Remove qualquer mapa existente no contêiner
+            if (mapaDiv._map) {
+                mapaDiv._map.remove();
+            }
+            
+            // Inicializa novo mapa
+            const map = L.map(mapaDiv).setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            
+            L.marker([lat, lng]).addTo(map)
+                .bindPopup(`Subestação: ${linha.dataset.nome}`)
+                .openPopup();
+            
+            // Força redimensionamento após um pequeno delay
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 100);
+            
+            // Armazena referência do mapa no elemento div
+            mapaDiv._map = map;
+        });
+        
+        // Limpa o mapa quando o modal é fechado
+        modal.addEventListener('hidden.bs.modal', function() {
+            const modalId = this.id;
+            const idSubestacao = modalId.replace('modalSub', '');
+            const mapaDiv = document.getElementById(`mapaSub${idSubestacao}`);
+            
+            if (mapaDiv && mapaDiv._map) {
+                setTimeout(() => {
+                    mapaDiv._map.remove();
+                    mapaDiv._map = null;
+                }, 300);
             }
         });
-        
-        // Atualizar contador e mensagem
-        totalLinhas.textContent = linhasVisiveis;
-        
-        if (linhasVisiveis === 0) {
-            nenhumResultado.style.display = 'block';
-        } else {
-            nenhumResultado.style.display = 'none';
-        }
-    }
-
-    // Adicionar eventos de input para filtrar em tempo real
-    Object.values(filtros).forEach(input => {
-        input.addEventListener('input', function() {
-            // Debounce para melhorar performance
-            clearTimeout(this.timeout);
-            this.timeout = setTimeout(aplicarFiltros, 300);
-        });
-        
-        // Filtrar também ao colar texto
-        input.addEventListener('paste', function() {
-            setTimeout(aplicarFiltros, 100);
-        });
     });
+    // ==== FIM: mapa Leaflet nos modais ====
 
-    // Botão limpar filtros
-    limparFiltros.addEventListener('click', function() {
-        Object.values(filtros).forEach(input => {
-            input.value = '';
-        });
-        aplicarFiltros();
-    });
-
-    // Adicionar indicador visual quando há filtros ativos
-    function atualizarIndicadorFiltros() {
-        const algumFiltroAtivo = Object.values(filtros).some(input => input.value.trim() !== '');
-        const titulo = document.querySelector('.card h5');
-        
-        if (algumFiltroAtivo) {
-            titulo.innerHTML = '<i class="fas fa-filter me-2 text-primary"></i>Filtros <small class="badge bg-primary">Ativo</small>';
-        } else {
-            titulo.innerHTML = '<i class="fas fa-filter me-2"></i>Filtros';
-        }
-    }
-
-    // Atualizar indicador quando houver mudanças
-    Object.values(filtros).forEach(input => {
-        input.addEventListener('input', atualizarIndicadorFiltros);
-    });
-    
-    limparFiltros.addEventListener('click', atualizarIndicadorFiltros);
 });
 </script>
 
