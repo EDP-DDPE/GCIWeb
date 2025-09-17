@@ -1,18 +1,55 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, Response
 from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
-    Regional, Circuito, RespRegiao, Usuario, Subestacao
+    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio
+import requests
+import re
+from datetime import datetime
 
 api_bp = Blueprint("api", __name__)
 
 
-@api_bp.route('/api/teste')
-def teste():
-    edp = Estudo.query.all()
-    return jsonify(
-        [{
-            'nome': e.nome_projeto
-        } for e in edp]
-    )
+def convert_date(data_str: str) -> str:
+    if data_str == '':
+        return ''
+    dt = datetime.strptime(data_str, "%d/%m/%Y")
+    return dt.strftime("%Y-%m-%d")
+
+
+def iso_para_sql_datetime(iso_str: str) -> str:
+    if iso_str == '':
+        return ''
+    """
+    Converte string ISO 8601 '2025-08-19T14:11:57.464Z' para
+    formato SQL Server 'YYYY-MM-DD HH:MM:SS'
+    """
+    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%S.%fZ")
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+
+def only_digits(s: str) -> str:
+    """Remove tudo que não for número"""
+    return re.sub(r'\D', '', s)
+
+
+def get_cnpj(c: str) -> dict:
+    """
+    Consulta o CNPJ na API da ReceitaWS
+    Retorna um dicionário (JSON).
+    """
+    cnpj = only_digits(c)
+    url = f"https://www.receitaws.com.br/v1/cnpj/{cnpj}"
+
+    response = requests.get(url, timeout=10)
+
+    if response.status_code == 200:
+        try:
+            return response.json()
+        except Exception as e:
+            return {"erro": f"Falha ao converter JSON: {e}"}
+    else:
+        return {"erro": f"Falha na requisição: {response.status_code}"}
+
+
 
 # @api_bp.route('/api/municipios/<int:municipio_id>')
 # def api_obter_municipio(municipio_id):
@@ -39,8 +76,6 @@ def teste():
 #         }, 500
 
 
-
-
 @api_bp.route('/api/estudos')
 def api_listar_estudos():
     page = request.args.get('page', 1, type=int)
@@ -65,6 +100,112 @@ def get_analises(viabilidade):
     return jsonify([a[0] for a in analises])
 
 
+@api_bp.route("/api/cliente/<instalacao>")
+def get_cliente_by_instalacao(instalacao):
+    try:
+        cliente = Instalacao.query.filter(Instalacao.INSTALACAO.contains(instalacao)).first()
+        return jsonify({
+            'regiao': cliente.EMPRESA,
+            'instalacao': cliente.INSTALACAO,
+            'cnpj': cliente.CNPJ,
+            'CPF': cliente.CPF,
+            'nivel_tensao': cliente.TIPO_CLIENTE,
+            'carga': cliente.CARGA,
+            'nome': cliente.NOME_PARCEIRO,
+            'cep': cliente.CEP
+        })
+    except Exception as e:
+        return Response(status=204)
+
+
+@api_bp.route("/api/cliente/cnpj/<cnpj>")
+def get_cliente_by_cnpj(cnpj):
+    try:
+        cliente = Instalacao.query.filter(Instalacao.CNPJ.contains(cnpj)).first()
+        return jsonify({
+            'regiao': cliente.EMPRESA,
+            'instalacao': cliente.INSTALACAO,
+            'cnpj': cliente.CNPJ,
+            'CPF': cliente.CPF,
+            'nivel_tensao': cliente.TIPO_CLIENTE,
+            'carga': cliente.CARGA,
+            'nome': cliente.NOME_PARCEIRO,
+            'cep': cliente.CEP
+        })
+    except Exception as e:
+        return Response(status=204)
+
+
+@api_bp.route("/api/cliente/<cpf>")
+def get_cliente_by_cpf(cpf):
+    cliente = Instalacao.query.filter(Instalacao.CPF.contains(cpf)).first()
+    return jsonify({
+        'regiao': cliente.EMPRESA,
+        'instalacao': cliente.INSTALACAO,
+        'cnpj': cliente.CNPJ,
+        'CPF': cliente.CPF,
+        'nivel_tensao': cliente.TIPO_CLIENTE,
+        'carga': cliente.CARGA,
+        'nome': cliente.NOME_PARCEIRO,
+        'cep': cliente.CEP
+    })
+
+
+@api_bp.route("/api/consulta/<cnpj>")
+def cadastra_cnpj(cnpj):
+    empresa = Empresa.query.filter(Empresa.cnpj.contains(cnpj)).first()
+    if not empresa:
+        try:
+            data = get_cnpj(cnpj)
+            nova_empresa = Empresa(
+                nome_empresa=data['nome'],
+                cnpj=only_digits(data['cnpj']),
+                abertura=convert_date(data['abertura']),
+                situacao=data['situacao'],
+                tipo=data['tipo'],
+                porte=data['porte'],
+                natureza_juridica=data['natureza_juridica'],
+                logradouro=data['logradouro'],
+                numero=data['numero'],
+                complemento=data['complemento'],
+                municipio=data['municipio'],
+                bairro=data['bairro'],
+                uf=data['uf'],
+                cep=only_digits(data['cep']),
+                email=data['email'],
+                telefone=data['telefone'],
+                data_situacao=convert_date(data['data_situacao']),
+                ultima_atualizacao=iso_para_sql_datetime(data['ultima_atualizacao']),
+                status=data['status'],
+                fantasia=data['fantasia'],
+                efr=data['efr'],
+                motivo_situacao=data['motivo_situacao'],
+                situacao_especial=data['situacao_especial'],
+                data_situacao_especial=convert_date(data['data_situacao_especial'])
+            )
+            db.session.add(nova_empresa)
+            db.session.flush()
+
+            for socio in data['qsa']:
+                novo_socio = Socio(
+                    nome=socio['nome'],
+                    cargo=socio['qual'],
+                    id_empresa=nova_empresa.id_empresa
+                )
+                db.session.add(novo_socio)
+            db.session.commit()
+            return jsonify({'id_empresa': nova_empresa.id_empresa, 'nome': data['nome']})
+        except Exception as e:
+            print(str(e))
+            db.session.rollback()
+            return jsonify({'id_empresa': -1})
+    else:
+        return jsonify({
+            'id_empresa': empresa.id_empresa,
+            'nome': empresa.nome_empresa
+        })
+
+
 @api_bp.route("/api/tipo_pedidos/<viabilidade>/<analise>")
 def get_pedidos(viabilidade, analise):
     solicitacoes = (
@@ -74,6 +215,7 @@ def get_pedidos(viabilidade, analise):
         .all()
     )
     return jsonify([{"id": s.id_tipo_solicitacao, "pedido": s.pedido} for s in solicitacoes])
+
 
 @api_bp.route('/api/dashboard/stats')
 def dashboard_stats():

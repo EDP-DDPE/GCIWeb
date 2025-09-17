@@ -36,11 +36,6 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="responsaveis-tab" data-bs-toggle="tab" data-bs-target="#responsaveis" type="button" role="tab">
-                            <i class="fas fa-users me-1"></i>Responsáveis
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
                         <button class="nav-link" id="datas-tab" data-bs-toggle="tab" data-bs-target="#datas" type="button" role="tab">
                             <i class="fas fa-calendar me-1"></i>Datas
                         </button>
@@ -142,12 +137,58 @@
                                 </div>
 
                                 <div class="row">
+                                    <div class="col-12">
+                                       <div id="msg_empresa" class="mt-2"></div>
+                                        {{ form.id_empresa(class="form-control", id="id_empresa") }}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Instalação -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.instalacao.label(class="form-label") }}
-                                            {{ form.instalacao(class="form-control") }}
+                                            {{ form.instalacao(class="form-control", id="instalacao") }}
                                         </div>
                                     </div>
+
+                                    <!-- CNPJ -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.CPNJ.label(class="form-label") }}
+                                            {{ form.CPNJ(class="form-control", id="CNPJ", placeholder="00.000.000/0000-00", pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}")}}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- CPF -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.CPF.label(class="form-label") }}
+                                            {{ form.CPF(class="form-control", id="CPF") }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Empresa -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.nome_empresa.label(class="form-label") }}
+                                            {{ form.nome_empresa(class="form-control", id="nome_empresa", readonly=true) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- Demanda Contratual -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form.demanda.label(class="form-label") }}
+                                            {{ form.demanda(class="form-control", id="demanda_contratual", readonly=true) }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Número de Alternativas -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             {{ form.n_alternativas.label(class="form-label") }}
@@ -455,22 +496,8 @@
                             </div>
                         </div>
 
-                        <!-- Tab 5: Responsáveis -->
-                        <div class="tab-pane fade" id="responsaveis" role="tabpanel">
-                            <div class="p-4">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.empresa.label(class="form-label") }}
-                                            {{ form.empresa(class="form-select") }}
-                                            <small class="text-muted">Empresa solicitante (opcional)</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Tab 6: Datas -->
+                        <!-- Tab 5: Datas -->
                         <div class="tab-pane fade" id="datas" role="tabpanel">
                             <div class="p-4">
                                 <div class="row">
@@ -568,7 +595,7 @@
                             </div>
                         </div>
 
-                        <!-- Tab 7: Observações e Anexo -->
+                        <!-- Tab 6: Observações e Anexo -->
                         <div class="tab-pane fade" id="observacoes" role="tabpanel">
                             <div class="p-4">
                                 <div class="mb-3">
@@ -599,9 +626,9 @@
                                 <a href="{{ url_for('listar.listar') }}" class="btn btn-secondary">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a>
-                                <button type="submit" class="btn btn-primary" id="btn-submit">
+                                <button class="btn btn-primary" id="btn-submit">
                                     <i class="fas fa-save me-2"></i>
-                                    <span class="btn-text">Cadastrar Estudo</span>
+                                    <span class="btn-text">Próximo</span>
                                     <span class="loading">
                                         <i class="fas fa-spinner fa-spin me-2"></i>Salvando...
                                     </span>
@@ -759,7 +786,7 @@
 
 {% block extra_js %}
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
 
 function removerAcentos(str) {
@@ -767,6 +794,7 @@ function removerAcentos(str) {
 }
 
 $(document).ready(function() {
+    $('#CNPJ').mask('00.000.000/0000-00');
 
     // Valores iniciais do banco ou padrão
     var initialLat = parseFloat($('#latitude').val()) || -23.550520;
@@ -1041,6 +1069,71 @@ $(document).ready(function() {
             });
         }
     });
+    // Pesquisa cliente por numero de Instalacao
+    $('#instalacao').change(function() {
+        var instalacao_value=$(this).val();
+        if (instalacao_value) {
+            $.get('/api/cliente/' + instalacao_value, function(data) {
+                $('#instalacao').val(data.instalacao)
+                if (data.cnpj) {
+<!--                    $('#CNPJ').val(data.cnpj).mask('00.000.000/0000-00');-->
+                    $('#CNPJ').val(data.cnpj).trigger('input');
+                    $('#CNPJ').closest('.mb-3').show();
+                    $.get('/api/consulta/' + data.cnpj, function(data2) {
+                        $('#id_empresa').val(data2.id_empresa)
+                    })
+                } else {
+                    $('#CNPJ').val('').closest('.mb-3').hide();
+                }
+
+                if (data.cpf) {
+                    $('#CPF').val(data.CPF).closest('.mb-3').show();
+                } else {
+                    $('#CPF').val('').closest('.mb-3').hide();
+                }
+                $('#nome_empresa').val(data.nome || '');
+                $('#demanda_contratual').val(data.carga || '');
+            })
+        } else {
+            $('#CPF').closest('.mb-3').show();
+            $('#CNPJ').closest('.mb-3').show();
+        }
+
+    })
+
+    $('#CNPJ').change(function() {
+        var cnpj_value=$(this).val().replace(/\D/g, '');;
+        if (cnpj_value) {
+            $.get('/api/cliente/cnpj/' + cnpj_value, function(data) {
+                $('#CNPJ').closest('.mb-3').show();
+                $.get('/api/consulta/' + cnpj_value, function(data2) {
+                    $('#id_empresa').val(data2.id_empresa)
+                    $('#nome_empresa').val(data2.nome || '');
+                })
+                if (data) {
+                    $('#instalacao').val(data.instalacao);
+                    $('#nome_empresa').val(data.nome || '');
+                    $('#demanda_contratual').val(data.carga || '');
+
+                    if (data.cpf) {
+                        $('#CPF').val(data.CPF).closest('.mb-3').show();
+                    } else {
+                        $('#CPF').val('').closest('.mb-3').hide();
+                    }
+
+                } else {
+                    $('#msg_empresa')
+                        .text('Empresa sem número de instalação.')
+                        .removeClass()
+                        .addClass('alert alert-success mt-2');
+                }
+
+            })
+        } else {
+            $('#CPF').closest('.mb-3').show();
+        }
+    });
+
 
     // Filtros dinâmicos baseados na EDP selecionada
     $('#edp-select').change(function() {
@@ -1074,11 +1167,11 @@ $(document).ready(function() {
     // Carregar responsáveis baseado na regional
     $('#regional-select').change(function() {
         var regionalId = $(this).val();
-
+        console.log(regionalId)
         if (regionalId) {
             $.get('/api/resp_regioes/' + regionalId, function(data) {
                 var respSelect = $('#resp-regiao-select');
-                respSelect.empty().append('<option value="0">Selecione um responsável...</option>');
+                respSelect.empty().append('<option value="">Selecione um responsável...</option>');
                 $.each(data.responsaveis, function(index, resp) {
                     respSelect.append('<option value="' + resp.id + '">' + resp.nome + '</option>');
                 });
@@ -1130,7 +1223,6 @@ $(document).ready(function() {
     $('#tipo_analise').change(function(){
         var analise = $(this).val();
         var viabilidade = $('#tipo_viab').val();
-        console.log(analise)
         if(analise){
             $.get('/api/tipo_pedidos/' + viabilidade + '/' + analise, function(data) {
                 var pedidoSelect = $('#tipo_pedido');
@@ -1147,34 +1239,140 @@ $(document).ready(function() {
     const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
     const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-    // Controle do botão de submit
-    const form = document.getElementById('form-estudo');
-    const submitBtn = document.getElementById('btn-submit');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const loadingText = submitBtn.querySelector('.loading');
+<!--    // Controle do botão de submit-->
+<!--    const form = document.getElementById('form-estudo');-->
+<!--    const submitBtn = document.getElementById('btn-submit');-->
+<!--    const btnText = submitBtn.querySelector('.btn-text');-->
+<!--    const loadingText = submitBtn.querySelector('.loading');-->
 
-    $('#form-estudo').submit(function(){
-            btnText.style.display = 'none';
-            loadingText.style.display = 'inline';
-            submitBtn.disabled = true;
-            console.log(`${btnText.textContent} ocultado, carregando...`);
-     });
+<!--    $('#form-estudo').submit(function(){-->
+<!--            btnText.style.display = 'none';-->
+<!--            loadingText.style.display = 'inline';-->
+<!--            submitBtn.disabled = true;-->
+<!--            console.log(`${btnText.textContent} ocultado, carregando...`);-->
+<!--     });-->
 
     // Validação em tempo real para campos obrigatórios
-    const requiredFields = $('#form-estudo [required]');
-    requiredFields.each(function() {
-        $(this).on('blur'), function() {
-            if ($(this).val().trim() === '') {
-                        $(this).addClass('is-invalid');
-                        console.log(`Campo ${this.name} está vazio`);
-                    } else {
-                        $(this).removeClass('is-invalid').addClass('is-valid');
-                        console.log(`Campo ${this.name} válido`);
+    const $tabs = $('#estudoTabs button');
+    const $tabPanes = $('.tab-pane');
+    let currentIndex = 0;
+
+    // Atualiza o botão de acordo com a aba
+    function updateButton() {
+        if (currentIndex === $tabs.length - 1) {
+            $("#btn-submit").text("Cadastrar Estudo").attr("type", "submit");
+        } else {
+            $("#btn-submit").text("Próximo").attr("type", "button");
+        }
+    }
+
+    // Validação de uma aba
+    function validateTab(index) {
+        let isValid = true;
+        const $tab = $tabPanes.eq(index);
+        const $requiredFields = $tab.find('input[required], select[required], textarea[required]');
+
+        $requiredFields.each(function () {
+            const $field = $(this);
+            const value = $field.val();
+
+            if ($field.is('select')) {
+                if (!value || value === "0" || value === "") {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                    isValid = false;
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            } else {
+                if (!value || value.trim() === '') {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                    isValid = false;
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
             }
+        });
+
+        return isValid;
+    }
+
+    // Salva o estado de cada aba (mantém selects e inputs)
+    function saveTabValues(index) {
+        const $tab = $tabPanes.eq(index);
+        $tab.find('input, select, textarea').each(function () {
+            const $field = $(this);
+            $field.data('saved-value', $field.val());
+        });
+    }
+
+    function restoreTabValues(index) {
+        const $tab = $tabPanes.eq(index);
+        $tab.find('input, select, textarea').each(function () {
+            const $field = $(this);
+            if ($field.data('saved-value') !== undefined) {
+                $field.val($field.data('saved-value')).trigger('change');
+            }
+        });
+    }
+
+    // Clique no botão Próximo / Cadastrar
+    $("#btn-submit").click(function () {
+        if (!validateTab(currentIndex)) return;
+
+        // Salva os valores da aba atual antes de avançar
+        saveTabValues(currentIndex);
+
+        if (currentIndex < $tabs.length - 1) {
+            currentIndex++;
+            restoreTabValues(currentIndex);
+            $tabs.eq(currentIndex).tab("show");
+            updateButton();
         }
     });
 
+    // Controle manual de abas
+    $tabs.on("show.bs.tab", function (e) {
+        const newIndex = $(e.target).parent().index();
+
+        if (newIndex > currentIndex && !validateTab(currentIndex)) {
+            e.preventDefault(); // cancela a troca se aba anterior não estiver válida
+            return false;
+        }
+
+        // Salva e restaura valores para manter selects e inputs
+        saveTabValues(currentIndex);
+        restoreTabValues(newIndex);
+
+        currentIndex = newIndex;
+        updateButton();
+    });
+
+    // Validação em tempo real (blur)
+    $('#form-estudo [required]').each(function () {
+        $(this).on('blur change', function () {
+            const $field = $(this);
+            const value = $field.val();
+
+            if ($field.is('select')) {
+                if (!value || value === "0" || value === "") {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            } else {
+                if (!value || value.trim() === '') {
+                    $field.addClass("is-invalid").removeClass("is-valid");
+                } else {
+                    $field.removeClass("is-invalid").addClass("is-valid");
+                }
+            }
+        });
+    });
+
+    updateButton();
 });
+
+
 </script>
 
 {% endblock %}
