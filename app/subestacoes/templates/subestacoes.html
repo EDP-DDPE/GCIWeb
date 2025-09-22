@@ -15,14 +15,14 @@
             <table class="table table-bordered table-hover" id="tabelaSubestacoes">
                 <thead class="table-light">
                     <tr>
-                        <th>
+                        <!--<th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>ID</span>
                                 <a href="#" class="btn btn-link p-0 text-muted btn-sort" data-sort="id" data-direction="asc" title="Ordenar por ID">
                                     <i class="fas fa-sort"></i>
                                 </a>
                             </div>
-                        </th>
+                        </th> -->
                         <th>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Nome</span>
@@ -69,7 +69,7 @@
                         data-edp="{{ sub.edp.empresa|lower }}"
                         data-lat="{{ sub.lat | lower }}"
                         data-long="{{ sub.long | lower }}">
-                        <td>{{ sub.id_subestacao }}</td>
+                        <!--<td>{{ sub.id_subestacao }}</td> -->
                         <td>{{ sub.nome }}</td>
                         <td>{{ sub.sigla }}</td>
                         <td>{{ sub.municipio.municipio }}</td>

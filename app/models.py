@@ -175,7 +175,7 @@ class Subestacao(db.Model):
     # Relacionamentos
     municipio = db.relationship('Municipio', back_populates='subestacoes', lazy='joined')
     edp = db.relationship('EDP', back_populates='subestacoes', lazy='joined')
-    circuitos = db.relationship('Circuito', back_populates='subestacao', lazy='select')
+    circuitos = db.relationship('Circuito', back_populates='subestacao', lazy='select', passive_deletes=True)
 
 
 class Circuito(db.Model):
