@@ -483,7 +483,8 @@ def listar_estudos(page, per_page):
             db.joinedload(Estudo.empresa),
             db.joinedload(Estudo.municipio),
             db.joinedload(Estudo.tipo_solicitacao),
-            db.joinedload(Estudo.criado_por)
+            db.joinedload(Estudo.criado_por),
+            db.joinedload(Estudo.resp_regiao).joinedload(RespRegiao.usuario)
         ).order_by(Estudo.id_estudo.desc()) \
             .paginate(
             page=page,
@@ -501,6 +502,7 @@ def listar_estudos(page, per_page):
                 'empresa': estudo.empresa.nome_empresa if estudo.empresa else None,
                 'municipio': estudo.municipio.municipio if estudo.municipio else None,
                 'tipo_solicitacao': estudo.tipo_solicitacao.viabilidade if estudo.tipo_solicitacao else None,
+                'eng_responsavel': estudo.resp_regiao.usuario.nome if estudo.resp_regiao else None,
                 'criado_por': estudo.criado_por.nome if estudo.criado_por else None,
                 'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None
             })

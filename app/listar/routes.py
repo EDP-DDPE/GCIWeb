@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from app.models import listar_estudos, obter_estudo, Estudo
 from app.auth import requires_permission, get_usuario_logado
 
-listar_bp = Blueprint("listar", __name__, template_folder="templates")
+listar_bp = Blueprint("listar", __name__, template_folder="templates", static_folder="static", static_url_path='/listar/static')
 
 
 @listar_bp.route("/listar", methods=["GET", "POST"])
