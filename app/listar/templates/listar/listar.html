@@ -1,60 +1,279 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<div class="container mt-4">
-    <h2>Lista de Estudos</h2>
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>ID</th>
-                <th>Nº Documento</th>
-                <th>Projeto</th>
-                <th>Empresa</th>
-                <th>Município</th>
-                <th>Responsável</th>
-                <th>Data Criação</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for doc in documentos %}
-            <tr>
-                <td>{{ doc.id }}</td>
-                <td>{{ doc.num_doc }}</td>
-                <td>{{ doc.nome_projeto }}</td>
-                <td>{{ doc.empresa }}</td>
-                <td>{{ doc.municipio }}</td>
-                <td>{{ doc.criado_por }}</td>
-                <td>{{ doc.data_registro }}</td>
-                <td>
-                    <button class="btn btn-sm btn-info"
-                            onclick="verDetalhes({{ doc.id }})"
-                            data-bs-toggle="tooltip"
-                            title="Ver detalhes">
-                        <i class="bi bi-eye"></i>
+<link rel="stylesheet" type="text/css" href="{{ url_for('listar.static', filename='css/listar_estudos.css') }}">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-alt me-2"></i>Lista de Estudos</h2>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+            <a href="{{ url_for('cadastro.cadastro_estudo') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Novo Estudo
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-header-controls">
+            <!-- Controles principais -->
+            <div class="d-flex flex-wrap gap-3 align-items-center w-100">
+                <!-- Busca global -->
+                <div class="flex-grow-1" style="max-width: 300px;">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="globalSearch" class="form-control" placeholder="Buscar em todas as colunas...">
+                    </div>
+                </div>
+
+                <!-- Registros por página -->
+                <div>
+                    <label class="form-label mb-0 me-2">Exibir:</label>
+                    <select id="pageSize" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="ms-1">registros</span>
+                </div>
+
+                <!-- Seletor de colunas -->
+                <div class="column-selector">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleColumnSelector()">
+                        <i class="fas fa-columns"></i> Colunas
                     </button>
+                    <div id="columnDropdown" class="column-dropdown">
+                        <h6 class="mb-2">Selecionar Colunas</h6>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="id" id="col-id" checked>
+                            <label class="form-check-label" for="col-id">ID</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="num_doc" id="col-num_doc" checked>
+                            <label class="form-check-label" for="col-num_doc">Nº Documento</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="nome_projeto" id="col-nome_projeto" checked>
+                            <label class="form-check-label" for="col-nome_projeto">Projeto</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="empresa" id="col-empresa" checked>
+                            <label class="form-check-label" for="col-empresa">Empresa</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="municipio" id="col-municipio" checked>
+                            <label class="form-check-label" for="col-municipio">Município</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="eng_responsavel" id="col-eng_responsavel" checked>
+                            <label class="form-check-label" for="col-eng_responsavel">Responsável</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="data_registro" id="col-data_registro" checked>
+                            <label class="form-check-label" for="col-data_registro">Data Criação</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
+                            <label class="form-check-label" for="col-acoes">Ações</label>
+                        </div>
+                        <hr>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllColumns()">Todas</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllColumns()">Nenhuma</button>
+                    </div>
+                </div>
 
-                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}"
-                       class="btn btn-sm btn-warning {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
-                       data-bs-toggle="tooltip"
-                       title="Editar estudo">
-                        <i class="bi bi-pencil"></i>
-                    </a>
+                <!-- Exportar -->
+                <div class="export-dropdown">
+                    <button class="btn btn-outline-info btn-sm" onclick="toggleExportMenu()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <div id="exportMenu" class="export-menu">
+                        <a href="#" onclick="exportData('csv')"><i class="fas fa-file-csv me-2"></i>CSV</a>
+                        <a href="#" onclick="exportData('excel')"><i class="fas fa-file-excel me-2"></i>Excel</a>
+                        <a href="#" onclick="exportData('pdf')"><i class="fas fa-file-pdf me-2"></i>PDF</a>
+                    </div>
+                </div>
 
-                    <a href="{{ url_for('alternativa.listar', id_estudo=doc.id) }}"
-                       class="btn btn-sm btn-success {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
-                       data-bs-toggle="tooltip"
-                       title="Gerenciar alternativas">
-                        <i class="bi bi-list-check"></i>
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <!-- Limpar filtros -->
+                <button class="btn btn-outline-warning btn-sm" onclick="clearAllFilters()">
+                    <i class="fas fa-times"></i> Limpar Filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="table-responsive-custom">
+                <table class="table table-hover table-sm mb-0" id="estudosTable">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="resizable-header" data-column="id" style="min-width: 80px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>ID</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="id" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="num_doc" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Nº Documento</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="num_doc" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="nome_projeto" style="min-width: 200px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Projeto</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="nome_projeto" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="empresa" style="min-width: 150px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Empresa</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="empresa" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="municipio" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Município</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="municipio" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="eng_responsavel" style="min-width: 150px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Responsável</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="eng_responsavel" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="data_registro" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Data Criação</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="data_registro" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Ações</span>
+                                    <div class="resize-handle"></div>
+                                </div>
+                            </th>
+                        </tr>
+                        <!-- Linha de filtros -->
+                        <tr class="filter-row">
+                            <th data-column="id">
+                                <input type="text" class="filter-input" placeholder="Filtrar ID..." data-filter="id">
+                            </th>
+                            <th data-column="num_doc">
+                                <input type="text" class="filter-input" placeholder="Filtrar Doc..." data-filter="num_doc">
+                            </th>
+                            <th data-column="nome_projeto">
+                                <input type="text" class="filter-input" placeholder="Filtrar Projeto..." data-filter="nome_projeto">
+                            </th>
+                            <th data-column="empresa">
+                                <input type="text" class="filter-input" placeholder="Filtrar Empresa..." data-filter="empresa">
+                            </th>
+                            <th data-column="municipio">
+                                <input type="text" class="filter-input" placeholder="Filtrar Município..." data-filter="municipio">
+                            </th>
+                            <th data-column="eng_responsavel">
+                                <input type="text" class="filter-input" placeholder="Filtrar Responsável..." data-filter="eng_responsavel">
+                            </th>
+                            <th data-column="data_registro">
+                                <input type="date" class="filter-input" data-filter="data_registro">
+                            </th>
+                            <th data-column="acoes">
+                                <!-- Sem filtro para ações -->
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for doc in documentos %}
+                        <tr>
+                            <td data-column="id">{{ doc.id }}</td>
+                            <td data-column="num_doc">{{ doc.num_doc }}</td>
+                            <td data-column="nome_projeto">{{ doc.nome_projeto }}</td>
+                            <td data-column="empresa">{{ doc.empresa }}</td>
+                            <td data-column="municipio">{{ doc.municipio }}</td>
+                            <td data-column="eng_responsavel">{{ doc.eng_responsavel }}</td>
+                            <td data-column="data_registro">{{ doc.data_registro }}</td>
+                            <td data-column="acoes">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-info"
+                                        onclick="verDetalhes({{ doc.id }})"
+                                        data-bs-toggle="tooltip"
+                                        title="Ver detalhes">
+                                    <i class="bi bi-eye"></i>
+                                    </button>
+
+                                    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=doc.id) }}"
+                                       class="btn btn-sm btn-warning {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                                       data-bs-toggle="tooltip"
+                                       title="Editar estudo">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <a href="{{ url_for('alternativa.listar', id_estudo=doc.id) }}"
+                                       class="btn btn-sm btn-success {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                                       data-bs-toggle="tooltip"
+                                       title="Gerenciar alternativas">
+                                        <i class="bi bi-list-check"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé com paginação e informações -->
+        <div class="card-footer">
+            <div class="table-actions">
+                <div class="pagination-info">
+                    Exibindo <span id="startRecord">1</span> a <span id="endRecord">25</span> de <span id="totalRecords">{{ documentos|length }}</span> registros
+                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ documentos|length }}</span> registros)</span>
+                </div>
+
+                <nav aria-label="Paginação da tabela">
+                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                        <!-- Paginação será gerada via JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Modal para detalhes do documento -->
+<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
 <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -74,129 +293,7 @@
     </div>
 </div>
 
-<script>
-
-// Função para abrir modal e mostrar loader
-function verDetalhes(estudoId) {
-    const modalBody = document.getElementById('modalDetalhesBody');
-    // Mostrar loader
-    modalBody.innerHTML = `
-        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-        </div>
-    `;
-
-    // Abrir modal imediatamente
-    const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
-    modal.show();
-
-    // Buscar dados do estudo
-    fetch(`/api/estudos/${estudoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                modalBody.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                return;
-            }
-
-            // Construir conteúdo do modal
-            const detalhesHtml = `
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-info-circle me-2"></i>Informações Básicas
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Protocolo:</strong> ${data.protocolo}</p>
-                                <p><strong>Nº Documento:</strong> ${data.num_doc}</p>
-                                <p><strong>Projeto:</strong> ${data.nome_projeto}</p>
-                                <p><strong>Descrição:</strong> ${data.descricao || 'N/A'}</p>
-                                <p><strong>Cliente:</strong> ${data.empresa?.nome || 'N/A'}</p>
-                                <p><strong>CNPJ:</strong> ${data.empresa?.cnpj || 'N/A'}</p>
-                                <p><strong>Município:</strong> ${data.municipio?.nome || 'N/A'}</p>
-                                <p><strong>Regional:</strong> ${data.regional?.nome || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Tipo Viabilidade:</strong> ${data.tipo_pedido?.viabilidade || 'N/A'}</p>
-                                <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
-                                <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
-                                <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
-                                <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
-                                <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-3 mt-3">
-                    <div class="col-md-12">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-chart-bar me-2"></i>Demandas
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Demanda FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
-                                <p><strong>Demanda P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-3 mt-3">
-                    <div class="col-md-12">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-file-upload me-2"></i>Anexos
-                            </div>
-                            <div class="card-body">
-                                ${data.anexos && data.anexos.length > 0 ? `
-                                    <ul class="list-group list-group-flush">
-                                        ${data.anexos.map(a => `<li class="list-group-item">${a.nome_arquivo} (${a.tipo_mime})</li>`).join('')}
-                                    </ul>
-                                ` : '<p>Nenhum anexo.</p>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-3 mt-3">
-                    <div class="col-md-12">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-history me-2"></i>Status Histórico
-                            </div>
-                            <div class="card-body">
-                                ${data.status_historico && data.status_historico.length > 0 ? `
-                                    <ul class="list-group list-group-flush">
-                                        ${data.status_historico.map(s => `
-                                            <li class="list-group-item">
-                                                <strong>${s.status || 'N/A'}</strong> - ${s.data || 'N/A'} - ${s.criado_por || 'N/A'}
-                                                ${s.observacao ? `<br><small>${s.observacao}</small>` : ''}
-                                            </li>
-                                        `).join('')}
-                                    </ul>
-                                ` : '<p>Sem histórico de status.</p>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            modalBody.innerHTML = detalhesHtml;
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            modalBody.innerHTML = `<div class="alert alert-danger">Erro ao carregar detalhes do documento</div>`;
-        });
-}
-</script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src=" {{ url_for('listar.static', filename='js/listar_estudos.js') }}"></script>
 
 {% endblock %}

@@ -1239,18 +1239,6 @@ $(document).ready(function() {
     const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
     const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
-<!--    // Controle do botão de submit-->
-<!--    const form = document.getElementById('form-estudo');-->
-<!--    const submitBtn = document.getElementById('btn-submit');-->
-<!--    const btnText = submitBtn.querySelector('.btn-text');-->
-<!--    const loadingText = submitBtn.querySelector('.loading');-->
-
-<!--    $('#form-estudo').submit(function(){-->
-<!--            btnText.style.display = 'none';-->
-<!--            loadingText.style.display = 'inline';-->
-<!--            submitBtn.disabled = true;-->
-<!--            console.log(`${btnText.textContent} ocultado, carregando...`);-->
-<!--     });-->
 
     // Validação em tempo real para campos obrigatórios
     const $tabs = $('#estudoTabs button');
@@ -1260,88 +1248,28 @@ $(document).ready(function() {
     // Atualiza o botão de acordo com a aba
     function updateButton() {
         if (currentIndex === $tabs.length - 1) {
-            $("#btn-submit").text("Cadastrar Estudo").attr("type", "submit");
+            $("#btn-submit").text("Cadastrar Estudo").attr("type", "button");
         } else {
             $("#btn-submit").text("Próximo").attr("type", "button");
         }
     }
 
-    // Validação de uma aba
-    function validateTab(index) {
-        let isValid = true;
-        const $tab = $tabPanes.eq(index);
-        const $requiredFields = $tab.find('input[required], select[required], textarea[required]');
-
-        $requiredFields.each(function () {
-            const $field = $(this);
-            const value = $field.val();
-
-            if ($field.is('select')) {
-                if (!value || value === "0" || value === "") {
-                    $field.addClass("is-invalid").removeClass("is-valid");
-                    isValid = false;
-                } else {
-                    $field.removeClass("is-invalid").addClass("is-valid");
-                }
-            } else {
-                if (!value || value.trim() === '') {
-                    $field.addClass("is-invalid").removeClass("is-valid");
-                    isValid = false;
-                } else {
-                    $field.removeClass("is-invalid").addClass("is-valid");
-                }
-            }
-        });
-
-        return isValid;
-    }
-
-    // Salva o estado de cada aba (mantém selects e inputs)
-    function saveTabValues(index) {
-        const $tab = $tabPanes.eq(index);
-        $tab.find('input, select, textarea').each(function () {
-            const $field = $(this);
-            $field.data('saved-value', $field.val());
-        });
-    }
-
-    function restoreTabValues(index) {
-        const $tab = $tabPanes.eq(index);
-        $tab.find('input, select, textarea').each(function () {
-            const $field = $(this);
-            if ($field.data('saved-value') !== undefined) {
-                $field.val($field.data('saved-value')).trigger('change');
-            }
-        });
-    }
 
     // Clique no botão Próximo / Cadastrar
     $("#btn-submit").click(function () {
-        if (!validateTab(currentIndex)) return;
-
-        // Salva os valores da aba atual antes de avançar
-        saveTabValues(currentIndex);
 
         if (currentIndex < $tabs.length - 1) {
             currentIndex++;
-            restoreTabValues(currentIndex);
             $tabs.eq(currentIndex).tab("show");
             updateButton();
+        } else {
+            $("#form-estudo").submit();
         }
     });
 
     // Controle manual de abas
     $tabs.on("show.bs.tab", function (e) {
         const newIndex = $(e.target).parent().index();
-
-        if (newIndex > currentIndex && !validateTab(currentIndex)) {
-            e.preventDefault(); // cancela a troca se aba anterior não estiver válida
-            return false;
-        }
-
-        // Salva e restaura valores para manter selects e inputs
-        saveTabValues(currentIndex);
-        restoreTabValues(newIndex);
 
         currentIndex = newIndex;
         updateButton();
