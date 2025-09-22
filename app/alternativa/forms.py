@@ -12,12 +12,7 @@ class AlternativaForm(FlaskForm):
     """Formulário para criar/editar alternativas"""
 
     # Relacionamentos obrigatórios
-    id_estudo = SelectField(
-        'Estudo',
-        validators=[DataRequired('Selecione um estudo')],
-        coerce=int,
-        choices=[]
-    )
+    id_estudo = IntegerField('Estudo', validators=[DataRequired()], render_kw={"readonly": True})
 
     id_circuito = SelectField(
         'Circuito',
@@ -193,17 +188,11 @@ class AlternativaForm(FlaskForm):
         """Inicializar formulário e popular choices"""
         super(AlternativaForm, self).__init__(*args, **kwargs)
 
-        # # Popular choices para estudos
-        # self.id_estudo.choices = [('', 'Selecione um estudo')] + [
-        #     (estudo.id_estudo, estudo.nome)
-        #     for estudo in Estudo.query.order_by(Estudo.id_estudo).all()
-        # ]
+        # Popular choices para circuitos
+        self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
+                                   [(circuito.id_circuito, f"{circuito.circuito}") for circuito in Circuito.query.all()]
 
-        # # Popular choices para circuitos
-        # self.id_circuito.choices = [('', 'Selecione um circuito')] + [
-        #     (circuito.id_circuito, f"{circuito.nome} ({circuito.estudo.nome if circuito.estudo else 'Sem estudo'})")
-        #     for circuito in Circuito.query.join(Estudo).order_by(Estudo.nome, Circuito.nome).all()
-        # ]
+        print(self.id_circuito.choices)
 
     def validate_flags(self):
         """Validação customizada para flags"""
