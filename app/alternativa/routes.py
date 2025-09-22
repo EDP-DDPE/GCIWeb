@@ -36,11 +36,12 @@ def listar(id_estudo):
     # Dados para filtros
     estudo = Estudo.get_with_all_relations(id_estudo)
 
-    print(estudo)
 
     #estudo = Estudo.query.filter(Estudo.id_estudo == id_estudo).first()
 
     form = AlternativaForm()
+
+    form.id_estudo.data = id_estudo
 
     return render_template(
         'alternativa/alternativa.html',

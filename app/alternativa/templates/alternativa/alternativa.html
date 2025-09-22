@@ -4,97 +4,6 @@
 
 {% block content %}
 <div class="container-fluid">
-<!--    <div class="row">-->
-<!--        <div class="col-12">-->
-<!--            <div class="card shadow-sm">-->
-<!--                <div class="card-header d-flex justify-content-between align-items-center">-->
-<!--                    <h3 class="card-title">Resumo do Estudo</h3>-->
-<!--                    <span class="badge bg-primary">ID: {{ estudo.id_estudo }}</span>-->
-<!--                </div>-->
-<!--                <div class="card-body">-->
-<!--                    <div class="row g-3">-->
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Nº Documento</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.num_doc }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Protocolo</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.protocolo or '—' }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-12">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Nome do Projeto</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.nome_projeto }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-12">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Descrição</h6>-->
-<!--                                <p class="mb-0">{{ estudo.descricao or 'Sem descrição' }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Município</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.municipio.nome if estudo.municipio else '—' }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Tensão</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.tensao.descricao if estudo.tensao else '—' }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Carga Atual</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.dem_carga_atual_p }} kW</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Carga Solicitada</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.dem_carga_solicit_p }} kW</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Data Registro</h6>-->
-<!--                                <p class="fw-bold mb-0">{{ estudo.data_registro|format_date }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-6">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Vencimento Cliente</h6>-->
-<!--                                <p class="fw-bold mb-0 text-danger">{{ estudo.data_vencimento_cliente|format_date }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-
-<!--                        <div class="col-md-12">-->
-<!--                            <div class="p-3 border rounded bg-light">-->
-<!--                                <h6 class="text-muted mb-1">Observações</h6>-->
-<!--                                <p class="mb-0">{{ estudo.observacao or 'Sem observações' }}</p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
     <div class="row">
         <div class="col-12">
             <div class="card shadow-lg border-0 overflow-hidden">
@@ -116,10 +25,19 @@
                     </div>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body p-1">
                     <!-- Informações principais em destaque -->
                     <div class="row g-4 mb-4">
-                        <div class="col-lg-4">
+
+                        <div class="col-lg-1 d-flex justify-content-center align-items-center">
+                            <!-- Botão de expandir/contrair -->
+                            <button class="btn btn-link text-decoration-none ms-2" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#estudoDetalhes"
+                                    aria-expanded="false" aria-controls="estudoDetalhes">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div class="col-lg-3">
                             <div class="info-card h-100 p-4 rounded-3 border-0 bg-gradient-light position-relative overflow-hidden">
                                 <div class="info-icon position-absolute top-0 end-0 mt-3 me-3 opacity-25">
                                     <i class="fas fa-file-invoice fa-2x text-primary"></i>
@@ -156,182 +74,189 @@
                                 </h4>
                             </div>
                         </div>
+
+
+
                     </div>
-                    {% set class_largura="col-lg-4" %}
-                    {% if (estudo.dem_carga_solicit_p + estudo.dem_carga_solicit_fp == 0) or (estudo.dem_ger_solicit_p + estudo.dem_ger_solicit_fp == 0) %}
-                        {% set class_largura="col-lg-6" %}
-                    {% endif %}
-                    <!-- Seção de Localização e Especificações -->
-                    <div class="row g-4 mb-4">
-                        <div class="{{class_largura}}">
-                            <div class="specification-section">
-                                <h5 class="section-title mb-3">
-                                    <i class="fas fa-info text-danger me-2"></i>
-                                    Informações
-                                </h5>
-                                <div class="spec-grid">
-                                    <div class="spec-item mb-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="spec-icon me-3">
-                                                <i class="fas fa-map-marker-alt text-success"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block">Município</small>
-                                                <span class="fw-semibold">{{ estudo.municipio.municipio if estudo.municipio else '—' }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="spec-item mb-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="spec-icon me-3">
-                                                <i class="fas fa-bolt text-warning"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block">Tensão</small>
-                                                <span class="fw-semibold">{{ estudo.tensao.tensao if estudo.tensao else '—' }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                    <div class="collapse mt-3" id="estudoDetalhes">
 
-                                    <div class="spec-item">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="spec-icon me-3">
-                                                <i class="fas fa-calendar text-success"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block">Data Registro</small>
-                                                <span class="fw-semibold">{{ estudo.data_registro|format_date }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="spec-item">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="spec-icon me-3">
-                                                <i class="fas fa-calendar text-success"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block">Data Vencimento Cliente</small>
-                                                <span class="fw-semibold">{{ estudo.data_vencimento_cliente|format_date }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="spec-item mb-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <div class="spec-icon me-3">
-                                                <i class="fas fa-city text-info"></i>
-                                            </div>
-                                            <div>
-                                                <small class="text-muted d-block">Empresa</small>
-                                                <span class="fw-semibold">{{ estudo.empresa.nome_empresa if estudo.empresa.nome_empresa else '' }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        {% if estudo.dem_carga_solicit_p > 0 or estudo.dem_carga_solicit_fp > 0 %}
-                        <div class="{{class_largura}}">
-                            <div class="demand-section">
-                                <h5 class="section-title mb-3">
-                                    <i class="fas fa-chart-line text-success me-2"></i>
-                                    Demanda de Energia
-                                </h5>
-                                <div class="demand-comparison">
-                                    <div class="demand-item current mb-3">
-                                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-info">
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Carga Atual</small>
-                                                <h4 class="mb-0 text-info fw-bold">{{ estudo.dem_carga_atual_p }}</h4>
-                                            </div>
-                                            <div class="demand-unit">
-                                                <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">kW</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="demand-item requested">
-                                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-success">
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Carga Solicitada</small>
-                                                <h4 class="mb-0 text-success fw-bold">{{ estudo.dem_carga_solicit_p }}</h4>
-                                            </div>
-                                            <div class="demand-unit">
-                                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">kW</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Indicador de crescimento -->
-                                    {% set crescimento = ((estudo.dem_carga_solicit_p - estudo.dem_carga_atual_p) / estudo.dem_carga_atual_p * 100) if estudo.dem_carga_atual_p > 0 %}
-                                    {% if crescimento %}
-                                    <div class="growth-indicator mt-3 p-2 rounded-2 text-center"
-                                         style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));">
-                                        <small class="text-muted d-block">Crescimento Esperado</small>
-                                        <span class="fw-bold {% if crescimento > 0 %}text-success{% else %}text-danger{% endif %}">
-                                            <i class="fas {% if crescimento > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %} me-1"></i>
-                                            {{ "%.1f"|format(crescimento|abs) }}%
-                                        </span>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+                        {% set class_largura="col-lg-4" %}
+                        {% if (estudo.dem_carga_solicit_p + estudo.dem_carga_solicit_fp == 0) or (estudo.dem_ger_solicit_p + estudo.dem_ger_solicit_fp == 0) %}
+                            {% set class_largura="col-lg-6" %}
                         {% endif %}
-
-                        <!-- Geração -->
-                        {% if estudo.dem_ger_solicit_p > 0 or estudo.dem_ger_solicit_fp > 0 %}
-                        <div class="{{class_largura}}">
-                            <div class="demand-section">
-                                <h5 class="section-title mb-3">
-                                    <i class="fas fa-chart-line text-success me-2"></i>
-                                    Demanda de Geração
-                                </h5>
-                                <div class="demand-comparison">
-                                    <div class="demand-item current mb-3">
-                                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-info">
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Geração Atual</small>
-                                                <h4 class="mb-0 text-info fw-bold">{{ estudo.dem_ger_atual_fp }}</h4>
-                                            </div>
-                                            <div class="demand-unit">
-                                                <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">kW</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="demand-item requested">
-                                        <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-success">
-                                            <div>
-                                                <small class="text-muted d-block mb-1">Geração Solicitada</small>
-                                                <h4 class="mb-0 text-success fw-bold">{{ estudo.dem_ger_solicit_fp }}</h4>
-                                            </div>
-                                            <div class="demand-unit">
-                                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">kW</span>
+                        <!-- Seção de Localização e Especificações -->
+                        <div class="row g-4 mb-4">
+                            <div class="{{class_largura}}">
+                                <div class="specification-section">
+                                    <h5 class="section-title mb-3">
+                                        <i class="fas fa-info text-danger me-2"></i>
+                                        Informações
+                                    </h5>
+                                    <div class="spec-grid">
+                                        <div class="spec-item mb-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="spec-icon me-3">
+                                                    <i class="fas fa-map-marker-alt text-success"></i>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Município</small>
+                                                    <span class="fw-semibold">{{ estudo.municipio.municipio if estudo.municipio else '—' }}</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <!-- Indicador de crescimento -->
-                                    {% set crescimento = ((estudo.dem_ger_solicit_fp - estudo.dem_ger_atual_fp) / estudo.dem_ger_atual_fp * 100) if estudo.dem_ger_atual_fp > 0 %}
-                                    {% if crescimento %}
-                                    <div class="growth-indicator mt-3 p-2 rounded-2 text-center"
-                                         style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));">
-                                        <small class="text-muted d-block">Crescimento Esperado</small>
-                                        <span class="fw-bold {% if crescimento > 0 %}text-success{% else %}text-danger{% endif %}">
-                                            <i class="fas {% if crescimento > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %} me-1"></i>
-                                            {{ "%.1f"|format(crescimento|abs) }}%
-                                        </span>
+                                        <div class="spec-item mb-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="spec-icon me-3">
+                                                    <i class="fas fa-bolt text-warning"></i>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Tensão</small>
+                                                    <span class="fw-semibold">{{ estudo.tensao.tensao if estudo.tensao else '—' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="spec-item">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="spec-icon me-3">
+                                                    <i class="fas fa-calendar text-success"></i>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Data Registro</small>
+                                                    <span class="fw-semibold">{{ estudo.data_registro|format_date }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="spec-item">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="spec-icon me-3">
+                                                    <i class="fas fa-calendar text-success"></i>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Data Vencimento Cliente</small>
+                                                    <span class="fw-semibold">{{ estudo.data_vencimento_cliente|format_date }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="spec-item mb-3">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="spec-icon me-3">
+                                                    <i class="fas fa-city text-info"></i>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Empresa</small>
+                                                    <span class="fw-semibold">{{ estudo.empresa.nome_empresa if estudo.empresa.nome_empresa else '' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
-                                    {% endif %}
                                 </div>
                             </div>
+
+                            {% if estudo.dem_carga_solicit_p > 0 or estudo.dem_carga_solicit_fp > 0 %}
+                            <div class="{{class_largura}}">
+                                <div class="demand-section">
+                                    <h5 class="section-title mb-3">
+                                        <i class="fas fa-chart-line text-success me-2"></i>
+                                        Demanda de Energia
+                                    </h5>
+                                    <div class="demand-comparison">
+                                        <div class="demand-item current mb-3">
+                                            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-info">
+                                                <div>
+                                                    <small class="text-muted d-block mb-1">Carga Atual</small>
+                                                    <h4 class="mb-0 text-info fw-bold">{{ estudo.dem_carga_atual_p }}</h4>
+                                                </div>
+                                                <div class="demand-unit">
+                                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">kW</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="demand-item requested">
+                                            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-success">
+                                                <div>
+                                                    <small class="text-muted d-block mb-1">Carga Solicitada</small>
+                                                    <h4 class="mb-0 text-success fw-bold">{{ estudo.dem_carga_solicit_p }}</h4>
+                                                </div>
+                                                <div class="demand-unit">
+                                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">kW</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Indicador de crescimento -->
+                                        {% set crescimento = ((estudo.dem_carga_solicit_p - estudo.dem_carga_atual_p) / estudo.dem_carga_atual_p * 100) if estudo.dem_carga_atual_p > 0 %}
+                                        {% if crescimento %}
+                                        <div class="growth-indicator mt-3 p-2 rounded-2 text-center"
+                                             style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));">
+                                            <small class="text-muted d-block">Crescimento Esperado</small>
+                                            <span class="fw-bold {% if crescimento > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                <i class="fas {% if crescimento > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %} me-1"></i>
+                                                {{ "%.1f"|format(crescimento|abs) }}%
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Geração -->
+                            {% if estudo.dem_ger_solicit_p > 0 or estudo.dem_ger_solicit_fp > 0 %}
+                            <div class="{{class_largura}}">
+                                <div class="demand-section">
+                                    <h5 class="section-title mb-3">
+                                        <i class="fas fa-chart-line text-success me-2"></i>
+                                        Demanda de Geração
+                                    </h5>
+                                    <div class="demand-comparison">
+                                        <div class="demand-item current mb-3">
+                                            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-info">
+                                                <div>
+                                                    <small class="text-muted d-block mb-1">Geração Atual</small>
+                                                    <h4 class="mb-0 text-info fw-bold">{{ estudo.dem_ger_atual_fp }}</h4>
+                                                </div>
+                                                <div class="demand-unit">
+                                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">kW</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="demand-item requested">
+                                            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light border-start border-4 border-success">
+                                                <div>
+                                                    <small class="text-muted d-block mb-1">Geração Solicitada</small>
+                                                    <h4 class="mb-0 text-success fw-bold">{{ estudo.dem_ger_solicit_fp }}</h4>
+                                                </div>
+                                                <div class="demand-unit">
+                                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">kW</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Indicador de crescimento -->
+                                        {% set crescimento = ((estudo.dem_ger_solicit_fp - estudo.dem_ger_atual_fp) / estudo.dem_ger_atual_fp * 100) if estudo.dem_ger_atual_fp > 0 %}
+                                        {% if crescimento %}
+                                        <div class="growth-indicator mt-3 p-2 rounded-2 text-center"
+                                             style="background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));">
+                                            <small class="text-muted d-block">Crescimento Esperado</small>
+                                            <span class="fw-bold {% if crescimento > 0 %}text-success{% else %}text-danger{% endif %}">
+                                                <i class="fas {% if crescimento > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %} me-1"></i>
+                                                {{ "%.1f"|format(crescimento|abs) }}%
+                                            </span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
 
@@ -450,12 +375,12 @@
 
                             <div class="mb-3">
                                 {{ form.id_estudo.label(class="form-label") }}
-                                {{ form.id_estudo(class="form-select") }}
+                                {{ form.id_estudo(class="form-control") }}
                             </div>
 
                             <div class="mb-3">
                                 {{ form.id_circuito.label(class="form-label") }}
-                                {{ form.id_circuito(class="form-select") }}
+                                {{ form.id_circuito(class="form-select", id="circuito_select") }}
                             </div>
 
                             <div class="mb-3">
@@ -595,6 +520,24 @@
 
 {% block scripts %}
 <script>
+$(document).ready(function() {
+    $('#circuito_select').select2({
+        dropdownParent: $('#alternativaModal'), // garante que o dropdown abra dentro do modal
+        placeholder: "Selecione um circuito...", // opcional
+        allowClear: true, // adiciona um "x" para limpar a seleção
+        width: '100%' // ajusta à largura do container
+    });
+
+<!--    // Exemplo para outro select-->
+<!--    $('#circuito_select').select2({-->
+<!--        dropdownParent: $('#alternativaModal'),-->
+<!--        placeholder: "Selecione um estudo...",-->
+<!--        allowClear: true,-->
+<!--        width: '100%'-->
+<!--    });-->
+});
+
+
 function filtrarAlternativas() {
     const estudoId = document.getElementById('filtro_estudo').value;
     const circuitoId = document.getElementById('filtro_circuito').value;
@@ -680,6 +623,8 @@ document.getElementById('alternativaModal').addEventListener('hidden.bs.modal', 
     document.getElementById('alternativaModalLabel').textContent = 'Nova Alternativa';
     document.getElementById('formAlternativa').action = `{{ url_for('alternativa.criar') }}`;
 });
+
+
 </script>
 
 <style>
@@ -803,6 +748,45 @@ document.getElementById('alternativaModal').addEventListener('hidden.bs.modal', 
 .info-card:nth-child(1) { animation-delay: 0.1s; }
 .info-card:nth-child(2) { animation-delay: 0.2s; }
 .info-card:nth-child(3) { animation-delay: 0.3s; }
+
+.toggle-btn .fa-chevron-down {
+    transition: transform 0.3s ease; /* precisa estar no estado base */
+}
+
+.toggle-btn[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+button[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+button[aria-expanded="true"] > .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+/* Ajuste de tamanhos de fonte */
+.card-title {
+    font-size: 1rem; /* título do card */
+}
+
+.card-text,
+.form-label {
+    font-size: 0.9rem; /* textos e labels */
+}
+
+.form-control,
+select,
+input,
+textarea {
+    font-size: 0.9rem; /* campos de formulário */
+}
+
+.card-body {
+    padding: 0.75rem 1rem;
+}
+
 </style>
 
 {% endblock %}
