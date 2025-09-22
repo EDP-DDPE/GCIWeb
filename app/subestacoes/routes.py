@@ -32,10 +32,14 @@ def editar_subestacao(id):
 
     if request.method == "POST":
         if "delete" in request.form:
-            db.session.delete(sub)
-            db.session.commit()
-            flash("Subestação apagada com sucesso!", "success")
-            return redirect(url_for("subestacoes.listar_subestacoes"))
+            try:
+                db.session.delete(sub)
+                db.session.commit()
+                flash("Subestação apagada com sucesso!", "success")
+                return redirect(url_for("subestacoes.listar_subestacoes"))
+            except Exception as e:
+                db.session.rollback()
+                flash("Não foi possível apagar a suestação", "danger")
 
         # Atualizar subestação
         sub.nome = request.form["nome"]
