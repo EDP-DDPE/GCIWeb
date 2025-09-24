@@ -48,38 +48,43 @@
                     </button>
                     <div id="columnDropdown" class="column-dropdown">
                         <h6 class="mb-2">Selecionar Colunas</h6>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="id" id="col-id" checked>
-                            <label class="form-check-label" for="col-id">ID</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="num_doc" id="col-num_doc" checked>
-                            <label class="form-check-label" for="col-num_doc">Nº Documento</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="nome_projeto" id="col-nome_projeto" checked>
-                            <label class="form-check-label" for="col-nome_projeto">Projeto</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="empresa" id="col-empresa" checked>
-                            <label class="form-check-label" for="col-empresa">Empresa</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="municipio" id="col-municipio" checked>
-                            <label class="form-check-label" for="col-municipio">Município</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="eng_responsavel" id="col-eng_responsavel" checked>
-                            <label class="form-check-label" for="col-eng_responsavel">Responsável</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="data_registro" id="col-data_registro" checked>
-                            <label class="form-check-label" for="col-data_registro">Data Criação</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
-                            <label class="form-check-label" for="col-acoes">Ações</label>
-                        </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="id" id="col-id">
+                                <label class="form -check-label" for="col-id">ID</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="num_doc" id="col-num_doc" checked>
+                                <label class="form-check-label" for="col-num_doc">Nº Documento</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="nome_projeto" id="col-nome_projeto" checked>
+                                <label class="form-check-label" for="col-nome_projeto">Projeto</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="empresa" id="col-empresa" checked>
+                                <label class="form-check-label" for="col-empresa">Empresa</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="municipio" id="col-municipio" checked>
+                                <label class="form-check-label" for="col-municipio">Município</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="eng_responsavel" id="col-eng_responsavel" checked>
+                                <label class="form-check-label" for="col-eng_responsavel">Responsável</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="data_registro" id="col-data_registro" checked>
+                                <label class="form-check-label" for="col-data_registro">Data Criação</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="status" id="col-status" checked>
+                                <label class="form-check-label" for="col-status">Status</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
+                                <label class="form-check-label" for="col-acoes">Ações</label>
+                            </div>
+
                         <hr>
                         <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllColumns()">Todas</button>
                         <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllColumns()">Nenhuma</button>
@@ -179,6 +184,15 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="status" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Status</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="status" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Ações</span>
@@ -209,6 +223,9 @@
                             <th data-column="data_registro">
                                 <input type="date" class="filter-input" data-filter="data_registro">
                             </th>
+                            <th data-column="status">
+                                <input type="text" class="filter-input" data-filter="status">
+                            </th>
                             <th data-column="acoes">
                                 <!-- Sem filtro para ações -->
                             </th>
@@ -224,6 +241,7 @@
                             <td data-column="municipio">{{ doc.municipio }}</td>
                             <td data-column="eng_responsavel">{{ doc.eng_responsavel }}</td>
                             <td data-column="data_registro">{{ doc.data_registro }}</td>
+                            <td data-column="status">{{ doc.status }}</td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-sm btn-info"
@@ -246,6 +264,13 @@
                                        title="Gerenciar alternativas">
                                         <i class="bi bi-list-check"></i>
                                     </a>
+
+                                    <button type="button" class="btn btn-primary btn-status" data-bs-toggle="modal"
+                                            data-bs-target="#statusModal" data-id-estudo="{{ doc.id }}">
+                                      Novo Status
+                                    </button>
+
+
                                 </div>
                             </td>
                         </tr>
@@ -271,6 +296,63 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Modal para Status -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="statusModalLabel">Histórico de Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Histórico de status -->
+        <div id="status-historico" class="mb-3">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Observação</th>
+                <th>Criado por</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="status-historico-body">
+              <!-- preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <hr>
+
+        <!-- Form adicionar/editar -->
+        <form id="statusForm">
+          <input type="hidden" name="id_estudo" id="status_id_estudo">
+          <input type="hidden" name="id_status" id="status_id_status">
+
+          <div class="mb-3">
+            <label for="id_status_tipo" class="form-label">Tipo de Status</label>
+            <select class="form-select" name="id_status_tipo" id="id_status_tipo" required>
+              {% for tipo in status_tipos %}
+                <option value="{{ tipo.id_status_tipo }}">{{ tipo.status }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="observacao" class="form-label">Observação</label>
+            <textarea class="form-control" name="observacao" id="observacao"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-success">Salvar</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
