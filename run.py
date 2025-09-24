@@ -8,6 +8,7 @@ app = create_app()
 
 
 def run():
+
     # Context da aplicação para comandos
     with app.app_context():
         print("🚀 Iniciando aplicação GCI Web...")

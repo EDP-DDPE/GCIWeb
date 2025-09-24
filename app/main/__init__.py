@@ -10,7 +10,7 @@ from app.auth.routes import create_auth_blueprint
 from app.database import init_database, db_manager
 
 
-def create_app(test_config=None):
+def create_app():
 
     load_dotenv()
 
@@ -26,14 +26,6 @@ def create_app(test_config=None):
         JSON_AS_ASCII=False
     )
 
-    # if test_config is None:
-    #     # load the instance config, if it exists, when not testing
-    #     app.config.from_pyfile('config.py', silent=True)
-    # else:
-    #     # load the test config if passed in
-    #     app.config.from_mapping(test_config)
-
-    # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
     except OSError:
