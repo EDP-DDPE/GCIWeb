@@ -21,7 +21,7 @@ def requires_permission(permission):
         def decorated_function(*args, **kwargs):
             usuario = get_usuario_logado()
             if not usuario:
-                flash("Você precisa estar logado.", "danger")
+                flash(f"Você não tem autorizações. Não encontrei a matrícula {session['user']['preferred_username'].split('@')[0]} na base de dados.", "danger")
                 return redirect(url_for("auth.login"))
 
             # Se for admin, libera tudo
