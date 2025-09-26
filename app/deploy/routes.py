@@ -24,8 +24,8 @@ def deploy():
                 "/bin/bash", "-c",
                 """
                 cd /var/www/atlas/GCIWeb &&
-                git fetch --all &&
-                git reset --hard origin/main &&
+                /usr/bin/git fetch --all &&
+                /usr/bin/git reset --hard origin/main &&
                 source /var/www/atlas/venv/bin/activate &&
                 pip install -r requirements.txt &&
                 sudo systemctl restart atlas
