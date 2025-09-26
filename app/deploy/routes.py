@@ -20,17 +20,7 @@ def deploy():
     try:
         # Rodar o script de deploy
         output = subprocess.check_output(
-            [
-                "/bin/bash", "-c",
-                """
-                cd /var/www/atlas/GCIWeb &&
-                /usr/bin/git fetch --all &&
-                /usr/bin/git reset --hard origin/main &&
-                source /var/www/atlas/venv/bin/activate &&
-                pip install -r requirements.txt &&
-                sudo systemctl restart atlas
-                """
-            ],
+            ["/bin/bash", "/var/www/atlas/GCIWeb/app/deploy/restart_atlas.sh"],
             stderr=subprocess.STDOUT
         )
         return jsonify({"status": "ok", "output": output.decode("utf-8")})
