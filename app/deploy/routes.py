@@ -18,11 +18,14 @@ def deploy():
         return jsonify({"error": "Unauthorized"}), 401
 
     try:
-        # Rodar o script de deploy
-        output = subprocess.check_output(
-            ["/bin/bash", "/var/www/atlas/GCIWeb/app/deploy/restart_atlas.sh"],
-            stderr=subprocess.STDOUT
+        # Executa o script de deploy
+        result = subprocess.run(
+            ["/var/www/atlas/restart_atlas.sh"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True  # Retorna strings ao invés de bytes
         )
-        return jsonify({"status": "ok", "output": output.decode("utf-8")})
+        return jsonify({"status": "ok", "output": result.stdout})
     except subprocess.CalledProcessError as e:
-        return jsonify({"status": "error", "output": e.output.decode("utf-8")}), 500
+        return jsonify({"status": "error", "output": e.stdout}), 500
