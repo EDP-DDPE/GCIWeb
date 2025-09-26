@@ -28,7 +28,7 @@ def deploy():
                 /usr/bin/git reset --hard origin/main &&
                 source /var/www/atlas/venv/bin/activate &&
                 pip install -r requirements.txt &&
-                systemctl restart atlas
+                /usr/local/bin/restart_atlas.sh
                 """
             ],
             stderr=subprocess.STDOUT
