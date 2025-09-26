@@ -28,4 +28,4 @@ def deploy():
         )
         return jsonify({"status": "ok", "output": result.stdout})
     except subprocess.CalledProcessError as e:
-        return jsonify({"status": "error", "output": e.stdout}), 500
+        return jsonify({"status": f"error {str(e.stdout)}, {str(e.stderr)}", "output": e.stdout}), 500
