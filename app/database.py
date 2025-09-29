@@ -8,6 +8,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 import logging
 from contextlib import contextmanager
+from dotenv import load_dotenv
 
 # Configuração de logging para SQL Server
 logging.basicConfig()
@@ -16,18 +17,19 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 class DatabaseConfig:
     """Configurações do banco de dados SQL Server"""
-    
+    load_dotenv()
     # Configurações padrão - podem ser sobrescritas por variáveis de ambiente
     SERVER = os.getenv('SQLSERVER_HOST', '')
     PORT = os.getenv('SQLSERVER_PORT', '')
     DATABASE = os.getenv('SQLSERVER_DATABASE', '')
     USERNAME = os.getenv('SQLSERVER_USERNAME', '')
     PASSWORD = os.getenv('SQLSERVER_PASSWORD', '')
-    DRIVER = os.getenv('SQLSERVER_DRIVER', 'ODBC Driver 17 for SQL Server')
+    DRIVER = os.getenv('SQLSERVER_DRIVER')
+    print(f"Driver Selecionado: {DRIVER}")
     
     # Configurações de conexão
-    TRUST_SERVER_CERTIFICATE = os.getenv('TRUST_SERVER_CERTIFICATE', 'yes')
-    ENCRYPT = os.getenv('SQLSERVER_ENCRYPT', 'no')
+    TRUST_SERVER_CERTIFICATE = os.getenv('TRUST_SERVER_CERTIFICATE', 'no')
+    ENCRYPT = os.getenv('SQLSERVER_ENCRYPT', 'yes')
     CONNECTION_TIMEOUT = int(os.getenv('CONNECTION_TIMEOUT', '30'))
     COMMAND_TIMEOUT = int(os.getenv('COMMAND_TIMEOUT', '30'))
     
@@ -108,6 +110,7 @@ class DatabaseManager:
         
         # Aplicar configurações do SQLAlchemy
         config = DatabaseConfig.get_sqlalchemy_config()
+        print(f"Configuração SQL: {config}")
         for key, value in config.items():
             app.config[key] = value
         

@@ -1,11 +1,14 @@
 from app.models import db
 from app.main import create_app
 from app.database import db_manager
-#from waitress import serve
+
+# from waitress import serve
+
+app = create_app()
 
 
 def run():
-    app = create_app()
+
     # Context da aplicação para comandos
     with app.app_context():
         print("🚀 Iniciando aplicação GCI Web...")
