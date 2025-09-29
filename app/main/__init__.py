@@ -14,7 +14,11 @@ def create_app(test_config=None):
 
     load_dotenv()
 
-    app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'))
+    app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder="static", static_url_path='/static')
+
+    # Registrar getattr no Jinja2, para utiliza no template genérico
+    app.jinja_env.globals['getattr'] = getattr
+
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET"),
         SESSION_TYPE="filesystem",
