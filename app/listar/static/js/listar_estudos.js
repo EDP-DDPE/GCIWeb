@@ -6,6 +6,7 @@
     let sortColumn = '';
     let sortDirection = 'asc';
     let columnFilters = {};
+    let idEstudo = null;
 
     // Inicialização
     $(document).ready(function() {
@@ -13,6 +14,7 @@
         setupEventListeners();
         setupColumnResizing();
         initializeTooltips();
+        status_event_listeners();
     });
 
     // Inicializar dados
@@ -28,7 +30,8 @@
                 municipio: cells.eq(4).text().trim(),
                 eng_responsavel: cells.eq(5).text().trim(),
                 data_registro: cells.eq(6).text().trim(),
-                acoes: cells.eq(7).html(),
+                status: cells.eq(7).text().trim(),
+                acoes: cells.eq(8).html(),
                 element: this
             };
         }).get();
@@ -191,6 +194,7 @@
                     <td data-column="municipio">${item.municipio}</td>
                     <td data-column="eng_responsavel">${item.eng_responsavel}</td>
                     <td data-column="data_registro">${item.data_registro}</td>
+                    <td data-column="status">${item.status}</td>
                     <td data-column="acoes">${item.acoes}</td>
                 `);
                 $tbody.append(row);
@@ -711,45 +715,65 @@
         }
     }
 
-    <!--// Adicionar funcionalidade de impressão-->
-    <!--function printTable() {-->
-    <!--    const printWindow = window.open('', '_blank');-->
-    <!--    const $tableClone = $('#estudosTable').clone();-->
-    <!--    -->
-    <!--    // Remover colunas de ações para impressão-->
-    <!--    $tableClone.find('[data-column="acoes"]').remove();-->
-    <!--    -->
-    <!--    printWindow.document.write(`-->
-    <!--        <html>-->
-    <!--        <head>-->
-    <!--            <title>Lista de Estudos</title>-->
-    <!--            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">-->
-    <!--            <style>-->
-    <!--                body { font-size: 12px; }-->
-    <!--                table { font-size: 10px; }-->
-    <!--                @media print { .no-print { display: none; } }-->
-    <!--            </style>-->
-    <!--        </head>-->
-    <!--        <body>-->
-    <!--            <h3 class="text-center mb-4">Lista de Estudos</h3>-->
-    <!--            <div class="table-responsive">-->
-    <!--                ${$tableClone[0].outerHTML}-->
-    <!--            </div>-->
-    <!--            <script>window.print();</script>-->
-    <!--        </body>-->
-    <!--        </html>-->
-    <!--    `);-->
-    <!--    printWindow.document.close();-->
-    <!--}-->
 
-<!--    // Adicionar botão de impressão à interface-->
-<!--    $(document).ready(function() {-->
-<!--        loadTableSettings();-->
+  // Código do modal Status
+  // Quando abrir o modal
 
-<!--        const $printButton = $('<button>')-->
-<!--            .addClass('btn btn-outline-secondary btn-sm')-->
-<!--            .html('<i class="fas fa-print"></i> Imprimir')-->
-<!--            .on('click', printTable);-->
+  function status_event_listeners() {
+    $('#statusModal').on('show.bs.modal', function (event) {
+        let button = $(event.relatedTarget);
+        idEstudo = button.data('id-estudo');
+        console.log(idEstudo)
+        $('#status_id_estudo').val(idEstudo);
 
-<!--        $('.table-header-controls .d-flex').append($printButton);-->
-<!--    });-->
+        carregarHistorico(idEstudo);
+    });
+
+    $(document).on('click', '.btn-editar', function () {
+        let status = $(this).data('status');
+        $('#status_id_status').val(status.id_status);
+        $('#id_status_tipo').val(status.id_status_tipo);
+        $('#observacao').val(status.observacao);
+    });
+
+      // Submeter form (novo ou edição)
+    $('#statusForm').submit(function (e) {
+        e.preventDefault();
+
+        let formData = $(this).serialize();
+
+        $.post(`/estudos/${idEstudo}/status/save`, formData, function (res) {
+          carregarHistorico(idEstudo);
+          $('#statusForm')[0].reset();
+          $('#status_id_status').val('');
+        });
+    });
+  }
+
+  // Função para carregar o histórico via AJAX
+  function carregarHistorico(idEstudo) {
+    console.log('teste')
+    $.get('/estudos/${idEstudo}/status', function (data) {
+      let tbody = $('#status-historico-body');
+      tbody.empty();
+
+      data.forEach(status => {
+        tbody.append(`
+          <tr>
+            <td>${status.data}</td>
+            <td>${status.status_tipo}</td>
+            <td>${status.observacao || ''}</td>
+            <td>${status.criado_por}</td>
+            <td>
+              <button class="btn btn-sm btn-warning btn-editar" data-status='${JSON.stringify(status)}'>Editar</button>
+            </td>
+          </tr>
+        `);
+      });
+    });
+  }
+
+  // Editar status
+
+
+

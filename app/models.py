@@ -362,6 +362,18 @@ class StatusEstudo(db.Model):
     status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
 
 
+class StatusTipo(db.Model):
+    __tablename__ = 'status_tipos'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_status_tipo = db.Column(db.BigInteger, primary_key=True)
+    status = db.Column(db.String(100), nullable=False)
+    descricao = db.Column(db.Text)
+    ativo = db.Column(db.Boolean, nullable=False, default=True)
+
+    status_estudos = db.relationship('StatusEstudo', back_populates='status_tipo', lazy='select')
+
+
 class Kit(db.Model):
     __tablename__ = 'kits'
     __table_args__ = {'schema': 'gciweb'}
@@ -433,16 +445,7 @@ class Obra(db.Model):
     alternativa = db.relationship('Alternativa', back_populates='obras', lazy='joined')
 
 
-class StatusTipo(db.Model):
-    __tablename__ = 'status_tipos'
-    __table_args__ = {'schema': 'gciweb'}
 
-    id_status_tipo = db.Column(db.BigInteger, primary_key=True)
-    status = db.Column(db.String(100), nullable=False)
-    descricao = db.Column(db.Text)
-    ativo = db.Column(db.Boolean, nullable=False, default=True)
-
-    status_estudos = db.relationship('StatusEstudo', back_populates='status_tipo', lazy='select')
 
 
 # Funções utilitárias para queries otimizadas
@@ -484,7 +487,8 @@ def listar_estudos(page, per_page):
             db.joinedload(Estudo.municipio),
             db.joinedload(Estudo.tipo_solicitacao),
             db.joinedload(Estudo.criado_por),
-            db.joinedload(Estudo.resp_regiao).joinedload(RespRegiao.usuario)
+            db.joinedload(Estudo.resp_regiao).joinedload(RespRegiao.usuario),
+            db.selectinload(Estudo.status_estudos).selectinload(StatusEstudo.status_tipo)
         ).order_by(Estudo.id_estudo.desc()) \
             .paginate(
             page=page,
@@ -492,8 +496,11 @@ def listar_estudos(page, per_page):
             error_out=False
         )
 
+
         estudos_data = []
         for estudo in estudos_paginated.items:
+            print(estudo.ultimo_status.status_tipo.status) if estudo.ultimo_status else None
+
             estudos_data.append({
                 'id': estudo.id_estudo,
                 'num_doc': estudo.num_doc,
@@ -504,6 +511,7 @@ def listar_estudos(page, per_page):
                 'tipo_solicitacao': estudo.tipo_solicitacao.viabilidade if estudo.tipo_solicitacao else None,
                 'eng_responsavel': estudo.resp_regiao.usuario.nome if estudo.resp_regiao else None,
                 'criado_por': estudo.criado_por.nome if estudo.criado_por else None,
+                'status': estudo.ultimo_status.status_tipo.status if estudo.ultimo_status else "Status não cadastrado",
                 'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None
             })
 
