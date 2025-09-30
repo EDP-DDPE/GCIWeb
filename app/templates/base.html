@@ -12,14 +12,11 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- Mapa do Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <!-- JS do Select2 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
@@ -191,17 +188,23 @@
     <!-- Bootstrap JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <!-- Select2 JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Sweet Alert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
-            // Inicializar Select2 em todos os selects
-            $('select').select2({
-                theme: 'bootstrap-5',
-                placeholder: function() {
-                    return $(this).data('placeholder') || 'Selecione uma opção...';
-                },
-                allowClear: true
+            // Inicializar Select2 global
+            $('select').each(function() {
+                let parentModal = $(this).closest('.modal');
+
+                $(this).select2({
+                    theme: 'bootstrap-5',
+                    placeholder: $(this).data('placeholder') || 'Selecione uma opção...',
+                    allowClear: true,
+                    width: '100%',
+                    // se estiver dentro de modal, define dropdownParent
+                    dropdownParent: parentModal.length ? parentModal : $(document.body)
+                });
             });
 
             // Auto-hide alerts after 5 seconds
