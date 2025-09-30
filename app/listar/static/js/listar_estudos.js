@@ -10,11 +10,21 @@
 
     // Inicialização
     $(document).ready(function() {
+
+        $('#id_status_tipo').select2({
+            dropdownParent: $('#statusModal'),
+            theme: 'bootstrap-5',
+            placeholder: 'Selecione uma opção...',
+            allowClear: true
+        });
+
         initializeData();
         setupEventListeners();
         setupColumnResizing();
         initializeTooltips();
         status_event_listeners();
+
+
     });
 
     // Inicializar dados
@@ -736,13 +746,19 @@
         $('#observacao').val(status.observacao);
     });
 
+    $(document).on('click', '.btn-excluir', function () {
+        let status = $(this).data('status');
+        excluirStatus(status)
+
+    });
+
       // Submeter form (novo ou edição)
     $('#statusForm').submit(function (e) {
         e.preventDefault();
 
         let formData = $(this).serialize();
 
-        $.post(`/estudos/${idEstudo}/status/save`, formData, function (res) {
+        $.post('/estudos/' + idEstudo + '/status/save', formData, function (res) {
           carregarHistorico(idEstudo);
           $('#statusForm')[0].reset();
           $('#status_id_status').val('');
@@ -752,8 +768,7 @@
 
   // Função para carregar o histórico via AJAX
   function carregarHistorico(idEstudo) {
-    console.log('teste')
-    $.get('/estudos/${idEstudo}/status', function (data) {
+    $.get('/estudos/' + idEstudo + '/status', function (data) {
       let tbody = $('#status-historico-body');
       tbody.empty();
 
@@ -766,6 +781,7 @@
             <td>${status.criado_por}</td>
             <td>
               <button class="btn btn-sm btn-warning btn-editar" data-status='${JSON.stringify(status)}'>Editar</button>
+              <button class="btn btn-sm btn-danger btn-excluir" data-status='${status.id_status}'>Excluir</button>
             </td>
           </tr>
         `);
@@ -774,6 +790,46 @@
   }
 
   // Editar status
+
+  function excluirStatus(idStatus) {
+      Swal.fire({
+        title: 'Confirmar Exclusão',
+        text: 'Tem certeza que deseja excluir este status?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch('/status/excluir/' + idStatus, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.querySelector(`tr[data-status-id="${idStatus}"]`).remove();
+
+              Swal.fire(
+                'Excluído!',
+                'O status foi excluído com sucesso.',
+                'success'
+              );
+            } else {
+              Swal.fire('Erro!', 'Não foi possível excluir o status.', 'error');
+            }
+          })
+          .catch(error => {
+//            console.error('Erro:', error);
+            Swal.fire('Erro!', 'Ocorreu um erro ao excluir o status.', 'error');
+          });
+        }
+      });
+    }
 
 
 

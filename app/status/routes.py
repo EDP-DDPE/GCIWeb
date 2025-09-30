@@ -38,7 +38,7 @@ def salvar_status(id_estudo):
     id_status = request.form.get("id_status")
     id_status_tipo = request.form["id_status_tipo"]
     observacao = request.form.get("observacao")
-    usuario_id = get_usuario_logado()
+    usuario = get_usuario_logado()
 
     if id_status:  # edição
         status = StatusEstudo.query.get(id_status)
@@ -49,9 +49,32 @@ def salvar_status(id_estudo):
             id_estudo=id_estudo,
             id_status_tipo=id_status_tipo,
             observacao=observacao,
-            id_criado_por=usuario_id,
+            id_criado_por=usuario.id_usuario,
         )
         db.session.add(status)
 
     db.session.commit()
     return jsonify({"success": True})
+
+
+@status_bp.route("/status/excluir/<int:id_status>", methods=["DELETE"])
+def excluir_status(id_status):
+    try:
+        user = get_usuario_logado()
+        status = StatusEstudo.query.get_or_404(id_status)
+        if user.admin or user.id_usuario == status.id_criado_por:
+            db.session.delete(status)
+            db.session.commit()
+        else:
+            raise NameError
+    except NameError:
+        return jsonify({
+            'success': False,
+            'message': f'Você não tem permissão para deletar esse status.'
+        }), 500
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao excluir status: {str(e)}'
+        }), 500
