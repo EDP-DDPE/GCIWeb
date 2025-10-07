@@ -619,6 +619,7 @@ def obter_estudo(estudo_id):
                 {
                     'id': anexo.id_anexo,
                     'nome_arquivo': anexo.nome_arquivo,
+                    'endereco': anexo.endereco,
                     'tamanho_arquivo': anexo.tamanho_arquivo,
                     'tipo_mime': anexo.tipo_mime,
                     'data_upload': anexo.data_upload.isoformat() if anexo.data_upload else None
