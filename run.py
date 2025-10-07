@@ -11,7 +11,7 @@ def run():
 
     # Context da aplicação para comandos
     with app.app_context():
-        print("🚀 Iniciando aplicação GCI Web...")
+        print("🚀 Iniciando aplicação Atlas...")
         # Testar conexão
         if db_manager.test_connection():
             print("✅ Conexão com SQL Server OK!")
