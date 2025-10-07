@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ======================= MUDANÇA ==================== -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/listar_unificado.css') }}">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- =====================MUDANÇA ==================== -->
+        <h2><i class="fas fa-file-alt me-2"></i>{{ titulo }}</h2>
+        <div class="d-flex gap-2">
+
+            <!-- MANTER -->
+            <!-- Verificar função refreshData() no arquivo listar.js -->
+            <button class="btn btn-success" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+
+            <!-- ========================== MUDANÇA ============================ -->
+            {% if botao_novo %}
+            <a href="{{ botao_novo.url }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> {{ botao_novo.texto }}
+            </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-header-controls">
+          <!-- Controles principais -->
+            <div class="d-flex flex-wrap gap-3 align-items-center w-100">
+
+                <!-- Busca global -->
+                <!-- MANTER IGUAL PARA TODOS OS MODELOS -->
+                <div class="flex-grow-1" style="max-width: 300px;">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="globalSearch" class="form-control" placeholder="Buscar em todas as colunas...">
+                    </div>
+                </div>
+
+                <!-- Registros por página -->
+                <!-- MANTER IGUAL PARA TODOS OS MODELOS -->
+                <div>
+                    <label class="form-label mb-0 me-2">Exibir:</label>
+                    <select id="pageSize" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="ms-1">registros</span>
+                </div>
+
+                <!-- Seletor de colunas -->
+                <div class="column-selector">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleColumnSelector()">
+                        <i class="fas fa-columns"></i> Colunas
+                    </button>
+                    <div id="columnDropdown" class="column-dropdown">
+                        <h6 class="mb-2">Selecionar Colunas</h6>
+
+                        <!-- ========================== MUDANÇA ============================ -->
+                        {% if colunas %}
+                                {% for coluna in colunas %}
+                                <div class="form-check">
+                                  <input class="form-check-input column-toggle"
+                                         type="checkbox"
+                                         value="{{ coluna.value }}"
+                                         id="col-{{ coluna.value }}"
+                                         {% if coluna.visivel %}checked{% endif %}>
+                                  <label class="form-check-label" for="col-{{ coluna.value }}">
+                                      {{ coluna.value }}
+                                  </label>
+                                </div>
+                                {% endfor %}
+                        {% endif %}
+
+                        <!-- Coluna de Ações Separada -->
+                        <div class="form-check">
+                          <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
+                          <label class="form-check-label" for="col-acoes">Ações</label>
+                        </div>
+
+                        <hr>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllColumns()">Todas</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllColumns()">Nenhuma</button>
+                    </div>
+                </div>
+
+                <!-- Exportar -->
+                <!-- MANTER IGUAL PARA TODOS OS MODELOS -->
+                <div class="export-dropdown">
+                    <button class="btn btn-outline-info btn-sm" onclick="toggleExportMenu()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <div id="exportMenu" class="export-menu">
+                        <a href="#" onclick="exportData('csv')"><i class="fas fa-file-csv me-2"></i>CSV</a>
+                        <a href="#" onclick="exportData('excel')"><i class="fas fa-file-excel me-2"></i>Excel</a>
+                        <a href="#" onclick="exportData('pdf')"><i class="fas fa-file-pdf me-2"></i>PDF</a>
+                    </div>
+                </div>
+
+                <!-- Limpar filtros -->
+                <!-- MANTER IGUAL PARA TODOS OS MODELOS -->
+                <button class="btn btn-outline-warning btn-sm" onclick="clearAllFilters()">
+                    <i class="fas fa-times"></i> Limpar Filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- MANTER IGUAL PARA TODOS OS MODELOS -->
+        <div class="table-container">
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="table-responsive-custom">
+                <table class="table table-hover table-sm mb-0" id="estudosTable"
+                    data-colunas='{{ colunas | tojson }}'
+                    data-itens='{{ itens | tojson }}'
+                    data-acoes='{{ acoes | tojson }}'>
+                    <thead class="table-light sticky-top">
+                    <!-- ========================== MUDANÇA ============================ -->
+                        <tr>
+                          {% for coluna in colunas %}
+                          <th class="resizable-header" data-column="{{ coluna.value }}" style="min-width: 80px;">
+                            <div class="d-flex align-items-center justify-content-between">
+                              <span>{{ coluna.nome }}</span>
+                                <div class="d-flex align-items-center">
+                                  <i class="fas fa-sort sort-icon" data-sort="{{ coluna.value }}" style="cursor: pointer; margin-left: 5px;"></i>
+                                  <div class="resize-handle"></div>
+                                </div>
+                              </div>
+                          </th>
+                          {% endfor %}
+
+                          <!-- Coluna de açoes Separada -->
+                          <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
+                              <div class="d-flex align-items-center justify-content-between">
+                                  <span>Ações</span>
+                                  <div class="resize-handle"></div>
+                              </div>
+                          </th>
+                        </tr>
+
+                        <!-- Linha de filtros -->
+                        <tr class="filter-row">
+                          <!-- ========================== MUDANÇA ============================ -->
+                          {% for coluna in colunas %}
+                            <th data-column="{{ coluna.value }}">
+                              {% if coluna.value != 'acoes' %}
+                                {% if 'data' in coluna.value or 'date' in coluna.value %}
+                                  <input type="date" class="filter-input" data-filter="{{ coluna.value }}">
+                                {% else %}
+                                  <input type="text" class="filter-input" data-filter="{{ coluna.value }}" placeholder="Filtrar {{ coluna.value }}...">
+                                {% endif %}
+                              {% endif %}
+                            </th>
+                          {% endfor %}
+                        </tr>
+                        
+                    </thead>
+                    <tbody id="tableBody">
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé com paginação e informações -->
+        <div class="card-footer">
+            <div class="table-actions">
+                <div class="pagination-info">
+                    Exibindo <span id="startRecord">1</span> a <span id="endRecord">25</span> de <span id="totalRecords">{{ itens|length }}</span> registros
+                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ itens|length }}</span> registros)</span>
+                </div>
+
+                <nav aria-label="Paginação da tabela">
+                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                        <!-- Paginação será gerada via JavaScript -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
+<!-- <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalDetalhesLabel">
+                    <i class="fas fa-file-alt me-2"></i>Detalhes do Documento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src=" {{ url_for('static', filename='js/listar_unificado.js') }}"></script>
+
+{% endblock %}
+
+<!-- ============= MANUAL PARA USO DO TEMPLATE ================ -->
+
+<!-- PARÂMETRO: titulo (Exemplo: "Lista de Estudos"), OBRIGATÓRIO -->
+
+<!-- PARÂMETRO: botao_novo (se não for passado não aparece na tela, não obrigatório) -->
+<!-- botao_novo = {
+    'url': url_for('cadastro.cadastro_estudo'),
+    'texto': 'Novo Estudo'
+}
+return render_template('listar_unificado.html', botao_novo=botao_novo)-->
+
+<!-- PARÂMETRO: colunas, OBRIGATÓRIO
+
+exemplo
+
+    colunas = [
+        {'value': 'id', 'nome': 'ID', 'visivel': False},
+        {'value': 'num_doc', 'nome': 'Nº Documento', 'visivel': True},
+        {'value': 'nome_projeto', 'nome': 'Projeto', 'visivel': True},
+        {'value': 'empresa', 'nome': 'Empresa', 'visivel': True},
+        {'value': 'municipio', 'nome': 'Município', 'visivel': True},
+        {'value': 'eng_responsavel', 'nome': 'Responsável', 'visivel': True},
+        {'value': 'data_registro', 'nome': 'Data Criação', 'visivel': True},
+        {'value': 'status', 'nome': 'Status', 'visivel': True},
+        {'value': 'acoes', 'nome': 'Ações', 'visivel': True}
+    ]-->
+
+<!-- itens: referenciando os itens vindo da lista no SQL -->
