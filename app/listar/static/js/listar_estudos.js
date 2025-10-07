@@ -600,9 +600,19 @@
                                     <i class="fas fa-file-upload me-2"></i>Anexos
                                 </div>
                                 <div class="card-body">
+
                                     ${data.anexos && data.anexos.length > 0 ? `
                                         <ul class="list-group list-group-flush">
-                                            ${data.anexos.map(a => `<li class="list-group-item">${a.nome_arquivo || 'N/A'} (${a.tipo_mime || 'N/A'})</li>`).join('')}
+                                            ${data.anexos.map(a => {
+                                                const caminho = a.endereco.replace(/\\/g, '/'); // troca '\' por '/'
+                                                return `
+                                                    <li class="list-group-item  d-flex justify-content-between align-items-center">${a.nome_arquivo || 'N/A'}
+                                                        <a href="/listar/download/${caminho}" class="btn btn-sm btn-outline-primary">
+                                                          <i class="bi bi-download"></i> Baixar
+                                                        </a>
+                                                    </li>
+                                                `;
+                                            }).join('')}
                                         </ul>
                                     ` : '<p>Nenhum anexo.</p>'}
                                 </div>
