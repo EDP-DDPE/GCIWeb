@@ -181,15 +181,22 @@
                     <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ itens|length }}</span> registros)</span>
                 </div>
 
-                <nav aria-label="Paginação da tabela">
-                    <ul class="pagination pagination-sm mb-0" id="pagination">
-                        <!-- Paginação será gerada via JavaScript -->
-                    </ul>
-                </nav>
+                <div class="pagination-controls">
+                    <nav aria-label="Paginação da tabela">
+                        <ul class="pagination pagination-sm mb-0" id="pagination">
+                            <!-- Paginação será gerada via JavaScript -->
+                        </ul>
+                    </nav>
+                    <!-- Campo para ir para página específica -->
+                    <div class="page-jump-controls">
+                        <span class="page-jump-label">Ir para página:</span>
+                        <input type="number" id="pageJumpInput" class="form-control form-control-sm page-jump-input" min="1" placeholder="1">
+                        <button type="button" id="pageJumpBtn" class="btn btn-sm btn-outline-primary page-jump-btn">Ir</button>
+                        <span class="page-total">de <span id="totalPagesSpan">1</span></span>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
 
 <!-- Modal para detalhes do documento (mantido o mesmo do código original) -->

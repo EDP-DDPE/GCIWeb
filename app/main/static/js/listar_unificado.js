@@ -81,6 +81,45 @@
 
         // Fechar dropdowns ao clicar fora
         $(document).on('click', closeDropdowns);
+
+        // Pular para página específica
+        $('#pageJumpBtn').on('click', jumpToPage);
+        $('#pageJumpInput').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                jumpToPage();
+            }
+        });
+    
+        // Validar entrada apenas números
+        $('#pageJumpInput').on('input', function() {
+            const value = parseInt(this.value);
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+        
+            if (value > totalPages) {
+                this.value = totalPages;
+            } else if (value < 1) {
+                this.value = 1;
+            }
+        });
+    }
+
+    // Nova função para pular para página
+    function jumpToPage() {
+        const pageInput = $('#pageJumpInput');
+        const targetPage = parseInt(pageInput.val());
+        const totalPages = Math.ceil(filteredData.length / pageSize);
+    
+        if (isNaN(targetPage) || targetPage < 1 || targetPage > totalPages) {
+            // Destacar erro visualmente
+            pageInput.addClass('is-invalid');
+            setTimeout(() => {
+                pageInput.removeClass('is-invalid');
+            }, 2000);
+            return;
+        }
+    
+    changePage(targetPage);
+    pageInput.removeClass('is-invalid');
     }
 
     // Debounce function - NÃO MUDA
@@ -462,6 +501,25 @@
         $('#endRecord').text(end);
         $('#totalRecords').text(totalRecords);
 
+        // Atualizar total de páginas no controle de pulo
+        $('#totalPagesSpan').text(totalPages);
+    
+        // Atualizar o valor máximo do input
+        $('#pageJumpInput').attr('max', totalPages);
+    
+        // Se a página atual mudou, atualizar o input
+        if ($('#pageJumpInput').val() != currentPage) {
+            $('#pageJumpInput').val(currentPage);
+        }
+    
+        // Mostrar/esconder controles de pulo de página
+        const $pageJumpControls = $('.page-jump-controls');
+        if (totalPages <= 1) {
+            $pageJumpControls.hide();
+        } else {
+            $pageJumpControls.show();
+        }
+
         // Mostrar informação de filtro se necessário
         const $filteredInfo = $('#filteredInfo');
         const $originalTotal = $('#originalTotal');
@@ -492,6 +550,19 @@
                 .html(`<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`);
             $pagination.append($li);
         }
+
+        // Última página se necessário
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const $ellipsis = $('<li>').addClass('page-item disabled')
+                    .html('<span class="page-link">...</span>');
+                $pagination.append($ellipsis);
+            }
+        
+            const $lastLi = $('<li>').addClass('page-item')
+                .html(`<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`);
+            $pagination.append($lastLi);
+    }
 
         // Botão próximo
         const $nextLi = $('<li>').addClass(`page-item ${currentPage === totalPages ? 'disabled' : ''}`)
