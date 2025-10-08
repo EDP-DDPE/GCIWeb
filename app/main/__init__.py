@@ -13,8 +13,14 @@ from app.database import init_database, db_manager
 def create_app():
 
     load_dotenv()
+    #app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-    app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'))
+    app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder="static", static_url_path='/static')
+    #app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder=os.path.join(app_dir, 'static'), static_url_path='/static')
+
+    # Registrar getattr no Jinja2, para utiliza no template genérico
+    app.jinja_env.globals['getattr'] = getattr
+
     app.config.from_mapping(
         SECRET_KEY=os.getenv("FLASK_SECRET"),
         SESSION_TYPE="filesystem",
@@ -73,6 +79,7 @@ def create_app():
     from app.user.routes import user_bp
     from app.municipios.routes import municipio_bp
     from app.alternativa.routes import alternativa_bp
+    from app.circuitos.routes import circuito_bp
     from app.status.routes import status_bp
     from app.deploy.routes import deploy_bp
 
@@ -87,6 +94,7 @@ def create_app():
     app.register_blueprint(user_bp)
     app.register_blueprint(municipio_bp)
     app.register_blueprint(alternativa_bp)
+    app.register_blueprint(circuito_bp)
     app.register_blueprint(status_bp)
     app.register_blueprint(deploy_bp)
 
