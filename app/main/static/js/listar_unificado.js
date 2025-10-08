@@ -96,24 +96,103 @@
         };
     }
 
+
     // Busca global - NÃO MUDA
     function applyGlobalSearch() {
-        const searchTerm = $('#globalSearch').val().toLowerCase();
+        try {
+            const searchTerm = $('#globalSearch').val().toLowerCase();    
+        
+            if (!searchTerm) {
+                filteredData = [...currentData];
+            } else {
+            
+                filteredData = currentData.filter((item, index) => {
+                
+                    // === FUNÇÃO AUXILIAR LOCAL PARA EXTRAIR VALORES ANINHADOS ===
+                    // Esta função é definida DENTRO do callback do filter, não é global.
+                    const getAllSearchableValuesForItem = (obj) => {
+                        const values = [];
 
-        if (!searchTerm) {
-            filteredData = [...currentData];
-        } else {
-            filteredData = currentData.filter(item =>
-                Object.values(item).some(value =>
-                    String(value).toLowerCase().includes(searchTerm)
-                )
-            );
-        }
+                        // Função recursiva interna para percorrer o objeto
+                        const recurse = (currentObj) => {
+                            // Se não é um objeto (ou é null), converte para string e adiciona
+                            if (currentObj === null || typeof currentObj !== 'object') {
+                                values.push(String(currentObj));
+                                return;
+                            }
 
+                            // Se for um array, itera sobre seus elementos
+                            if (Array.isArray(currentObj)) {
+                                currentObj.forEach(elem => recurse(elem));
+                                return;
+                            }
+
+                            // Se for um objeto, itera sobre suas propriedades
+                            for (const key in currentObj) {
+                                // Garante que a propriedade pertence ao próprio objeto e não à cadeia de protótipos
+                                if (Object.prototype.hasOwnProperty.call(currentObj, key)) {
+                                    const value = currentObj[key];
+                                    if (value !== null && typeof value === 'object') {
+                                        // Se o valor é outro objeto (ou array), chama recursivamente
+                                        recurse(value);
+                                    } else {
+                                        // Se não é um objeto, converte para string e adiciona
+                                        values.push(String(value));
+                                    }
+                                }
+                            }
+                        };
+
+                        recurse(obj); // Inicia a recursão com o objeto atual (item)
+                        return values;
+                    };
+                    // === FIM DA FUNÇÃO AUXILIAR LOCAL ===
+
+                    const allSearchableValues = getAllSearchableValuesForItem(item);
+                
+                    const match = allSearchableValues.some(value => {
+                        // Garantir que o valor é uma string antes de chamar toLowerCase()
+                        const strValue = String(value).toLowerCase(); 
+                        const hasMatch = strValue.includes(searchTerm);
+                        return hasMatch;
+                    });
+                
+                    return match;
+             });
+    }
+        
+        console.log('📈 Resultados:', {
+            total: currentData.length,
+            filtrados: filteredData.length,
+            percentual: currentData.length > 0 ? ((filteredData.length / currentData.length) * 100).toFixed(1) + '%' : '0%'
+        });
+        
         currentPage = 1;
         updatePagination();
         renderTable();
+        
+        console.log('✅ Busca concluída com sucesso');
+        
+    } catch (error) {
+        console.error('💥 ERRO na busca global:', error);
+        console.error('Stack trace completo:', error.stack);
+        
+        // Fallback em caso de erro
+        filteredData = currentData || [];
+        currentPage = 1;
+        updatePagination();
+        renderTable();
+        
+        // Opcional: exibir uma mensagem de erro amigável para o usuário
+        // alert('Ocorreu um erro ao realizar a busca. Por favor, tente novamente.');
+        
+    } finally {
+        console.timeEnd('TempoTotalBusca');
+        console.log('🏁 === BUSCA GLOBAL FINALIZADA ===\n');
     }
+    }
+
+
 
     // Filtros por coluna - NÃO MUDA, VERIFICAR data_registro
     function applyColumnFilter(event) {
