@@ -191,3 +191,24 @@
   #statusModal .modal-header {
     border-radius: 12px 12px 0 0;
   }
+
+.page-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Aumentei um pouco o gap */
+    flex-wrap: nowrap; /* Evita quebra de linha */
+}
+
+.page-size-controls .form-label,
+.page-size-controls span {
+    margin-bottom: 0 !important;
+    line-height: 1.5;
+    white-space: nowrap; /* Evita quebra do texto */
+}
+
+/* Ajuste específico para o select */
+#pageSize.form-select-sm {
+    min-width: 70px; /* Aumentei um pouco para garantir espaço */
+    max-width: 80px; /* Limita o tamanho máximo */
+    flex-shrink: 0; /* Evita que o select encolha */
+}
