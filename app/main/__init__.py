@@ -82,6 +82,7 @@ def create_app():
     from app.circuitos.routes import circuito_bp
     from app.status.routes import status_bp
     from app.deploy.routes import deploy_bp
+    from app.gerencial.routes import gestao_bp
 
     app.register_blueprint(create_auth_blueprint(redirect_path="/callback"), url_prefix="/auth")
     # REDIRECT_URI deve ser http://localhost:5000/auth/callback
@@ -97,6 +98,7 @@ def create_app():
     app.register_blueprint(circuito_bp)
     app.register_blueprint(status_bp)
     app.register_blueprint(deploy_bp)
+    app.register_blueprint(gestao_bp)
 
     # with app.app_context():
     #     print("\n[DEBUG] Rotas registradas:")
