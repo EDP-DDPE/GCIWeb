@@ -191,3 +191,13 @@
   #statusModal .modal-header {
     border-radius: 12px 12px 0 0;
   }
+
+  #pageSize {
+    height: calc(1.5em + 0.5rem + 2px); /* força a altura do select pequena */
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.select2-selection__clear {
+  display: none !important;
+}
