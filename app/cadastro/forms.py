@@ -18,7 +18,7 @@ class EstudoForm(FlaskForm):
 
     # Campo instalação (pode ser um número ou texto dependendo do uso)
     instalacao = IntegerField('Instalação', validators=[Optional()])
-    CPNJ = StringField('CNPJ', validators=[Optional()])
+    CNPJ = StringField('CNPJ', validators=[Optional()])
     CPF = IntegerField('CPF', validators=[Optional()])
     nome_empresa = StringField('Empresa', validators=[Optional()], render_kw={"readonly": True})
     demanda = FloatField('Demanda Contratual', validators=[Optional()], render_kw={"readonly": True})
@@ -28,7 +28,7 @@ class EstudoForm(FlaskForm):
     # Número de alternativas
     n_alternativas = IntegerField('Número de Alternativas',
                                   validators=[Optional(), NumberRange(min=0)],
-                                  default=0)
+                                  default=0, render_kw={"readonly": True})
 
     # Demandas solicitadas
     dem_carga_atual_fp = FloatField('Demanda Carga atual FP (kW)',
