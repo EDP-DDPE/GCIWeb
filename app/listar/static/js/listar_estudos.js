@@ -743,7 +743,6 @@
     $('#statusModal').on('show.bs.modal', function (event) {
         let button = $(event.relatedTarget);
         idEstudo = button.data('id-estudo');
-        console.log(idEstudo)
         $('#status_id_estudo').val(idEstudo);
 
         carregarHistorico(idEstudo);
@@ -790,8 +789,8 @@
             <td>${status.observacao || ''}</td>
             <td>${status.criado_por}</td>
             <td>
-              <button class="btn btn-sm btn-warning btn-editar" data-status='${JSON.stringify(status)}'>Editar</button>
-              <button class="btn btn-sm btn-danger btn-excluir" data-status='${status.id_status}'>Excluir</button>
+             <!-- <button class="btn btn-sm btn-warning btn-editar" data-status='${JSON.stringify(status)}'>Editar</button> -->
+             <!-- <button class="btn btn-sm btn-danger btn-excluir" data-status='${status.id_status}'>Excluir</button> -->
             </td>
           </tr>
         `);
