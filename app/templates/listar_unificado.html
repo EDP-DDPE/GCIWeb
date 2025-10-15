@@ -199,24 +199,26 @@
         </div>
 
 
-<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
-<!-- <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+<!-- Modal para detalhes do documento -->
+<div class="modal fade" id="genericModal" tabindex="-1" aria-labelledby="genericModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalDetalhesLabel">
-                    <i class="fas fa-file-alt me-2"></i>Detalhes do Documento
+                <h5 class="modal-title" id="genericModalLabel">
+                    <!-- Ícone e Título serão preenchidos via JS -->
+                    <i class="fas fa-file-alt me-2" id="genericModalIcon"></i>
+                    <span id="genericModalTitleText">Título do Modal</span> <!-- Pegar o título do modal como uma variável -->
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="modalDetalhesBody">
+            <div class="modal-body" id="genericModalBody">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>
-</div> -->
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src=" {{ url_for('static', filename='js/listar_unificado.js') }}"></script>
