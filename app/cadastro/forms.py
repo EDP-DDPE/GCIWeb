@@ -19,7 +19,7 @@ class EstudoForm(FlaskForm):
     # Campo instalação (pode ser um número ou texto dependendo do uso)
     instalacao = IntegerField('Instalação', validators=[Optional()])
     CNPJ = StringField('CNPJ', validators=[Optional()])
-    CPF = IntegerField('CPF', validators=[Optional()])
+    #CPF = IntegerField('CPF', validators=[Optional()])
     nome_empresa = StringField('Empresa', validators=[Optional()], render_kw={"readonly": True})
     demanda = FloatField('Demanda Contratual', validators=[Optional()], render_kw={"readonly": True})
     id_empresa = IntegerField('id_empresa', validators=[Optional()], render_kw={'style': 'display: none;'})

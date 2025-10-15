@@ -31,7 +31,7 @@ class Instalacao(db.Model):
     EMPRESA = db.Column(db.Text, nullable=True)
     INSTALACAO = db.Column(db.Text, nullable=True)
     CNPJ = db.Column(db.Text, nullable=True)
-    CPF = db.Column(db.Text, nullable=True)
+    #CPF = db.Column(db.Text, nullable=True)
     STATUS_INSTALACAO = db.Column(db.Text, nullable=True)
     DESCRICAO_STATUS = db.Column(db.Text, nullable=True)
     DESCRICAO_CLASSE = db.Column(db.Text, nullable=True)
