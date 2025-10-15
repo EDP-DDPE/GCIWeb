@@ -15,7 +15,7 @@
             dropdownParent: $('#statusModal'),
             theme: 'bootstrap-5',
             placeholder: 'Selecione uma opção...',
-            allowClear: true
+            allowClear: false
         });
 
         initializeData();
