@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from app.models import db,Subestacao, Municipio, EDP, Circuito
 from sqlalchemy.orm import joinedload
 from sqlalchemy import asc, desc
@@ -24,6 +24,9 @@ def listar_circuitos():
         {'value': 'edp.empresa', 'nome': 'EDP', 'visivel': True},
         {'value': 'subestacao.nome', 'nome': 'Subestação', 'visivel': True}
     ]
+    
+    # Para o modal
+    labels_map = {c['value']: c['nome'] for c in colunas}
 
     # Definir as ações disponíveis para cada registro
     acoes = [
@@ -32,17 +35,36 @@ def listar_circuitos():
             'icon': 'bi bi-eye',
             'js_function': 'verDetalhes', # Chama a função JS verDetalhes(id)
             'tooltip': 'Ver detalhes'
-        }
+        },
+    {
+        'type': 'edit',
+        'icon': 'bi bi-pencil',
+        'js_function': 'abrirModalEditar',
+        'tooltip': 'Editar'
+    }
     ]
 
     return render_template(
         "listar_unificado.html",
         titulo="Lista de Circuitos",    # OBRIGATÓRIO
+        titulo_modal="Circuito",
         #botao_novo -> OPCIONAL
         colunas = colunas,    # OBRIGATÓRIO
         itens = itens_serializaveis,
-        acoes = acoes
+        acoes = acoes,
+        campo_id = 'id_circuito',
+        labels_map=labels_map
     )
+
+@circuito_bp.route('/circuitos/<int:id>/editar', methods=['POST'])
+def editar_circuito(id):
+    circuito = Circuito.query.get_or_404(id)
+    # Atualiza os campos recebidos
+    for campo in request.form:
+        if hasattr(circuito, campo):
+            setattr(circuito, campo, request.form[campo])
+    db.session.commit()
+    return jsonify({'status': 'ok'})
 
 # # ✅ Rotas adicionais implementadas
 # @circuito_bp.route("/circuitos/novo")
