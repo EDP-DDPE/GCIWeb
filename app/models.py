@@ -31,7 +31,7 @@ class Instalacao(db.Model):
     EMPRESA = db.Column(db.Text, nullable=True)
     INSTALACAO = db.Column(db.Text, nullable=True)
     CNPJ = db.Column(db.Text, nullable=True)
-    CPF = db.Column(db.Text, nullable=True)
+    #CPF = db.Column(db.Text, nullable=True)
     STATUS_INSTALACAO = db.Column(db.Text, nullable=True)
     DESCRICAO_STATUS = db.Column(db.Text, nullable=True)
     DESCRICAO_CLASSE = db.Column(db.Text, nullable=True)
@@ -60,6 +60,8 @@ class Usuario(db.Model):
     # Relacionamentos
     resp_regioes = db.relationship('RespRegiao', back_populates='usuario', lazy='select')
     estudos_criados = db.relationship('Estudo', foreign_keys='Estudo.id_criado_por', back_populates='criado_por',
+                                      lazy='select')
+    resp_alteracao = db.relationship('Estudo', foreign_keys='Estudo.id_resp_alteracao', back_populates='alterado_por',
                                       lazy='select')
     status_estudos = db.relationship('StatusEstudo', back_populates='criado_por', lazy='select')
 
@@ -234,8 +236,6 @@ class Estudo(db.Model):
     descricao = db.Column(db.Text)
     instalacao = db.Column(db.BigInteger)
     n_alternativas = db.Column(db.Integer, nullable=False, default=0)
-    # dem_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
-    # dem_solicit_p = db.Column(db.Numeric(10, 2), nullable=False)
     dem_carga_atual_fp = db.Column(db.Numeric(10, 2), nullable=False)
     dem_carga_atual_p = db.Column(db.Numeric(10, 2), nullable=False)
     dem_carga_solicit_fp = db.Column(db.Numeric(10, 2), nullable=False)
@@ -252,7 +252,8 @@ class Estudo(db.Model):
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
     id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=False)
     id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
-    id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('gciweb.resp_regioes.id_resp_regiao'), nullable=False)
+    id_resp_alteracao = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
+    id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('gciweb.resp_regioes.id_resp_regiao'), nullable=True)
     id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'))
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
     id_tensao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tensao.id_tensao'), nullable=False)
@@ -263,11 +264,13 @@ class Estudo(db.Model):
     data_vencimento_cliente = db.Column(db.Date, nullable=False)
     data_prevista_conexao = db.Column(db.Date, nullable=False)
     data_vencimento_ddpe = db.Column(db.Date, nullable=False)
+    data_alteracao = db.Column(db.Date, nullable=True)
 
     # Relacionamentos com lazy estratégico
     edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
     regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
     criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados', lazy='joined')
+    alterado_por = db.relationship('Usuario', foreign_keys=[id_resp_alteracao], back_populates='resp_alteracao', lazy='joined')
     resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='joined')
     empresa = db.relationship('Empresa', back_populates='estudos', lazy='joined')
     municipio = db.relationship('Municipio', back_populates='estudos', lazy='joined')

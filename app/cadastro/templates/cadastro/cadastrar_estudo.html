@@ -155,20 +155,13 @@
                                     <!-- CNPJ -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            {{ form.CPNJ.label(class="form-label") }}
-                                            {{ form.CPNJ(class="form-control", id="CNPJ", placeholder="00.000.000/0000-00", pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}")}}
+                                            {{ form.CNPJ.label(class="form-label") }}
+                                            {{ form.CNPJ(class="form-control", id="CNPJ", placeholder="00.000.000/0000-00", pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}")}}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="row">
-                                    <!-- CPF -->
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            {{ form.CPF.label(class="form-label") }}
-                                            {{ form.CPF(class="form-control", id="CPF") }}
-                                        </div>
-                                    </div>
 
                                     <!-- Empresa -->
                                     <div class="col-md-6">
@@ -177,9 +170,7 @@
                                             {{ form.nome_empresa(class="form-control", id="nome_empresa", readonly=true) }}
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="row">
                                     <!-- Demanda Contratual -->
                                     <div class="col-md-6">
                                         <div class="mb-3">
@@ -187,6 +178,10 @@
                                             {{ form.demanda(class="form-control", id="demanda_contratual", readonly=true) }}
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="row">
+
 
                                     <!-- Número de Alternativas -->
                                     <div class="col-md-6">
@@ -423,6 +418,7 @@
 
                                 <div class="row">
                                     <div class="col-md-12">
+                                        <p></p>
                                         <div id="map"></div>
                                     </div>
                                 </div>
@@ -1086,16 +1082,10 @@ $(document).ready(function() {
                     $('#CNPJ').val('').closest('.mb-3').hide();
                 }
 
-                if (data.cpf) {
-                    $('#CPF').val(data.CPF).closest('.mb-3').show();
-                } else {
-                    $('#CPF').val('').closest('.mb-3').hide();
-                }
                 $('#nome_empresa').val(data.nome || '');
                 $('#demanda_contratual').val(data.carga || '');
             })
         } else {
-            $('#CPF').closest('.mb-3').show();
             $('#CNPJ').closest('.mb-3').show();
         }
 
@@ -1115,11 +1105,6 @@ $(document).ready(function() {
                     $('#nome_empresa').val(data.nome || '');
                     $('#demanda_contratual').val(data.carga || '');
 
-                    if (data.cpf) {
-                        $('#CPF').val(data.CPF).closest('.mb-3').show();
-                    } else {
-                        $('#CPF').val('').closest('.mb-3').hide();
-                    }
 
                 } else {
                     $('#msg_empresa')
@@ -1129,8 +1114,6 @@ $(document).ready(function() {
                 }
 
             })
-        } else {
-            $('#CPF').closest('.mb-3').show();
         }
     });
 

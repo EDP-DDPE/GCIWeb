@@ -95,6 +95,49 @@
         .loading.active {
             display: inline-block;
         }
+
+        /* ======== Ajuste visual do Select2 para parecer Bootstrap ======== */
+        .select2-container .select2-selection--single {
+            height: calc(1.5em + 0.75rem + 2px); /* igual ao .form-select padrão */
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            margin-right: 3px;
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #212529;
+            line-height: 1.5;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 100%;
+            right: 0.75rem;
+        }
+
+        /* ======== Foco ======== */
+        .select2-container--default .select2-selection--single:focus,
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #86b7fe;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* ======== Dropdown ======== */
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        /* ======== Remove o botão de limpar (caso allowClear = true) ======== */
+        .select2-selection__clear {
+            display: none !important;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}

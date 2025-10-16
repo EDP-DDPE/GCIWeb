@@ -14,7 +14,7 @@ def format_date(value, fmt='%d/%m/%Y'):
     return value.strftime(fmt)
 
 
-@alternativa_bp.route('/estudo/<id_estudo>/alternativas/')
+@alternativa_bp.route('/estudo/<id_estudo>/alternativas/', methods=['POST', 'GET'])
 @requires_permission('visualizar')
 def listar(id_estudo):
     """Página principal de alternativas com filtros opcionais"""
@@ -36,31 +36,14 @@ def listar(id_estudo):
     # Dados para filtros
     estudo = Estudo.get_with_all_relations(id_estudo)
 
-
-    #estudo = Estudo.query.filter(Estudo.id_estudo == id_estudo).first()
-
     form = AlternativaForm()
 
     form.id_estudo.data = id_estudo
 
-    return render_template(
-        'alternativa/alternativa.html',
-        alternativas=alternativas_pagination.items,
-        pagination=alternativas_pagination,
-        estudo=estudo,
-        form=form
-    )
-
-
-@alternativa_bp.route('/alternativas/<int:id_estudo>/criar', methods=['POST'])
-@requires_permission('criar')
-def criar(id_estudo):
-    """Criar nova alternativa"""
-    form = AlternativaForm()
-
-    if form.validate_on_submit():
+    if request.method == 'POST' and form.validate_on_submit():
         try:
-            alternativa_obj = Alternativa(
+            # Criar novo estudo
+            nova_alternativa = Alternativa(
                 id_circuito=form.id_circuito.data,
                 descricao=form.descricao.data,
                 dem_fp_ant=form.dem_fp_ant.data,
@@ -78,24 +61,24 @@ def criar(id_estudo):
                 demanda_disponivel_ponto=form.demanda_disponivel_ponto.data
             )
 
-            db.session.add(alternativa_obj)
+            db.session.add(nova_alternativa)
+            #db.session.flush()  # Para obter o ID do estudo
+
             db.session.commit()
+            flash(f'Alternativa cadastrada com sucesso!', 'success')
+            return redirect(url_for('alternativa.listar', id_estudo=id_estudo))
 
-            flash('Alternativa criada com sucesso!', 'success')
-
-        except IntegrityError as e:
-            db.session.rollback()
-            flash('Erro ao criar alternativa. Verifique se os dados estão corretos.', 'error')
         except Exception as e:
             db.session.rollback()
-            flash(f'Erro inesperado: {str(e)}', 'error')
-    else:
-        for field, errors in form.errors.items():
-            for error in errors:
-                flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'error')
+            flash(f'Erro ao cadastrar alternativa. Tente novamente.', 'error')
 
-    return redirect(url_for('alternativa.listar'))
-
+    return render_template(
+        'alternativa/alternativa.html',
+        alternativas=alternativas_pagination.items,
+        pagination=alternativas_pagination,
+        estudo=estudo,
+        form=form
+    )
 
 @alternativa_bp.route('/alternativas/<int:id>/editar', methods=['GET', 'POST'])
 @requires_permission('editar')

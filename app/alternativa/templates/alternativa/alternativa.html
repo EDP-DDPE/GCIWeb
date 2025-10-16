@@ -296,7 +296,6 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Descrição</th>
-                                    <th>Estudo</th>
                                     <th>Circuito</th>
                                     <th>Custo Modular</th>
                                     <th>Menor Custo</th>
@@ -309,8 +308,7 @@
                                 <tr>
                                     <td>{{ alternativa.id_alternativa }}</td>
                                     <td>{{ alternativa.descricao[:50] }}{% if alternativa.descricao|length > 50 %}...{% endif %}</td>
-                                    <td>{{ alternativa.estudo.nome if alternativa.estudo else 'N/A' }}</td>
-                                    <td>{{ alternativa.circuito.nome if alternativa.circuito else 'N/A' }}</td>
+                                    <td>{{ alternativa.circuito.circuito if alternativa.circuito else 'N/A' }}</td>
                                     <td>R$ {{ "{:,.2f}".format(alternativa.custo_modular) }}</td>
                                     <td>
                                         {% if alternativa.flag_menor_custo_global %}

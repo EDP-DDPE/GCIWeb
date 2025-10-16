@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.utils import secure_filename
 from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
-                        Subestacao, Anexo, Alternativa, Tensao)
+                        Subestacao, Anexo, Alternativa, Tensao, Instalacao)
 
 from datetime import datetime
 from app.auth import requires_permission, get_usuario_logado
@@ -14,7 +14,6 @@ cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
 def gerar_proximo_documento():
     doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.id_estudo.desc()).first()
 
-    print(doc_atual[0])
     if doc_atual[0]:
         num, ano = str(doc_atual[0]).split('/')
         ano = int(ano) + 2000
@@ -33,7 +32,7 @@ def carregar_choices_estudo(form):
 
         # Classe de Tensão
         form.tensao.choices = [(0, 'Selecione uma classe de tensão...')] + \
-                             [(t.id_tensao, t.tensao) for t in Tensao.query.all()]
+                              [(t.id_tensao, t.tensao) for t in Tensao.query.all()]
 
         # EDP
         form.edp.choices = [(0, 'Selecione uma EDP...')] + \
@@ -42,7 +41,7 @@ def carregar_choices_estudo(form):
         # Empresas
 
         form.empresa.choices = [(0, 'Selecione uma empresa...')] + \
-                              [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
+                               [(e.id_empresa, e.nome_empresa) for e in Empresa.query.all()]
 
         # Municípios (filtrar por EDP se necessário)
         form.municipio.choices = [(0, 'Selecione um município...')] + \
@@ -50,8 +49,7 @@ def carregar_choices_estudo(form):
 
         # Regionais (filtrar por EDP se necessário)
         form.regional.choices = [(0, 'Selecione uma regional...')] + \
-                               [(r.id_regional, r.regional) for r in Regional.query.all()]
-
+                                [(r.id_regional, r.regional) for r in Regional.query.all()]
 
         # Responsáveis por região
         form.resp_regiao.choices = [(0, 'Selecione um responsável...')] + \
@@ -68,9 +66,6 @@ def carregar_choices_estudo(form):
         # Tipos
         form.tipo_viab.choices = [('', 'Selecione...')] + \
                                  [(v[0], v[0]) for v in viabilidades]
-
-        form.num_doc.data = gerar_proximo_documento()
-
 
     except Exception as e:
         current_app.logger.error(f"Erro ao carregar choices: {str(e)}")
@@ -100,9 +95,11 @@ def carregar_choices_alternativa(form, id_edp=None):
 def cadastro_estudo():
     """Rota para cadastro de estudos"""
     form = EstudoForm()
+    form.num_doc.data = gerar_proximo_documento()
+
     carregar_choices_estudo(form)
     usuario = get_usuario_logado()
-    print(f'usuario: {usuario.nome}, id: {usuario.id_usuario}')
+    # print(f'usuario: {usuario.nome}, id: {usuario.id_usuario}')
 
     if request.method == 'POST' and form.validate_on_submit():
         try:
@@ -189,43 +186,171 @@ def cadastro_estudo():
     return render_template('cadastro/cadastrar_estudo.html', form=form)
 
 
+def carregar_classificacao(form, id):
+    classificacao = TipoSolicitacao.query.get_or_404(id)
+
+    analises = (
+        db.session.query(TipoSolicitacao.analise)
+        .filter(TipoSolicitacao.viabilidade == classificacao.viabilidade)
+        .distinct()
+        .order_by(TipoSolicitacao.analise)
+        .all()
+    )
+
+    pedidos = (
+        db.session.query(TipoSolicitacao).filter(
+            (TipoSolicitacao.viabilidade == classificacao.viabilidade) &
+            (TipoSolicitacao.analise == classificacao.analise)
+        )
+        .distinct()
+        .order_by(TipoSolicitacao.pedido)
+        .all()
+    )
+
+    form.tipo_analise.choices = [(a[0], a[0]) for a in analises if a[0]]
+    form.tipo_pedido.choices = [(p.id_tipo_solicitacao, p.pedido) for p in pedidos]
+
+
 @cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
 @requires_permission('editar')
 def editar_estudo(id_estudo):
     estudo = Estudo.query.get_or_404(id_estudo)
     form = EstudoForm()
+    carregar_choices_estudo(form)
+    carregar_classificacao(form, estudo.id_tipo_solicitacao)
+    anexos = Anexo.query.filter_by(id_estudo=estudo.id_estudo).all()
+    usuario = get_usuario_logado()
 
-    form.num_doc.data = estudo.num_doc
-    form.protocolo.data = estudo.protocolo
-    form.nome_projeto.data = estudo.nome_projeto
-    form.descricao.data = estudo.descricao
-    form.instalacao.data = estudo.instalacao
-    form.tensao.data = estudo.tensao
-    form.n_alternativas.data = estudo.n_alternativas
-    form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
-    form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
-    form.dem_carga_solicit_fp.data = estudo.dem_carga_solicit_fp
-    form.dem_carga_solicit_p.data = estudo.dem_carga_solicit_p
-    form.dem_ger_atual_fp.data = estudo.dem_ger_atual_fp
-    form.dem_ger_atual_p.data = estudo.dem_ger_atual_p
-    form.dem_ger_solicit_fp.data = estudo.dem_ger_solicit_fp
-    form.dem_ger_solicit_p.data = estudo.dem_ger_solicit_p
-    form.latitude_cliente.data = estudo.latitude_cliente
-    form.longitude_cliente.data = estudo.longitude_cliente
-    form.observacao.data = estudo.observacao
-    form.edp.data = estudo.id_edp
-    form.regional.data = estudo.id_regional
-    form.resp_regiao.data = estudo.id_resp_regiao
-    form.empresa.data = estudo.id_empresa
-    form.municipio.data = estudo.id_municipio
-    form.tipo_pedido.data = estudo.id_tipo_solicitacao
-    form.data_registro.data = estudo.data_registro
-    form.data_abertura_cliente.data = estudo.data_abertura_cliente
-    form.data_desejada_cliente.data = estudo.data_desejada_cliente
-    form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
-    form.data_prevista_conexao.data = estudo.data_prevista_conexao
-    form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
-    return render_template('cadastro/editar_estudo.html', form=form)
+    if request.method == 'POST' and form.validate_on_submit():
+        try:
+            estudo.protocolo = int(form.protocolo.data) if form.protocolo.data else None
+            estudo.nome_projeto = form.nome_projeto.data
+            estudo.descricao = form.descricao.data
+            estudo.id_tensao = form.tensao.data
+            estudo.instalacao = int(form.instalacao.data)
+            estudo.n_alternativas = form.n_alternativas.data or 0
+            estudo.dem_carga_atual_fp = form.dem_carga_atual_fp.data or 0
+            estudo.dem_carga_atual_p = form.dem_carga_atual_p.data or 0
+            estudo.dem_carga_solicit_fp = form.dem_carga_solicit_fp.data or 0
+            estudo.dem_carga_solicit_p = form.dem_carga_solicit_p.data or 0
+            estudo.dem_ger_atual_fp = form.dem_ger_atual_fp.data or 0
+            estudo.dem_ger_atual_p = form.dem_ger_atual_p.data or 0
+            estudo.dem_ger_solicit_fp = form.dem_ger_solicit_fp.data or 0
+            estudo.dem_ger_solicit_p = form.dem_ger_solicit_p.data or 0
+            estudo.latitude_cliente = form.latitude_cliente.data
+            estudo.longitude_cliente = form.longitude_cliente.data
+            estudo.observacao = form.observacao.data
+            estudo.id_edp = form.edp.data
+            estudo.id_regional = form.regional.data
+            estudo.id_resp_regiao = form.resp_regiao.data
+            estudo.id_empresa = form.id_empresa.data
+            estudo.id_municipio = form.municipio.data
+            estudo.id_tipo_solicitacao = form.tipo_pedido.data
+            estudo.data_abertura_cliente = form.data_abertura_cliente.data
+            estudo.data_desejada_cliente = form.data_desejada_cliente.data
+            estudo.data_vencimento_cliente = form.data_vencimento_cliente.data
+            estudo.data_prevista_conexao = form.data_prevista_conexao.data
+            estudo.data_vencimento_ddpe = form.data_vencimento_ddpe.data
+            estudo.id_resp_alteracao = usuario.id_usuario
+            estudo.data_alteracao = datetime.today()
+
+            anexos_excluir = request.form.getlist('excluir_anexo')
+
+
+            # Upload de novos arquivos (opcional)
+            for file in form.arquivos.data:
+                if file:
+                    prefix = f"DDPE_{str(estudo.num_doc).replace('/', '_')}"
+                    if not prefix in file.filename:
+                        new_name = f"{prefix}_{file.filename}"
+                    else:
+                        new_name = file.filename
+                    nome_arquivo = secure_filename(new_name)
+
+                    upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], prefix)
+                    os.makedirs(upload_folder, exist_ok=True)
+                    caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
+                    file.save(caminho_arquivo)
+
+                    novo_anexo = Anexo(
+                        nome_arquivo=nome_arquivo,
+                        endereco=caminho_arquivo,
+                        tamanho_arquivo=os.path.getsize(caminho_arquivo),
+                        tipo_mime=file.content_type,
+                        id_estudo=estudo.id_estudo
+                    )
+                    db.session.add(novo_anexo)
+
+            for id_anexo in anexos_excluir:
+                anexo = Anexo.query.get_or_404(id_anexo)
+                if anexo:
+                    if os.path.exists(anexo.endereco):
+                        os.remove(anexo.endereco)
+                    db.session.delete(anexo)
+
+            db.session.commit()
+
+            flash(f'Estudo {estudo.num_doc} atualizado com sucesso!', 'success')
+            return redirect(url_for('alternativa.listar', id_estudo=estudo.id_estudo))
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro ao editar estudo: {str(e)}")
+            flash('Erro ao salvar alterações. Tente novamente.', 'error')
+
+    elif request.method == 'GET':
+
+        # Preenche os dados no formulário (GET)
+
+        # Aba Básicas
+        form.num_doc.data = estudo.num_doc
+        form.protocolo.data = estudo.protocolo
+        form.nome_projeto.data = estudo.nome_projeto
+        form.descricao.data = estudo.descricao
+        form.instalacao.data = estudo.instalacao
+        form.tensao.data = estudo.id_tensao
+        form.n_alternativas.data = estudo.n_alternativas
+        form.id_empresa.data = estudo.id_empresa
+        form.CNPJ.data = estudo.empresa.cnpj
+        form.nome_empresa.data = estudo.empresa.nome_empresa
+        form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
+
+
+        # Aba Demandas
+        form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
+        form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
+        form.dem_carga_solicit_fp.data = estudo.dem_carga_solicit_fp
+        form.dem_carga_solicit_p.data = estudo.dem_carga_solicit_p
+        form.dem_ger_atual_fp.data = estudo.dem_ger_atual_fp
+        form.dem_ger_atual_p.data = estudo.dem_ger_atual_p
+        form.dem_ger_solicit_fp.data = estudo.dem_ger_solicit_fp
+        form.dem_ger_solicit_p.data = estudo.dem_ger_solicit_p
+
+        # Aba Localização
+        form.edp.data = estudo.id_edp
+        form.regional.data = estudo.id_regional
+        form.municipio.data = estudo.id_municipio
+        form.resp_regiao.data = estudo.id_resp_regiao
+        form.latitude_cliente.data = estudo.latitude_cliente
+        form.longitude_cliente.data = estudo.longitude_cliente
+
+        # Aba Classificação
+        form.tipo_viab.data = estudo.tipo_solicitacao.viabilidade
+        form.tipo_pedido.data = estudo.tipo_solicitacao.pedido
+        form.tipo_analise.data = estudo.tipo_solicitacao.analise
+
+        # Aba Datas
+        form.data_abertura_cliente.data = estudo.data_abertura_cliente
+        form.data_desejada_cliente.data = estudo.data_desejada_cliente
+        form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
+        form.data_prevista_conexao.data = estudo.data_prevista_conexao
+        form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
+
+        # Aba Observações
+
+        form.observacao.data = estudo.observacao
+
+    return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos)
 
 
 @cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
@@ -321,6 +446,7 @@ def upload_anexo(id_estudo):
         flash('Por favor, corrija os erros no formulário.', 'error')
 
     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
+
 
 # @cadastro_bp.route("/estudos")
 # def listar_estudos():

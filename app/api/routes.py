@@ -108,7 +108,7 @@ def get_cliente_by_instalacao(instalacao):
             'regiao': cliente.EMPRESA,
             'instalacao': cliente.INSTALACAO,
             'cnpj': cliente.CNPJ,
-            'CPF': cliente.CPF,
+            #'CPF': cliente.CPF,
             'nivel_tensao': cliente.TIPO_CLIENTE,
             'carga': cliente.CARGA,
             'nome': cliente.NOME_PARCEIRO,
@@ -126,7 +126,7 @@ def get_cliente_by_cnpj(cnpj):
             'regiao': cliente.EMPRESA,
             'instalacao': cliente.INSTALACAO,
             'cnpj': cliente.CNPJ,
-            'CPF': cliente.CPF,
+            #'CPF': cliente.CPF,
             'nivel_tensao': cliente.TIPO_CLIENTE,
             'carga': cliente.CARGA,
             'nome': cliente.NOME_PARCEIRO,
@@ -136,19 +136,19 @@ def get_cliente_by_cnpj(cnpj):
         return Response(status=204)
 
 
-@api_bp.route("/api/cliente/<cpf>")
-def get_cliente_by_cpf(cpf):
-    cliente = Instalacao.query.filter(Instalacao.CPF.contains(cpf)).first()
-    return jsonify({
-        'regiao': cliente.EMPRESA,
-        'instalacao': cliente.INSTALACAO,
-        'cnpj': cliente.CNPJ,
-        'CPF': cliente.CPF,
-        'nivel_tensao': cliente.TIPO_CLIENTE,
-        'carga': cliente.CARGA,
-        'nome': cliente.NOME_PARCEIRO,
-        'cep': cliente.CEP
-    })
+# @api_bp.route("/api/cliente/<cpf>")
+# def get_cliente_by_cpf(cpf):
+#     cliente = Instalacao.query.filter(Instalacao.CPF.contains(cpf)).first()
+#     return jsonify({
+#         'regiao': cliente.EMPRESA,
+#         'instalacao': cliente.INSTALACAO,
+#         'cnpj': cliente.CNPJ,
+#         'CPF': cliente.CPF,
+#         'nivel_tensao': cliente.TIPO_CLIENTE,
+#         'carga': cliente.CARGA,
+#         'nome': cliente.NOME_PARCEIRO,
+#         'cep': cliente.CEP
+#     })
 
 
 @api_bp.route("/api/consulta/<cnpj>")
