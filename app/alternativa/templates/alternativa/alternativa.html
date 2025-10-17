@@ -372,11 +372,6 @@
                             <h6 class="text-primary mb-3">Informações Básicas</h6>
 
                             <div class="mb-3">
-                                {{ form.id_estudo.label(class="form-label") }}
-                                {{ form.id_estudo(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
                                 {{ form.id_circuito.label(class="form-label") }}
                                 {{ form.id_circuito(class="form-select", id="circuito_select") }}
                             </div>
@@ -390,6 +385,12 @@
                                 {{ form.custo_modular.label(class="form-label") }}
                                 {{ form.custo_modular(class="form-control", step="0.01") }}
                             </div>
+
+                            <div class="mb-3">
+                                {{ form.subgrupo_tarif.label(class="form-label") }}
+                                {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
+                            </div>
+
                         </div>
 
                         <!-- Demandas -->
@@ -400,13 +401,13 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_fp_ant.label(class="form-label") }}
-                                        {{ form.dem_fp_ant(class="form-control", step="0.01") }}
+                                        {{ form.dem_fp_ant(class="form-control", step="0.01", id="dem_fp_antes") }}
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_p_ant.label(class="form-label") }}
-                                        {{ form.dem_p_ant(class="form-control", step="0.01") }}
+                                        {{ form.dem_p_ant(class="form-control", step="0.01", id="dem_p_antes") }}
                                     </div>
                                 </div>
                             </div>
@@ -415,20 +416,41 @@
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_fp_dep.label(class="form-label") }}
-                                        {{ form.dem_fp_dep(class="form-control", step="0.01") }}
+                                        {{ form.dem_fp_dep(class="form-control", step="0.01", id="dem_fp_depois") }}
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_p_dep.label(class="form-label") }}
-                                        {{ form.dem_p_dep(class="form-control", step="0.01") }}
+                                        {{ form.dem_p_dep(class="form-control", step="0.01", id="dem_p_depois") }}
                                     </div>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 {{ form.demanda_disponivel_ponto.label(class="form-label") }}
-                                {{ form.demanda_disponivel_ponto(class="form-control", step="0.01") }}
+                                {{ form.demanda_disponivel_ponto(class="form-control", step="0.01", id="dem_disponivel") }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_carga(class="form-check-input", id='flag_carga') }}
+                                        {{ form.flag_carga.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_geracao(class="form-check-input", id='flag_geracao') }}
+                                        {{ form.flag_geracao.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_fluxo_reverso(class="form-check-input", id='flag_fluxo_reverso') }}
+                                        {{ form.flag_fluxo_reverso.label(class="form-check-label") }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -452,6 +474,18 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label for="imagem_alternativa" class="form-label">Imagem da Alternativa</label>
+                                    <div id="drop_zone" style="border: 2px dashed #007bff; padding: 20px; text-align: center; cursor: pointer;">
+                                        Arraste a imagem aqui ou clique para selecionar
+                                    </div>
+                                    {{ form.imagem_blob(class="form-control", id="imagem_alternativa", style="display:none") }}
+                                    <img id="preview_imagem" src="" alt="Pré-visualização" style="max-width: 100%; margin-top: 10px; display: none;">
+                                </div>
+
+                            </div>
                         </div>
 
                         <!-- Outros Campos -->
@@ -460,22 +494,34 @@
 
                             <div class="mb-3">
                                 {{ form.ERD.label(class="form-label") }}
-                                {{ form.ERD(class="form-control", step="0.001") }}
+                                {{ form.ERD(class="form-control", step="0.001", id="ERD") }}
                             </div>
 
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    {{ form.flag_menor_custo_global(class="form-check-input") }}
-                                    {{ form.flag_menor_custo_global.label(class="form-check-label") }}
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_menor_custo_global(class="form-check-input") }}
+                                        {{ form.flag_menor_custo_global.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_alternativa_escolhida(class="form-check-input") }}
+                                        {{ form.flag_alternativa_escolhida.label(class="form-check-label") }}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    {{ form.flag_alternativa_escolhida(class="form-check-input") }}
-                                    {{ form.flag_alternativa_escolhida.label(class="form-check-label") }}
+                            <div class="row">
+                                <p></p>
+                                <div class="mb-3">
+                                    {{ form.letra_alternativa.label(class="form-label") }}
+                                    {{ form.letra_alternativa(class="form-control", id="letra_select") }}
                                 </div>
                             </div>
+
+
+
                         </div>
                     </div>
 
@@ -514,122 +560,127 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+
 <script>
-$(document).ready(function() {
-    $('#circuito_select').select2({
-        dropdownParent: $('#alternativaModal'), // garante que o dropdown abra dentro do modal
-        placeholder: "Selecione um circuito...", // opcional
-        allowClear: true, // adiciona um "x" para limpar a seleção
-        width: '100%' // ajusta à largura do container
+$(document).ready(function(){
+
+    $('#subgrupo_select').change(function() {
+        atualiza_ERD()
     });
 
-<!--    // Exemplo para outro select-->
-<!--    $('#circuito_select').select2({-->
-<!--        dropdownParent: $('#alternativaModal'),-->
-<!--        placeholder: "Selecione um estudo...",-->
-<!--        allowClear: true,-->
-<!--        width: '100%'-->
-<!--    });-->
-});
+    $('#flag_carga').change(function() {
+        atualiza_ERD()
+    });
 
+    $('#flag_geracao').change(function() {
+        atualiza_ERD()
+    });
 
-function filtrarAlternativas() {
-    const estudoId = document.getElementById('filtro_estudo').value;
-    const circuitoId = document.getElementById('filtro_circuito').value;
+    var dropZone = $('#drop_zone');
+    var fileInput = $('#imagem_alternativa');
+    var preview = $('#preview_imagem');
+    var uploadedFile = null;
 
-    const params = new URLSearchParams();
-    if (estudoId) params.append('estudo', estudoId);
-    if (circuitoId) params.append('circuito', circuitoId);
+    // Clique na área abre o file input
+    dropZone.on('click', function() {
+        fileInput.click();
+    });
 
-    window.location.href = `{{ url_for('alternativa.index') }}?${params.toString()}`;
-}
+    // Seleção via file input
+    fileInput.on('change', function(e) {
+        handleFiles(this.files);
+    });
 
-function limparFiltros() {
-    document.getElementById('filtro_estudo').value = '';
-    document.getElementById('filtro_circuito').value = '';
-    window.location.href = `{{ url_for('alternativa.index') }}`;
-}
+    // Drag & Drop
+    dropZone.on('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.css('background-color', '#e9ecef');
+    });
 
-function visualizarAlternativa(id) {
-    fetch(`{{ url_for('alternativa.visualizar', id=0) }}`.replace('0', id))
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('conteudoVisualizacao').innerHTML = html;
-            new bootstrap.Modal(document.getElementById('visualizarModal')).show();
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao carregar os dados da alternativa.');
-        });
-}
+    dropZone.on('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.css('background-color', '');
+    });
 
-function editarAlternativa(id) {
-    fetch(`{{ url_for('alternativa.editar', id=0) }}`.replace('0', id))
-        .then(response => response.json())
-        .then(data => {
-            // Preencher o formulário com os dados
-            Object.keys(data).forEach(key => {
-                const field = document.querySelector(`[name="${key}"]`);
-                if (field) {
-                    if (field.type === 'checkbox') {
-                        field.checked = data[key];
-                    } else {
-                        field.value = data[key] || '';
-                    }
-                }
-            });
+    dropZone.on('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.css('background-color', '');
+        var files = e.originalEvent.dataTransfer.files;
+        handleFiles(files);
+    });
 
-            document.getElementById('alternativaModalLabel').textContent = 'Editar Alternativa';
-            document.getElementById('formAlternativa').action = `{{ url_for('alternativa.editar', id=0) }}`.replace('0', id);
-            new bootstrap.Modal(document.getElementById('alternativaModal')).show();
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao carregar os dados da alternativa.');
-        });
-}
-
-function excluirAlternativa(id) {
-    if (confirm('Tem certeza que deseja excluir esta alternativa?')) {
-        fetch(`{{ url_for('alternativa.excluir', id=0) }}`.replace('0', id), {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrf_token]').value
+    function handleFiles(files) {
+        if (files.length > 0) {
+            var file = files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Apenas imagens são permitidas!');
+                return;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert(data.message || 'Erro ao excluir alternativa.');
+
+            // define o arquivo no input file do WTForms
+            var fileInput = document.getElementById('imagem_alternativa');
+            var dataTransfer = new DataTransfer(); // necessário para setar arquivos
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            // pré-visualização
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview_imagem').attr('src', e.target.result).show();
             }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            alert('Erro ao excluir alternativa.');
-        });
+            reader.readAsDataURL(file);
+        }
     }
-}
-
-// Limpar formulário ao fechar modal
-document.getElementById('alternativaModal').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('formAlternativa').reset();
-    document.getElementById('alternativaModalLabel').textContent = 'Nova Alternativa';
-    document.getElementById('formAlternativa').action = `{{ url_for('alternativa.criar') }}`;
 });
 
+function atualiza_ERD() {
 
+    var cleaveERD = new Cleave('#ERD', {
+      numeral: true,
+      numeralThousandsGroupStyle: 'thousand',
+      prefix: 'R$ ',
+      numeralDecimalMark: ',',
+      delimiter: '.'
+    });
+
+    var subgrupo = $('#subgrupo_select').val();
+    var dem_p_antes = parseFloat($('#dem_p_antes').val().replace(',', '.'));
+    var dem_fp_antes = parseFloat($('#dem_fp_antes').val().replace(',', '.'));
+    var dem_p_depois = parseFloat($('#dem_p_depois').val().replace(',', '.'));
+    var dem_fp_depois = parseFloat($('#dem_fp_depois').val().replace(',', '.'));
+    var carga_flegada = $('#flag_carga').is(':checked');
+    var geracao_flegada = $('#flag_geracao').is(':checked');
+    var tipo;
+
+    if (!carga_flegada && !geracao_flegada){
+        cleaveERD.setRawValue(0);
+        return;
+    }
+
+    tipo = carga_flegada ? 1 : 0;
+
+    var dif_p = dem_p_depois - dem_p_antes;
+    var dif_fp = dem_fp_depois - dem_fp_antes;
+    var maior_demanda = Math.max(dif_p, dif_fp);
+
+    $.get('/api/fator_k/{{estudo.id_edp}}/' + subgrupo + '/{{estudo.data_abertura_cliente}}/' + tipo, function(data) {
+        var valor = data.k * maior_demanda;
+        cleaveERD.setRawValue(valor);  // número puro, Cleave vai formatar
+    });
+}
 </script>
 
 <style>
-/* Gradientes personalizados */
+/* Gradientes personalizados
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
+}*/
 
 .bg-gradient-light {
     background: linear-gradient(135deg, rgba(108, 117, 125, 0.08), rgba(108, 117, 125, 0.02));
