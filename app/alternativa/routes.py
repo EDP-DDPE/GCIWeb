@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for
 from sqlalchemy.exc import IntegrityError
-from app.models import Alternativa, Estudo, Circuito, db
+from app.models import Alternativa, Estudo, Circuito, db, FatorK
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
 
@@ -12,6 +12,14 @@ def format_date(value, fmt='%d/%m/%Y'):
     if value is None:
         return '—'
     return value.strftime(fmt)
+
+
+def get_fator_k(subgrupo, data, edp):
+    fator_k = FatorK.query.filter(
+        (FatorK.id_edp == edp) & (FatorK.subgrupo_tarif == subgrupo) & \
+        (FatorK.data_ref < data) & (FatorK.data_ref + 365 > data)
+    ).first()
+    return fator_k.id_k
 
 
 @alternativa_bp.route('/estudo/<id_estudo>/alternativas/', methods=['POST', 'GET'])
@@ -39,9 +47,21 @@ def listar(id_estudo):
     form = AlternativaForm()
 
     form.id_estudo.data = id_estudo
+    form.dem_fp_ant.data = max(estudo.dem_carga_atual_fp, estudo.dem_ger_atual_fp)
+    form.dem_p_ant.data = max(estudo.dem_carga_atual_p, estudo.dem_ger_atual_p)
+    form.dem_fp_dep.data = max(estudo.dem_carga_solicit_fp, estudo.dem_ger_solicit_fp)
+    form.dem_p_dep.data = max(estudo.dem_carga_solicit_p, estudo.dem_ger_solicit_p)
+    form.latitude_ponto_conexao.data = estudo.latitude_cliente
+    form.longitude_ponto_conexao.data = estudo.longitude_cliente
 
     if request.method == 'POST' and form.validate_on_submit():
+        print('vou tentar salvar')
         try:
+            arquivo = form.imagem_blob.data
+            blob = None
+            if arquivo:
+                blob = arquivo.read()
+                print('reconheci um arquivo')
             # Criar novo estudo
             nova_alternativa = Alternativa(
                 id_circuito=form.id_circuito.data,
@@ -54,21 +74,33 @@ def listar(id_estudo):
                 longitude_ponto_conexao=form.longitude_ponto_conexao.data,
                 flag_menor_custo_global=form.flag_menor_custo_global.data,
                 flag_alternativa_escolhida=form.flag_alternativa_escolhida.data,
+                flag_carga=form.flag_carga.data,
+                flag_geracao=form.flag_geracao.data,
+                flag_fluxo=form.flag_fluxo_reverso.data,
+                proporcionalide=form.proporcionalidade.data,
+                letra_alternativa=form.letra_alternativa.data,
                 custo_modular=form.custo_modular.data,
+                id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
                 id_estudo=id_estudo,
                 observacao=form.observacao.data,
                 ERD=form.ERD.data,
-                demanda_disponivel_ponto=form.demanda_disponivel_ponto.data
+                demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
+                blob_image=blob
+
             )
-
+            print('criei uma nova alternativa')
             db.session.add(nova_alternativa)
-            #db.session.flush()  # Para obter o ID do estudo
+            # db.session.flush()  # Para obter o ID do estudo
 
+            print('vou fazer o commit')
             db.session.commit()
             flash(f'Alternativa cadastrada com sucesso!', 'success')
+            print('tudo certo')
             return redirect(url_for('alternativa.listar', id_estudo=id_estudo))
 
         except Exception as e:
+            print('deu erro')
+            print(e)
             db.session.rollback()
             flash(f'Erro ao cadastrar alternativa. Tente novamente.', 'error')
 
@@ -79,6 +111,7 @@ def listar(id_estudo):
         estudo=estudo,
         form=form
     )
+
 
 @alternativa_bp.route('/alternativas/<int:id>/editar', methods=['GET', 'POST'])
 @requires_permission('editar')
@@ -237,54 +270,3 @@ def visualizar(id):
 
     return html_content
 
-
-@alternativa_bp.route('/api/circuitos/<int:estudo_id>')
-def get_circuitos_por_estudo(estudo_id):
-    """API para obter circuitos de um estudo específico"""
-    circuitos = Circuito.query.filter_by(id_estudo=estudo_id).order_by(Circuito.nome).all()
-    return jsonify([
-        {'id': c.id_circuito, 'nome': c.nome}
-        for c in circuitos
-    ])
-
-
-@alternativa_bp.route('/alternativas/relatorio')
-def relatorio():
-    """Relatório de alternativas"""
-    # Filtros
-    estudo_id = request.args.get('estudo', type=int)
-    circuito_id = request.args.get('circuito', type=int)
-
-    # Query base
-    query = Alternativa.query
-
-    # Aplicar filtros
-    if estudo_id:
-        query = query.filter(Alternativa.id_estudo == estudo_id)
-    if circuito_id:
-        query = query.filter(Alternativa.id_circuito == circuito_id)
-
-    alternativas = query.order_by(Alternativa.custo_modular).all()
-
-    # Estatísticas
-    total_alternativas = len(alternativas)
-    custo_total = sum(alt.custo_modular for alt in alternativas if alt.custo_modular)
-    alternativas_escolhidas = sum(1 for alt in alternativas if alt.flag_alternativa_escolhida)
-    menor_custo_global = sum(1 for alt in alternativas if alt.flag_menor_custo_global)
-
-    # Dados para filtros
-    estudos = Estudo.query.order_by(Estudo.nome).all()
-    circuitos = Circuito.query.order_by(Circuito.nome).all()
-
-    return render_template(
-        '/alternativas/relatorio.html',
-        alternativas=alternativas,
-        estudos=estudos,
-        circuitos=circuitos,
-        estatisticas={
-            'total_alternativas': total_alternativas,
-            'custo_total': custo_total,
-            'alternativas_escolhidas': alternativas_escolhidas,
-            'menor_custo_global': menor_custo_global
-        }
-    )

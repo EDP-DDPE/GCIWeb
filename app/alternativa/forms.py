@@ -1,15 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField, TextAreaField, DecimalField, BooleanField,
-    SelectField, FloatField, IntegerField
+    SelectField, FloatField, IntegerField, FileField
 )
 from wtforms.validators import DataRequired, Optional, NumberRange
 from wtforms.widgets import TextArea
-from app.models import Estudo, Circuito
+from app.models import Estudo, Circuito, FatorK
 
 
 class AlternativaForm(FlaskForm):
     """Formulário para criar/editar alternativas"""
+
+    imagem_blob = FileField('Imagem da Alternativa')
 
     # Relacionamentos obrigatórios
     id_estudo = IntegerField('Estudo', validators=[DataRequired()], render_kw={"readonly": True})
@@ -47,7 +49,7 @@ class AlternativaForm(FlaskForm):
 
     # Demandas obrigatórias
     dem_fp_ant = DecimalField(
-        'Demanda FP Anterior (MW)',
+        'Demanda FP Anterior (kW)',
         validators=[
             DataRequired('A demanda FP anterior é obrigatória'),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
@@ -61,7 +63,7 @@ class AlternativaForm(FlaskForm):
     )
 
     dem_p_ant = DecimalField(
-        'Demanda P Anterior (MW)',
+        'Demanda P Anterior (kW)',
         validators=[
             DataRequired('A demanda P anterior é obrigatória'),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
@@ -75,7 +77,7 @@ class AlternativaForm(FlaskForm):
     )
 
     dem_fp_dep = DecimalField(
-        'Demanda FP Depois (MW)',
+        'Demanda FP Depois (kW)',
         validators=[
             DataRequired('A demanda FP depois é obrigatória'),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
@@ -89,7 +91,7 @@ class AlternativaForm(FlaskForm):
     )
 
     dem_p_dep = DecimalField(
-        'Demanda P Depois (MW)',
+        'Demanda P Depois (kW)',
         validators=[
             DataRequired('A demanda P depois é obrigatória'),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
@@ -130,7 +132,7 @@ class AlternativaForm(FlaskForm):
     )
 
     demanda_disponivel_ponto = DecimalField(
-        'Demanda Disponível no Ponto (MW)',
+        'Demanda Disponível no Ponto (kW)',
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
@@ -143,17 +145,13 @@ class AlternativaForm(FlaskForm):
         }
     )
 
-    ERD = DecimalField(
+    ERD = TextAreaField(
         'ERD',
         validators=[
             Optional(),
-            NumberRange(min=0, message='O ERD deve ser maior ou igual a zero')
         ],
-        places=3,
         render_kw={
-            'placeholder': '0.000',
-            'step': '0.001',
-            'min': '0'
+            'placeholder': '0.00',
         }
     )
 
@@ -172,6 +170,53 @@ class AlternativaForm(FlaskForm):
         render_kw={
             'class': 'form-check-input'
         }
+    )
+
+    flag_carga = BooleanField(
+        'Carga',
+        default=False,
+        render_kw={
+            'class': 'form-check-input'
+        }
+    )
+
+    flag_geracao = BooleanField(
+        'Geração',
+        default=False,
+        render_kw={
+            'class': 'form-check-input'
+        }
+    )
+
+    flag_fluxo_reverso = BooleanField(
+        'Fluxo Reverso',
+        default=False,
+        render_kw={
+            'class': 'form-check-input'
+        }
+    )
+
+    proporcionalidade = DecimalField(
+        'Proporcionalidade',
+        places=2,
+        render_kw={
+            'placeholder': '0.00',
+            'step': '0.01',
+            'min': '0',
+            'max':'1'
+        }
+    )
+
+    letra_alternativa = SelectField(
+        'Alternativa',
+        validators=[DataRequired('Selecione uma letra')],
+        choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'), ('E', 'E'), ('F', 'F')]
+    )
+
+    subgrupo_tarif = SelectField(
+        'Subgrupo Tarifário:',
+        validators=[Optional()],
+        choices=[('A4', 'A4'), ('A3a', 'A3a'), ('A3', 'A3'), ('A2', 'A2')]
     )
 
     # Observações

@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, Response
 from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
-    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio
+    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio, FatorK
 import requests
 import re
 from datetime import datetime
+from sqlalchemy import func, and_, literal_column
 
 api_bp = Blueprint("api", __name__)
 
@@ -283,3 +284,30 @@ def get_resp_by_regional(id_regional):
     responsaveis = RespRegiao.query.filter_by(id_regional=id_regional).join(Usuario).all()
     return {'responsaveis': [{'id': r.id_resp_regiao, 'nome': r.usuario.nome}
                              for r in responsaveis]}
+
+
+@api_bp.route("/api/fator_k/<int:id_edp>/<subgrupo>/<data_ref>/<carga>")
+def get_fator_k(id_edp, subgrupo, data_ref, carga):
+    # Converte a string de data (YYYY-MM-DD)
+    data_ref_dt = datetime.strptime(data_ref, "%Y-%m-%d")
+
+    k = (
+        FatorK.query.filter(
+            and_(
+                FatorK.id_edp == id_edp,
+                FatorK.subgrupo_tarif == subgrupo,
+                FatorK.data_ref <= data_ref_dt,
+                func.DATEADD(literal_column("day"), 365, FatorK.data_ref) >= data_ref_dt,
+            )
+        )
+        .order_by(FatorK.data_ref.desc())
+        .first()
+    )
+
+    if not k:
+        return jsonify({"k": 0})
+
+    if carga == "1":
+        return jsonify({"k": k.k})
+    else:
+        return jsonify({"k": k.kg})

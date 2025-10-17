@@ -23,6 +23,20 @@ class EDP(db.Model):
     estudos = db.relationship('Estudo', back_populates='edp', lazy='select')
 
 
+class FatorK(db.Model):
+    __tablename__ = 'FATOR_K'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_k = db.Column(db.BigInteger, primary_key=True)
+    k = db.Column(db.Numeric(6, 2), nullable=True)
+    kg = db.Column(db.Numeric(6, 2), nullable=True)
+    subgrupo_tarif = db.Column(db.String(3), nullable=False)
+    data_ref = db.Column(db.Date)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+
+    alternativas = db.relationship('Alternativa', back_populates='fatorK', lazy='select')
+
+
 class Instalacao(db.Model):
     __tablename__ = 'INSTALACOES'
     __table_args__ = {'schema': 'gciweb'}
@@ -427,10 +441,18 @@ class Alternativa(db.Model):
     observacao = db.Column(db.Text)
     ERD = db.Column(db.Numeric(10, 3))
     demanda_disponivel_ponto = db.Column(db.Numeric(10, 2))
+    flag_carga = db.Column(db.Boolean, nullable=False, default=False)
+    flag_geracao = db.Column(db.Boolean, nullable=False, default=False)
+    flag_fluxo_reverso = db.Column(db.Boolean, nullable=False, default=False)
+    letra_alternativa = db.Column(db.String(1), nullable=False)
+    proporcionalidade = db.Column(db.Numeric(3, 2))
+    id_k = db.Column(db.BigInteger, db.ForeignKey('gciweb.FATOR_K.id_k'), nullable=True)
+
 
     # Relacionamentos simples - sem ambiguidade
     circuito = db.relationship('Circuito', back_populates='alternativas', lazy='joined')
     estudo = db.relationship('Estudo', back_populates='alternativas', lazy='joined')
+    fatorK = db.relationship('FatorK', back_populates='alternativas', lazy='joined')
 
     # Relacionamento 1:N - Uma alternativa pode ter várias obras
     obras = db.relationship(

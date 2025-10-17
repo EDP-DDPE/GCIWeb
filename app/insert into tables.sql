@@ -1,6 +1,19 @@
 --insert into gciweb.edp (empresa) values ('SP')
 --insert into gciweb.edp (empresa) values ('ES')
 
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (269.39, 192.79, 'A4', '2024-10-22', 1)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (269.39, 192.79, 'A3a', '2024-10-22', 1)
+insert into gciweb.FATOR_K(k, subgrupo_tarif, data_ref, id_edp) values (48.38,'A2', '2024-10-22', 1)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (1334.44, 722.58, 'A4', '2024-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (1334.44, 722.58, 'A3a', '2024-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (392.87, 263.54, 'A3', '2024-08-06', 2)
+insert into gciweb.FATOR_K(k, subgrupo_tarif, data_ref, id_edp) values (60.07,'A2', '2024-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (1363.70, 669.45, 'A4', '2025-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (1363.70, 669.45, 'A3a', '2025-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (412.24, 286.98, 'A3', '2025-08-06', 2)
+insert into gciweb.FATOR_K(k, kg, subgrupo_tarif, data_ref, id_edp) values (67.34, 168.81,'A2', '2025-08-06', 2)
+
+
 insert into gciweb.municipios(municipio, id_edp) values ('Guarulhos', 1)
 insert into gciweb.municipios(municipio, id_edp) values ('Cachoeira Paulista', 1)
 insert into gciweb.municipios(municipio, id_edp) values ('Vitoria', 2);

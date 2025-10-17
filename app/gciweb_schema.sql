@@ -5,6 +5,17 @@ Go
 -- Todos os tipos de dados são nativos do SQL Server 2016+
 -- Sistema centralizado, BIGINT é mais adequado que UNIQUEIDENTIFIER
 
+CREATE TABLE "gciweb"."FATOR_K"(
+    "id_k" BIGINT IDENTITY(1,1) NOT NULL,
+    "k" decimal(6,2) NULL,
+    "kg" decimal(6,2) NULL,
+    "subgrupo_tarif" varchar(3) NOT NULL,
+	"data_ref" DATE NOT NULL,
+    "id_edp" BIGINT NOT NULL
+);
+
+ALTER TABLE "gciweb"."FATOR_K" ADD CONSTRAINT "gciweb_fator_k_id_primary" PRIMARY KEY("id_k")
+
 CREATE TABLE "gciweb"."edp"(
     "id_edp" BIGINT IDENTITY(1,1) NOT NULL,
     "empresa" VARCHAR(2) NOT NULL
@@ -151,9 +162,6 @@ CREATE TABLE "gciweb"."estudos"(
     "id_resp_regiao" BIGINT NOT NULL,
     "id_empresa" BIGINT NULL,
     "id_municipio" BIGINT NOT NULL,
-    --"id_tipo_viab" BIGINT NOT NULL,
-    --"id_tipo_analise" BIGINT NOT NULL,
-    --"id_tipo_pedido" BIGINT NOT NULL,
     "id_tipo_solicitacao" BIGINT NOT NULL,
     "data_registro" DATE NOT NULL DEFAULT GETDATE(),
     "data_abertura_cliente" DATE NULL ,
@@ -228,6 +236,13 @@ CREATE TABLE "gciweb"."alternativas"(
     "observacao" TEXT NULL,
     "ERD" DECIMAL(10,3) NULL,
     "demanda_disponivel_ponto" DECIMAL(10,2) NULL
+    "flag_carga" bit null,
+    "flag_geracao" bit null,
+    "flag_fluxo_reverso" bit null,
+    "letra_alternativa" varchar(1) null,
+    "proporcionalidade" decimal(3,2),
+    "id_k" BIGINT null,
+
 );
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_alternativa_primary" PRIMARY KEY("id_alternativa");
 
@@ -284,6 +299,8 @@ ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_regional_foreign" F
 ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_kit_foreign" FOREIGN KEY("id_kit") REFERENCES "gciweb"."kits"("id_kit");
 ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_alternativa_foreign" FOREIGN KEY("id_alternativa") REFERENCES "gciweb"."alternativas"("id_alternativa");
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_obra_foreign" FOREIGN KEY("id_obra") REFERENCES "gciweb"."obras"("id_obra");
+ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_k_foreign" FOREIGN KEY("id_k") REFERENCES "gciweb"."FATOR_K"("id_k");
+ALTER TABLE "gciweb"."FATOR_K" ADD CONSTRAINT "gciweb_fator_k_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp")
 
 -- ÍNDICES ADICIONAIS PARA PERFORMANCE
 CREATE INDEX "idx_estudos_empresa" ON "gciweb"."estudos"("id_empresa");
