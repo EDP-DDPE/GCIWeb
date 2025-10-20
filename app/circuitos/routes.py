@@ -1,83 +1,9 @@
-#from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
-#from app.models import db,Subestacao, Municipio, EDP, Circuito
-#from sqlalchemy.orm import joinedload
-#from sqlalchemy import asc, desc
-
-#circuito_bp = Blueprint("circuitos", __name__, template_folder="templates", static_folder="static", static_url_path='/static')
-#circuito_bp = Blueprint("circuitos", __name__, template_folder="templates")
-
-#@circuito_bp.route("/circuitos")
-#def listar_circuitos():
-    # Buscar todos os circuitos COM relacionamentos (evita N+1 queries)
-#    registros = Circuito.query.options(
-#        joinedload(Circuito.subestacao),
-#        joinedload(Circuito.edp)
-#    ).all()
-
-    # Converter usando o método to_dict()
-#    itens_serializaveis = [circuito.to_dict() for circuito in registros]
-
-#    colunas = [
-#        {'value': 'id_circuito', 'nome': 'ID', 'visivel': True},
-#        {'value': 'circuito', 'nome': 'Circuito', 'visivel': True},
-#        {'value': 'tensao', 'nome': 'Tensão', 'visivel': True},
-#        {'value': 'edp.empresa', 'nome': 'EDP', 'visivel': True},
-#        {'value': 'subestacao.nome', 'nome': 'Subestação', 'visivel': True}
-#    ]
-    
-    # Para o modal
-#    labels_map = {c['value']: c['nome'] for c in colunas}
-
-    # Definir as ações disponíveis para cada registro
-#    acoes = [
-#        {
-#            'type': 'view',
-#            'icon': 'bi bi-eye',
-#            'js_function': 'verDetalhes', # Chama a função JS verDetalhes(id)
-#            'tooltip': 'Ver detalhes'
-#        },
-#    {
-#        'type': 'edit',
-#        'icon': 'bi bi-pencil',
-#        'js_function': 'abrirModalEditar',
-#        'tooltip': 'Editar'
-#    }
-#    ]
-
-#    return render_template(
-#        "listar_unificado.html",
-#        titulo="Lista de Circuitos",    # OBRIGATÓRIO
-#        titulo_modal="Circuito",
-        #botao_novo -> OPCIONAL
-#        colunas = colunas,    # OBRIGATÓRIO
-#        itens = itens_serializaveis,
-#        acoes = acoes,
-#       campo_id = 'id_circuito',
- #       labels_map=labels_map
- #   )
-
-#@circuito_bp.route('/circuitos/<int:id>/editar', methods=['POST'])
-#def editar_circuito(id):
-#    circuito = Circuito.query.get_or_404(id)
-#    # Atualiza os campos recebidos
-#    for campo in request.form:
-#        if hasattr(circuito, campo):
-#            setattr(circuito, campo, request.form[campo])
-#    db.session.commit()
-#    return jsonify({'status': 'ok'})
-
-# TAVA ANTES ATÉ AQUI #
-
-from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, send_from_directory, \
-    abort, flash
-from werkzeug.utils import safe_join
-from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, Circuito
+from flask import Blueprint, render_template, request, jsonify
+from app.models import Circuito, db, EDP, Subestacao
 from app.auth import requires_permission, get_usuario_logado
 from sqlalchemy.orm import joinedload
-import os
 
-circuito_bp = Blueprint("circuitos", __name__, template_folder="templates",
-                      static_folder="static", static_url_path='/circuitos/static')
+circuito_bp = Blueprint("circuitos", __name__, template_folder="templates", static_folder="static", static_url_path='/circuitos/static')
 
 
 @circuito_bp.route("/circuitos", methods=["GET", "POST"])
@@ -94,25 +20,117 @@ def listar():
     usuario = get_usuario_logado()
 
 
-    return render_template("circuitos/listar.html", documentos=registros, usuario=usuario)
+    return render_template("listar_circuitos.html", documentos=registros, usuario=usuario)
 
-#@listar_bp.route('/listar/download/<path:filename>')
-#@requires_permission('visualizar')
-#def download_file(filename):
-#    try:
-        # Garante que o caminho seja seguro e dentro da pasta uploads
-#        UPLOAD_FOLDER = os.path.join(os.path.dirname(current_app.root_path)).replace('\\', '/')
-#        safe_path = safe_join(UPLOAD_FOLDER, filename)
+@circuito_bp.route('/circuitos/<int:id>/editar', methods=['POST'])
+def editar_circuito(id):
+    circuito = Circuito.query.get_or_404(id)
+    
+    # CORREÇÃO: Verificar se é JSON ou FormData
+    if request.is_json:
+        data = request.get_json()
+        print("Dados recebidos (JSON):", data)  # Para debug
+    else:
+        data = request.form.to_dict()
+        print("Dados recebidos (Form):", data)  # Para debug
+    
+    # Atualiza os campos recebidos
+    for campo in data:
+        if hasattr(circuito, campo):
+            print(f"Atualizando {campo}: {getattr(circuito, campo)} -> {data[campo]}")  # Para debug
+            setattr(circuito, campo, data[campo])
+    
+    try:
+        db.session.commit()
+        print("Commit realizado com sucesso!")  # Para debug
+        return jsonify({'status': 'success', 'message': 'Circuito atualizado com sucesso!'})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro no commit: {e}")  # Para debug
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
-#        if not safe_path or not os.path.isfile(safe_path):
-#            flash("⚠️ Arquivo não encontrado ou removido.", "warning")
-#            abort(404)
+@circuito_bp.route('/circuitos/<int:id>/api', methods=['GET'])
+def get_circuito_api(id):
+    circuito = Circuito.query.options(
+        joinedload(Circuito.subestacao),
+        joinedload(Circuito.edp)
+    ).get_or_404(id)
 
-#        directory = os.path.dirname(safe_path)
-#        file = os.path.basename(safe_path)
+    return jsonify({
+        'id': circuito.id_circuito,
+        'circuito': circuito.circuito,
+        'tensao': circuito.tensao,
+        'subestacao': {
+            'nome': circuito.subestacao.nome if circuito.subestacao else None
+        } if circuito.subestacao else None,
+        'edp': {
+            'empresa': circuito.edp.empresa if circuito.edp else None
+        } if circuito.edp else None
+    })
 
-#        return send_from_directory(directory, file, as_attachment=True)
-#    except Exception as e:
-#        print(f'Erro em listar/routes: def download_file() - {str(e)} ')
-#        flash('Não foi possível encontrar o arquivo no servidor.')
-#        abort(404)
+@circuito_bp.route('/circuitos/<int:id>/excluir', methods=['POST'])
+def excluir_circuito(id):
+    circuito = Circuito.query.get_or_404(id)
+    try:
+        db.session.delete(circuito)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@circuito_bp.route('/circuitos/adicionar', methods=['POST'])
+def adicionar_circuito():
+    # Verificação do tipo de requisição  
+    if request.is_json:
+        data = request.get_json()
+        print("Dados recebidos (JSON):", data)
+    else:
+        data = request.form.to_dict()
+        print("Dados recebidos (Form):", data)
+
+    # Adaptar campos conforme seu modelo Circuito
+    try:
+        novo_circuito = Circuito(
+            circuito=data.get('circuito'),
+            tensao=data.get('tensao'),
+            id_subestacao=data.get('id_subestacao'),  # Se usar FK
+            id_edp=data.get('id_edp')  # Se usar FK
+        )
+        db.session.add(novo_circuito)
+        db.session.commit()
+        print("Novo circuito adicionado!", novo_circuito)
+        return jsonify({'status': 'success', 'message': 'Circuito adicionado com sucesso!'})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro ao adicionar circuito: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@circuito_bp.route('/circuitos/edps/api', methods=['GET'])
+def listar_edps():
+    edps = EDP.query.all()
+    return jsonify([
+        {'id': edp.id_edp, 'empresa': edp.empresa}
+        for edp in edps
+    ])
+
+@circuito_bp.route('/circuitos/subestacoes/api', methods=['GET'])
+def listar_subestacoes():
+    subestacoes = Subestacao.query.all()
+    return jsonify([
+        {'id': subestacao.id_subestacao, 'nome': subestacao.nome, 'sigla': subestacao.sigla}
+        for subestacao in subestacoes
+    ])
+
+@circuito_bp.route('/circuitos/subestacoes/api/<int:edp_id>', methods=['GET'])
+def listar_subestacoes_por_edp(edp_id):
+    subestacoes = Subestacao.query.filter_by(id_edp=edp_id).all()
+    return jsonify([
+        {
+            'id': subestacao.id_subestacao,
+            'nome': subestacao.nome,
+            'sigla': subestacao.sigla
+        }
+        for subestacao in subestacoes
+    ])
+

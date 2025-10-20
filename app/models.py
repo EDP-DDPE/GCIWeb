@@ -207,7 +207,7 @@ class Circuito(db.Model):
     # Relacionamentos
     subestacao = db.relationship('Subestacao', back_populates='circuitos', lazy='joined')
     edp = db.relationship('EDP', back_populates='circuitos', lazy='joined')
-    alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select')
+    alternativas = db.relationship('Alternativa', back_populates='circuito', lazy='select', passive_deletes=True)
 
     def to_dict(self):
         return {
