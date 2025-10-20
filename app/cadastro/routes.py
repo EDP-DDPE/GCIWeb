@@ -102,6 +102,11 @@ def cadastro_estudo():
     # print(f'usuario: {usuario.nome}, id: {usuario.id_usuario}')
 
     if request.method == 'POST' and form.validate_on_submit():
+
+        if not form.tipo_pedido.data or form.tipo_pedido.data == '0':
+            flash('Selecione um tipo de pedido válido.', 'warning')
+            return redirect(request.url)
+        
         try:
             # Criar novo estudo
             novo_estudo = Estudo(
@@ -214,12 +219,21 @@ def carregar_classificacao(form, id):
 @cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
 @requires_permission('editar')
 def editar_estudo(id_estudo):
+    print("iniciei")
     estudo = Estudo.query.get_or_404(id_estudo)
+    print("carreguei estudo")
     form = EstudoForm()
+    print("carreguei forms")
     carregar_choices_estudo(form)
+    print("carreguei choices 1")
+    print(estudo.id_tipo_solicitacao)
     carregar_classificacao(form, estudo.id_tipo_solicitacao)
+    print("Carreguei choices 2")
     anexos = Anexo.query.filter_by(id_estudo=estudo.id_estudo).all()
+    print("retornei anexos")
     usuario = get_usuario_logado()
+
+    print(request.method)
 
     if request.method == 'POST' and form.validate_on_submit():
         try:
@@ -289,67 +303,72 @@ def editar_estudo(id_estudo):
                     db.session.delete(anexo)
 
             db.session.commit()
-
+            print('fui pro caminho errado')
             flash(f'Estudo {estudo.num_doc} atualizado com sucesso!', 'success')
             return redirect(url_for('alternativa.listar', id_estudo=estudo.id_estudo))
 
         except Exception as e:
+            print('deu erro no caminho errado')
             db.session.rollback()
             current_app.logger.error(f"Erro ao editar estudo: {str(e)}")
             flash('Erro ao salvar alterações. Tente novamente.', 'error')
 
-    elif request.method == 'GET':
-
-        # Preenche os dados no formulário (GET)
-
-        # Aba Básicas
-        form.num_doc.data = estudo.num_doc
-        form.protocolo.data = estudo.protocolo
-        form.nome_projeto.data = estudo.nome_projeto
-        form.descricao.data = estudo.descricao
-        form.instalacao.data = estudo.instalacao
-        form.tensao.data = estudo.id_tensao
-        form.n_alternativas.data = estudo.n_alternativas
-        form.id_empresa.data = estudo.id_empresa
-        form.CNPJ.data = estudo.empresa.cnpj
-        form.nome_empresa.data = estudo.empresa.nome_empresa
-        form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
 
 
-        # Aba Demandas
-        form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
-        form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
-        form.dem_carga_solicit_fp.data = estudo.dem_carga_solicit_fp
-        form.dem_carga_solicit_p.data = estudo.dem_carga_solicit_p
-        form.dem_ger_atual_fp.data = estudo.dem_ger_atual_fp
-        form.dem_ger_atual_p.data = estudo.dem_ger_atual_p
-        form.dem_ger_solicit_fp.data = estudo.dem_ger_solicit_fp
-        form.dem_ger_solicit_p.data = estudo.dem_ger_solicit_p
+    # Preenche os dados no formulário (GET)
+    print("passei por aqui")
+    # Aba Básicas
+    form.num_doc.data = estudo.num_doc
+    form.protocolo.data = estudo.protocolo
+    form.nome_projeto.data = estudo.nome_projeto
+    form.descricao.data = estudo.descricao
+    form.instalacao.data = estudo.instalacao
+    form.tensao.data = estudo.id_tensao
+    form.n_alternativas.data = estudo.n_alternativas
+    form.id_empresa.data = estudo.id_empresa
+    form.CNPJ.data = estudo.empresa.cnpj
+    form.nome_empresa.data = estudo.empresa.nome_empresa
+    form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
 
-        # Aba Localização
-        form.edp.data = estudo.id_edp
-        form.regional.data = estudo.id_regional
-        form.municipio.data = estudo.id_municipio
-        form.resp_regiao.data = estudo.id_resp_regiao
-        form.latitude_cliente.data = estudo.latitude_cliente
-        form.longitude_cliente.data = estudo.longitude_cliente
 
-        # Aba Classificação
-        form.tipo_viab.data = estudo.tipo_solicitacao.viabilidade
-        form.tipo_pedido.data = estudo.tipo_solicitacao.pedido
-        form.tipo_analise.data = estudo.tipo_solicitacao.analise
+    # Aba Demandas
+    form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
+    form.dem_carga_atual_p.data = estudo.dem_carga_atual_p
+    form.dem_carga_solicit_fp.data = estudo.dem_carga_solicit_fp
+    form.dem_carga_solicit_p.data = estudo.dem_carga_solicit_p
+    form.dem_ger_atual_fp.data = estudo.dem_ger_atual_fp
+    form.dem_ger_atual_p.data = estudo.dem_ger_atual_p
+    form.dem_ger_solicit_fp.data = estudo.dem_ger_solicit_fp
+    form.dem_ger_solicit_p.data = estudo.dem_ger_solicit_p
 
-        # Aba Datas
-        form.data_abertura_cliente.data = estudo.data_abertura_cliente
-        form.data_desejada_cliente.data = estudo.data_desejada_cliente
-        form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
-        form.data_prevista_conexao.data = estudo.data_prevista_conexao
-        form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
+    # Aba Localização
+    form.edp.data = estudo.id_edp
+    form.regional.data = estudo.id_regional
+    form.municipio.data = estudo.id_municipio
+    form.resp_regiao.data = estudo.id_resp_regiao
+    form.latitude_cliente.data = estudo.latitude_cliente
+    form.longitude_cliente.data = estudo.longitude_cliente
 
-        # Aba Observações
+    # Aba Classificação
+    form.tipo_viab.data = estudo.tipo_solicitacao.viabilidade
+    form.tipo_pedido.data = estudo.tipo_solicitacao.pedido
+    form.tipo_analise.data = estudo.tipo_solicitacao.analise
 
-        form.observacao.data = estudo.observacao
+    # Aba Datas
+    form.data_abertura_cliente.data = estudo.data_abertura_cliente
+    form.data_desejada_cliente.data = estudo.data_desejada_cliente
+    form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
+    form.data_prevista_conexao.data = estudo.data_prevista_conexao
+    form.data_vencimento_ddpe.data = estudo.data_vencimento_ddpe
 
+    # Aba Observações
+
+    form.observacao.data = estudo.observacao
+
+    print(form)
+    print(anexos)
+    print(estudo)
+    print("cheguei aqui")
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos)
 
 
