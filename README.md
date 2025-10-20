@@ -324,6 +324,118 @@ gci-web/
 ├── .env.example        # Exemplo de configuração
 ├── gciweb_schema.sql   # Schema do banco
 └── README.md          # Esta documentação
+
+
+├── app/
+│ ├── alternativa
+│ │ ├── templates
+│ │ │ ├── alternativa
+│ │ │ │ └── alternativa.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── api
+│ │ ├── __init__.py  (Não tem nada)
+│ │ └── routes.py
+│ ├── auth
+│ │ ├── templates
+│ │ │ ├── auth
+│ │ │ │ └── login.html
+│ │ ├── __init__.py
+│ │ └── routes.py
+│ ├── cadastro
+│ │ ├── templates
+│ │ │ ├── cadastro
+│ │ │ │ ├── cadastrar_estudo.html
+│ │ │ │ └── editar_estudo.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── circuitos
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── deploy
+│ │ ├── __init__.py
+│ │ ├── restart_atlas.sh
+│ │ └── routes.py
+│ ├── listar
+│ │ ├── static
+│ │ │ ├── css
+│ │ │ │ └── listar_estudos.css
+│ │ │ └── js
+│ │ │ │ └── listar_estudos.js
+│ │ ├── templates
+│ │ │ ├── listar
+│ │ │ │ └── listar.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── main
+│ │ ├── static
+│ │ │ ├── css
+│ │ │ │ └── listar.css
+│ │ │ ├── images
+│ │ │ │ └── background.png
+│ │ │ └── js
+│ │ │ │ └── listar.js
+│ │ ├── templates
+│ │ │ ├── main
+│ │ │ │ └── index.html
+│ │ ├── __init__.py
+│ │ └── routes.py
+│ ├── municipios
+│ │ ├── templates
+│ │ │ └── municipios.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── static
+│ │ ├── css
+│ │ │ └── listar_unificado.css
+│ │ ├── js
+│ │ │ └── listar_unificado.js
+│ ├── status
+│ │ ├── templates
+│ │ │ ├── status
+│ │ │ │ └── status.html
+│ │ ├── __init__.py
+│ │ └── routes.py
+│ ├── subestacoes
+│ │ ├── templates
+│ │ │ ├── editar_subestacao.html
+│ │ │ ├── listar.html
+│ │ │ ├── nova_subestacao.html
+│ │ │ └── subestacoes.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── templates
+│ │ ├── base.html
+│ │ ├── lista_generica.html
+│ │ └── listar_unificado.html
+│ ├── user
+│ │ ├── templates
+│ │ │ ├── user
+│ │ │ │ └── user.html
+│ │ ├── __init__.py
+│ │ ├── forms.py
+│ │ └── routes.py
+│ ├── __init__.py
+│ ├── config.py
+│ ├── database.py
+│ ├── gciweb_schema.sql
+│ ├── insert into tables.sql
+│ ├── models.py
+│ ├── schema.sql
+├── run.py
+├── .env
+├── .gitignore
+├── LICENSE
+├── README.md
+├── todo.py
+├── wsgi.py
+
 ```
 
 ### Adicionando Novos Models

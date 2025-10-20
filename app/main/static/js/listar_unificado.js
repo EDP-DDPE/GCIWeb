@@ -81,6 +81,45 @@
 
         // Fechar dropdowns ao clicar fora
         $(document).on('click', closeDropdowns);
+
+        // Pular para página específica
+        $('#pageJumpBtn').on('click', jumpToPage);
+        $('#pageJumpInput').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                jumpToPage();
+            }
+        });
+    
+        // Validar entrada apenas números
+        $('#pageJumpInput').on('input', function() {
+            const value = parseInt(this.value);
+            const totalPages = Math.ceil(filteredData.length / pageSize);
+        
+            if (value > totalPages) {
+                this.value = totalPages;
+            } else if (value < 1) {
+                this.value = 1;
+            }
+        });
+    }
+
+    // Nova função para pular para página
+    function jumpToPage() {
+        const pageInput = $('#pageJumpInput');
+        const targetPage = parseInt(pageInput.val());
+        const totalPages = Math.ceil(filteredData.length / pageSize);
+    
+        if (isNaN(targetPage) || targetPage < 1 || targetPage > totalPages) {
+            // Destacar erro visualmente
+            pageInput.addClass('is-invalid');
+            setTimeout(() => {
+                pageInput.removeClass('is-invalid');
+            }, 2000);
+            return;
+        }
+    
+    changePage(targetPage);
+    pageInput.removeClass('is-invalid');
     }
 
     // Debounce function - NÃO MUDA
@@ -290,82 +329,6 @@
         renderTable();
     }
 
-    // function handleSort(event) {
-    // // event.currentTarget é o elemento ao qual o event listener foi anexado (neste caso, o .sortable-header)
-    // const $sortableElement = $(event.currentTarget); 
-    // const column = $sortableElement.data('sort');
-
-    // console.log('Coluna para ordenação:', column); // Verifique no console se o valor está correto
-
-    // if (!column) {
-    //     console.log('Erro: Atributo data-sort não encontrado no elemento clicado.');
-    //     return; // Sai da função se não encontrar a coluna
-    // }
-
-    // if (sortColumn === column) {
-    //     sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-    // } else {
-    //     sortColumn = column;
-    //     sortDirection = 'asc';
-    // }
-
-    // // 1. Resetar todos os ícones de ordenação para o estado padrão
-    // $('.sort-icon').removeClass('fa-sort-up fa-sort-down').addClass('fa-sort');
-
-    // // 2. Encontrar o ícone específico dentro do cabeçalho clicado e atualizá-lo
-    // const $currentSortIcon = $sortableElement.find('i.sort-icon');
-    // if ($currentSortIcon.length) {
-    //     $currentSortIcon.removeClass('fa-sort').addClass(`fa-sort-${sortDirection === 'asc' ? 'up' : 'down'}`);
-    // } else {
-    //     console.log('Erro: Ícone de ordenação não encontrado dentro do cabeçalho da coluna:', column);
-    // }
-
-    // // Ordenar dados (seu código existente)
-    // filteredData.sort((a, b) => {
-    //     let aVal, bVal;
-    //     const getNestedValue = (obj, path) => {
-    //         return path.split('.').reduce((acc, part) => acc && acc[part], obj);
-    //     };
-
-    //     if (column.includes('.')){
-    //         aVal = getNestedValue(a, column);
-    //         bVal = getNestedValue(b, column);
-    //     } else {
-    //         aVal = a[column];
-    //         bVal = b[column];
-    //     }
-
-    //     // Tratamento para valores undefined/null
-    //     aVal = aVal === undefined || aVal === null ? '' : aVal;
-    //     bVal = bVal === undefined || bVal === null ? '' : bVal;
-
-    //     // Tratamento especial para números 
-    //     if (column === 'id' || (!isNaN(parseFloat(aVal)) && isFinite(aVal) && !isNaN(parseFloat(bVal)) && isFinite(bVal))) {
-    //         aVal = parseFloat(aVal);
-    //         bVal = parseFloat(bVal);
-    //     }
-    //     // Tratamento especial para datas
-    //     if (column === 'data_registro' || (typeof aVal === 'string' && !isNaN(new Date(aVal)) && typeof bVal === 'string' && !isNaN(new Date(bVal)))) {
-    //         aVal = new Date(aVal);
-    //         bVal = new Date(bVal);
-    //     }
-
-    //     // Comparação de strings case-insensitive
-    //     if (typeof aVal === 'string' && typeof bVal === 'string') {
-    //         aVal = aVal.toLowerCase();
-    //         bVal = bVal.toLowerCase();
-    //     }
-
-    //     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-    //     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-    //     return 0;
-    // });
-    
-    // currentPage = 1; // Resetar para a primeira página após a ordenação
-    // updatePagination();
-    // renderTable();
-    // }
-
     // Mudança do tamanho da página - NÃO MUDA
     function changePageSize() {
         pageSize = parseInt($('#pageSize').val());
@@ -396,7 +359,7 @@
                         let actionButtonsHtml = '<div class="btn-group" role="group">';
                         allActionDefinitions.forEach(action => {
                             // Assumindo que 'item.id' é o identificador único para as ações
-                            const itemId = item.id; // Ou outro identificador, dependendo da sua estrutura de dados
+                            const itemId = item[window.campoId]; // Ou outro identificador, dependendo da sua estrutura de dados
 
                             // Verifica se a ação tem uma função JS para chamar (ex: verDetalhes)
                             if (action.js_function) {
@@ -407,17 +370,7 @@
                                         <i class="${action.icon}"></i>
                                     </button>
                                 `;
-                            } else if (action.url_prefix) {
-                                // Se tiver um prefixo de URL, constrói o link
-                                const actionUrl = `${action.url_prefix}${itemId}`;
-                                actionButtonsHtml += `
-                                    <a href="${actionUrl}"
-                                       class="btn btn-sm btn-${action.type === 'edit' ? 'warning' : (action.type === 'manage_alternatives' ? 'success' : 'primary')}"
-                                       data-bs-toggle="tooltip" title="${action.tooltip || ''}">
-                                        <i class="${action.icon}"></i>
-                                    </a>
-                                `;
-                            }
+                            } 
                             // Adicione outras lógicas para diferentes tipos de ações se necessário
                         });
                         actionButtonsHtml += '</div>';
@@ -462,6 +415,25 @@
         $('#endRecord').text(end);
         $('#totalRecords').text(totalRecords);
 
+        // Atualizar total de páginas no controle de pulo
+        $('#totalPagesSpan').text(totalPages);
+    
+        // Atualizar o valor máximo do input
+        $('#pageJumpInput').attr('max', totalPages);
+    
+        // Se a página atual mudou, atualizar o input
+        if ($('#pageJumpInput').val() != currentPage) {
+            $('#pageJumpInput').val(currentPage);
+        }
+    
+        // Mostrar/esconder controles de pulo de página
+        const $pageJumpControls = $('.page-jump-controls');
+        if (totalPages <= 1) {
+            $pageJumpControls.hide();
+        } else {
+            $pageJumpControls.show();
+        }
+
         // Mostrar informação de filtro se necessário
         const $filteredInfo = $('#filteredInfo');
         const $originalTotal = $('#originalTotal');
@@ -492,6 +464,19 @@
                 .html(`<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`);
             $pagination.append($li);
         }
+
+        // Última página se necessário
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const $ellipsis = $('<li>').addClass('page-item disabled')
+                    .html('<span class="page-link">...</span>');
+                $pagination.append($ellipsis);
+            }
+        
+            const $lastLi = $('<li>').addClass('page-item')
+                .html(`<a class="page-link" href="#" onclick="changePage(${totalPages})">${totalPages}</a>`);
+            $pagination.append($lastLi);
+    }
 
         // Botão próximo
         const $nextLi = $('<li>').addClass(`page-item ${currentPage === totalPages ? 'disabled' : ''}`)
@@ -753,120 +738,220 @@
         }
     }
     // Função original para detalhes (mantida)
-    function verDetalhes(estudoId) {
-        const $modalBody = $('#modalDetalhesBody');
-        $modalBody.html(`
-            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                </div>
-            </div>
-        `);
+    //function verDetalhes(url, titulo = 'Detalhes') {
+    //    const $modalBody = $('#modalDetalhesBody');
+    //    const $modalTitle = $('#modalDetalhesLabel');
+        
+        // Atualiza o título
+    //    $modalTitle.text(titulo);
+        
+        // Mostra o loading
+    //    $modalBody.html(`
+    //        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+    //            <div class="spinner-border text-primary" role="status">
+    //                <span class="visually-hidden">Carregando...</span>
+    //            </div>
+    //        </div>
+    //    `);
+        
+        // Abre o modal
+    //    const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
+    //    modal.show();
+        
+        // Requisição dinâmica
+    //    $.get(url)
+    //        .done(function (data) {
+    //            if (!data || Object.keys(data).length === 0) {
+    //                $modalBody.html(`<div class="alert alert-warning">Nenhum dado encontrado.</div>`);
+    //                return;
+    //            }
+                
+                // Monta HTML automático a partir do JSON
+    //            const detalhesHtml = gerarHtml(data);
+    //            $modalBody.html(detalhesHtml);
+    //        })
+    //        .fail(function (xhr, status, error) {
+    //            console.error('Erro:', error);
+    //            $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes.</div>`);
+    //        });
+    //}
+    
+    // Gera um HTML genérico a partir de um objeto JSON
+    //function gerarHtmlGenerico(data) {
+      //  let html = '<div class="row g-3">';
+        //for (const [key, value] of Object.entries(data)) {
+          //  html += `
+            //    <div class="col-md-6">
+              //      <div class="card shadow-sm">
+                //        <div class="card-body">
+                  //          <p><strong>${formatarLabel(key)}:</strong> ${formatarValor(value)}</p>
+                    //    </div>
+             //       </div>
+              //  </div>
+            //`;
+        //}
+        //html += '</div>';
+        //return html;
+    //}
 
+
+    // Formata chaves do JSON (ex: "nome_cliente" → "Nome Cliente")
+    function formatarLabel(key) {
+        // Usa o labelsMap para pegar o nome bonito
+        return window.labelsMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    // Trata valores complexos (objetos, arrays)
+    function formatarValor(value, key = "") {
+        if (value === null || value === undefined || value === '') {
+            return '<span class="text-muted">N/A</span>';
+        }
+    
+        if (typeof value === 'object' && value !== null) {
+            // Se o objeto tem apenas uma propriedade, exibe o valor dessa propriedade
+            const keys = Object.keys(value);
+            if (keys.length === 1) {
+                return formatarValor(value[keys[0]], keys[0]);
+            }
+    
+            // Para objetos com múltiplas propriedades, exibe como lista
+            let html = '<ul class="list-unstyled mb-0">';
+            for (const [k, v] of Object.entries(value)) {
+                html += `<li><strong>${formatarLabel(k)}</strong>: ${formatarValor(v, k)}</li>`;
+            }
+            html += '</ul>';
+            return html;
+        }
+    
+        return value;
+    }
+
+
+    
+    function gerarHtmlGenerico(data) {
+        let html = '<div class="container-fluid">';
+        for (const [key, value] of Object.entries(data)) {
+            // Pular campos vazios se quiser
+            if (value === null || value === undefined || value === "") continue;
+    
+            const label = window.labelsMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+            html += `
+                <div class="mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-primary mb-1">${label}</h6>
+                            <div class="card-text">${formatarValor(value, key)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        html += '</div>';
+        return html;
+    }
+
+
+    
+    // Função para ver detalhes usando dados já carregados
+    function verDetalhes(id) {
+        console.log('verDetalhes chamada com ID:', id);
+        console.log('Campo ID configurado:', window.campoId);
+    
+        const $modalBody = $('#modalDetalhesBody');
+        const $modalTitle = $('#modalDetalhesLabel');
+    
+        // Verifica se os dados estão disponíveis
+        if (!window.dadosTabela || !window.campoId) {
+            console.error('Dados da tabela ou campo ID não encontrados');
+            $modalBody.html(`<div class="alert alert-danger">Erro: Configuração não disponível.</div>`);
+            return;
+        }
+    
+        // Busca o item usando o campo ID específico
+        const item = window.dadosTabela.find(registro => {
+            return registro[window.campoId] == id;
+        });
+    
+        console.log('Item encontrado:', item);
+    
+        if (!item) {
+            $modalBody.html(`<div class="alert alert-warning">Item não encontrado.</div>`);
+            const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
+            modal.show();
+            return;
+        }
+    
+        // Atualiza o título
+        const titulo = window.tituloModal || 'Item';
+        $modalTitle.text(`Detalhes do ${titulo}`);
+        
+        // Gera o HTML diretamente
+        const detalhesHtml = gerarHtmlGenerico(item);
+        $modalBody.html(detalhesHtml);
+        
+        // Abre o modal
         const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
         modal.show();
-
-        $.get(`/api/estudos/${estudoId}`)
-            .done(function(data) {
-                if (data.error) {
-                    $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
-                    return;
-                }
-
-                const detalhesHtml = `
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-info-circle me-2"></i>Informações Básicas
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Protocolo:</strong> ${data.protocolo || 'N/A'}</p>
-                                    <p><strong>Nº Documento:</strong> ${data.num_doc || 'N/A'}</p>
-                                    <p><strong>Projeto:</strong> ${data.nome_projeto || 'N/A'}</p>
-                                    <p><strong>Descrição:</strong> ${data.descricao || 'N/A'}</p>
-                                    <p><strong>Cliente:</strong> ${data.empresa?.nome || 'N/A'}</p>
-                                    <p><strong>CNPJ:</strong> ${data.empresa?.cnpj || 'N/A'}</p>
-                                    <p><strong>Município:</strong> ${data.municipio?.nome || 'N/A'}</p>
-                                    <p><strong>Regional:</strong> ${data.regional?.nome || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Tipo Viabilidade:</strong> ${data.tipo_pedido?.viabilidade || 'N/A'}</p>
-                                    <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
-                                    <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
-                                    <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
-                                    <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
-                                    <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-chart-bar me-2"></i>Demandas
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Demanda FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
-                                    <p><strong>Demanda P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-file-upload me-2"></i>Anexos
-                                </div>
-                                <div class="card-body">
-                                    ${data.anexos && data.anexos.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.anexos.map(a => `<li class="list-group-item">${a.nome_arquivo || 'N/A'} (${a.tipo_mime || 'N/A'})</li>`).join('')}
-                                        </ul>
-                                    ` : '<p>Nenhum anexo.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-history me-2"></i>Status Histórico
-                                </div>
-                                <div class="card-body">
-                                    ${data.status_historico && data.status_historico.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.status_historico.map(s => `
-                                                <li class="list-group-item">
-                                                    <strong>${s.status || 'N/A'}</strong> - ${s.data || 'N/A'} - ${s.criado_por || 'N/A'}
-                                                    ${s.observacao ? `<br><small>${s.observacao}</small>` : ''}
-                                                </li>
-                                            `).join('')}
-                                        </ul>
-                                    ` : '<p>Sem histórico de status.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                $modalBody.html(detalhesHtml);
-            })
-            .fail(function(xhr, status, error) {
-                console.error('Erro:', error);
-                $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes do documento</div>`);
-            });
+    }   
+    
+    
+    function abrirModalEditar(id) {
+        const item = window.dadosTabela.find(r => r[window.campoId] == id);
+        if (!item) {
+            alert("Registro não encontrado!");
+            return;
+        }
+    
+        let formHtml = "";
+        for (const [key, value] of Object.entries(item)) {
+            // **Pula o campo ID!**
+            if (key === window.campoId) continue;
+    
+            // (Se quiser, pule também objetos/relacionamentos!)
+            if (typeof value === 'object' && value !== null) continue;
+    
+            const label = window.labelsMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            let inputType = 'text';
+            if (typeof value === 'number') inputType = 'number';
+    
+            formHtml += `
+                <div class="mb-3">
+                    <label for="edit_${key}" class="form-label">${label}</label>
+                    <input type="${inputType}" class="form-control" id="edit_${key}" name="${key}" value="${value !== null && value !== undefined ? value : ''}">
+                </div>
+            `;
+        }
+    
+        document.getElementById('modalEditarBody').innerHTML = formHtml;
+        document.getElementById('modalEditarLabel').innerText = `Editar ${window.tituloModal || ''}`;
+        $('#modalEditar').modal('show');
+        document.getElementById('formEditar').setAttribute('data-editar-id', id);
     }
+
+    
+    $('#formEditar').off('submit').on('submit', function(e){
+        e.preventDefault();
+        const id = this.getAttribute('data-editar-id');
+        const formData = $(this).serialize();
+    
+        // Adapte a URL para a entidade atual!
+        $.ajax({
+            type: 'POST', // ou PUT se estiver usando APIs REST
+            url: `/circuitos/${id}/editar`, // troque pelo plural adequado!
+            data: formData,
+            success: function(resp) {
+                $('#modalEditar').modal('hide');
+                // Aqui vc pode recarregar a tabela ou atualizar só o item alterado
+                location.reload();
+            },
+            error: function() {
+                alert("Erro ao editar registro!");
+            }
+        });
+    });
+
+        
 
     // Funcionalidades adicionais
 
