@@ -18,6 +18,8 @@ def listar():
     print(registros[0])
     
     usuario = get_usuario_logado()
+    
+    print(usuario)
 
 
     return render_template("listar_circuitos.html", documentos=registros, usuario=usuario)
@@ -81,25 +83,30 @@ def excluir_circuito(id):
     
 @circuito_bp.route('/circuitos/adicionar', methods=['POST'])
 def adicionar_circuito():
-    # Verificação do tipo de requisição  
     if request.is_json:
         data = request.get_json()
-        print("Dados recebidos (JSON):", data)
     else:
         data = request.form.to_dict()
-        print("Dados recebidos (Form):", data)
-
-    # Adaptar campos conforme seu modelo Circuito
+    
+    # Validação de campos obrigatórios
+    campos_obrigatorios = ['circuito', 'tensao', 'id_subestacao', 'id_edp']
+    campos_faltantes = [campo for campo in campos_obrigatorios if not data.get(campo)]
+    
+    if campos_faltantes:
+        return jsonify({
+            'status': 'error',
+            'message': f'Campos obrigatórios faltando: {", ".join(campos_faltantes)}'
+        }), 400
+    
     try:
         novo_circuito = Circuito(
             circuito=data.get('circuito'),
             tensao=data.get('tensao'),
-            id_subestacao=data.get('id_subestacao'),  # Se usar FK
-            id_edp=data.get('id_edp')  # Se usar FK
+            id_subestacao=data.get('id_subestacao'),
+            id_edp=data.get('id_edp')
         )
         db.session.add(novo_circuito)
         db.session.commit()
-        print("Novo circuito adicionado!", novo_circuito)
         return jsonify({'status': 'success', 'message': 'Circuito adicionado com sucesso!'})
     except Exception as e:
         db.session.rollback()
