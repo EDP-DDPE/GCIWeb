@@ -478,7 +478,7 @@
                                         <div class="mb-3">
                                             {{ form.tipo_pedido.label(class="form-label") }}
                                             <span class="required">*</span>
-                                            {{ form.tipo_pedido(class="form-select", id="tipo_pedido") }}
+                                            {{ form.tipo_pedido(class="form-select", required=True, id="tipo_pedido") }}
                                             {% if form.tipo_pedido.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.tipo_pedido.errors %}
@@ -862,12 +862,10 @@ $(document).ready(function() {
                 var municipio = data.find(function(m) {
                     return removerAcentos(m.nome) === removerAcentos(nomeMunicipio);
                 });
-                console.log(municipio);
                 if (municipio) {
 
                     $.getJSON('https://servicodados.ibge.gov.br/api/v4/malhas/municipios/' + municipio.id + '/metadados', function(data) {
                         var data = data[0]
-                        console.log(data.centroide.longitude);
                         var lat = (data.centroide.latitude !== undefined ? data.centroide.latitude : -23.550520);
                         var lng = (data.centroide.longitude !== undefined ? data.centroide.longitude : -46.633309);
 
@@ -1150,7 +1148,6 @@ $(document).ready(function() {
     // Carregar responsáveis baseado na regional
     $('#regional-select').change(function() {
         var regionalId = $(this).val();
-        console.log(regionalId)
         if (regionalId) {
             $.get('/api/resp_regioes/' + regionalId, function(data) {
                 var respSelect = $('#resp-regiao-select');

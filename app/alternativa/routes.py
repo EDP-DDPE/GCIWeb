@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models import Alternativa, Estudo, Circuito, db, FatorK
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
+from sqlalchemy import func, and_
 
 alternativa_bp = Blueprint('alternativa', __name__, template_folder='templates')
 
@@ -16,9 +17,13 @@ def format_date(value, fmt='%d/%m/%Y'):
 
 def get_fator_k(subgrupo, data, edp):
     fator_k = FatorK.query.filter(
-        (FatorK.id_edp == edp) & (FatorK.subgrupo_tarif == subgrupo) & \
-        (FatorK.data_ref < data) & (FatorK.data_ref + 365 > data)
-    ).first()
+        and_(
+            FatorK.id_edp == edp,
+            FatorK.subgrupo_tarif == subgrupo,
+            FatorK.data_ref <= data,
+            func.DATEADD('day', 365, FatorK.data_ref) >= data
+        )
+    ).order_by(FatorK.data_ref.desc()).first()
     return fator_k.id_k
 
 
@@ -58,6 +63,9 @@ def listar(id_estudo):
         print('vou tentar salvar')
         try:
             arquivo = form.imagem_blob.data
+            print(">> tipo:", type(form.imagem_blob.data))
+            print(">> conteúdo:", form.imagem_blob.data)
+            print(">> filename:", getattr(form.imagem_blob.data, "filename", None))
             blob = None
             if arquivo:
                 blob = arquivo.read()
