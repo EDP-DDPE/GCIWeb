@@ -2,9 +2,10 @@ from flask import Blueprint, render_template, request, jsonify
 from app.models import Circuito, db, EDP, Subestacao
 from app.auth import requires_permission, get_usuario_logado
 from sqlalchemy.orm import joinedload
+import re
+from sqlalchemy.exc import IntegrityError
 
 circuito_bp = Blueprint("circuitos", __name__, template_folder="templates", static_folder="static", static_url_path='/circuitos/static')
-
 
 @circuito_bp.route("/circuitos", methods=["GET", "POST"])
 @requires_permission('visualizar')
@@ -18,8 +19,6 @@ def listar():
     print(registros[0])
     
     usuario = get_usuario_logado()
-    
-    print(usuario)
 
 
     return render_template("listar_circuitos.html", documentos=registros, usuario=usuario)
@@ -70,16 +69,34 @@ def get_circuito_api(id):
         } if circuito.edp else None
     })
 
+
 @circuito_bp.route('/circuitos/<int:id>/excluir', methods=['POST'])
 def excluir_circuito(id):
     circuito = Circuito.query.get_or_404(id)
     try:
         db.session.delete(circuito)
         db.session.commit()
-        return jsonify({'status': 'success'})
+        return jsonify({'status': 'success', 'message': 'Circuito excluído com sucesso!'})
+    
+    except IntegrityError as e:
+        db.session.rollback()
+        error_message = str(e.orig)
+        
+        # Extrai o nome da tabela do erro
+        tabela_match = re.search(r'table "([^"]+)"', error_message)
+        if tabela_match:
+            tabela = tabela_match.group(1)
+            tabela_nome = tabela.split('.')[-1] if '.' in tabela else tabela
+            mensagem = f'Não é possível excluir este circuito! Existem registros relacionados na tabela "{tabela_nome}". Remova os registros relacionados antes de excluir o circuito.'
+        else:
+            mensagem = 'Não é possível excluir este circuito! Existem registros relacionados a ele em outras tabelas. Remova os registros relacionados primeiro.'
+        
+        return jsonify({'status': 'error', 'message': mensagem}), 409
+    
     except Exception as e:
         db.session.rollback()
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
+
     
 @circuito_bp.route('/circuitos/adicionar', methods=['POST'])
 def adicionar_circuito():
