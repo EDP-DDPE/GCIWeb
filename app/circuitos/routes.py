@@ -5,7 +5,6 @@ from sqlalchemy.orm import joinedload
 
 circuito_bp = Blueprint("circuitos", __name__, template_folder="templates", static_folder="static", static_url_path='/circuitos/static')
 
-
 @circuito_bp.route("/circuitos", methods=["GET", "POST"])
 @requires_permission('visualizar')
 def listar():
@@ -18,8 +17,6 @@ def listar():
     print(registros[0])
     
     usuario = get_usuario_logado()
-    
-    print(usuario)
 
 
     return render_template("listar_circuitos.html", documentos=registros, usuario=usuario)
