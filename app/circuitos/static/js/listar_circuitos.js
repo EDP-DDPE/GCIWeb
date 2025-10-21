@@ -603,7 +603,13 @@ function setupColumnResizing() {
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label"><strong>Tensão:</strong></label>
-                                            <input type="text" class="form-control" name="tensao" value="${data.tensao || ''}">
+                                            <select class="form-select" name="tensao" id="tensao-select" required>
+                                                <option value="">Selecione...</option>
+                                                <option value="11.4" ${data.tensao == 11.4 ? 'selected' : ''}>11.4 kV</option>
+                                                <option value="13.2" ${data.tensao == 13.2 ? 'selected' : ''}>13.2 kV</option>
+                                                <option value="13.8" ${data.tensao == 13.8 ? 'selected' : ''}>13.8 kV</option>
+                                                <option value="34.5" ${data.tensao == 34.5 ? 'selected' : ''}>34.5 kV</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -613,6 +619,15 @@ function setupColumnResizing() {
                 `;
     
                 $modalBody.html(editarHtml);
+                
+                // Inicializa Select2 dentro do modal
+                $('#tensao-select').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Selecione...',
+                    allowClear: true,
+                    width: '100%',
+                    dropdownParent: $('#modalEditar')
+                });
                 
             })
             .fail(function(xhr, status, error) {
@@ -667,7 +682,6 @@ function confirmarExclusao() {
     
     // Segunda verificação: digitar "EXCLUIR"
     const confirmacao = prompt('Para confirmar, digite a palavra: EXCLUIR');
-    
     if (confirmacao !== 'EXCLUIR') {
         alert('❌ Confirmação incorreta. Exclusão cancelada.');
         return;
@@ -682,15 +696,26 @@ function confirmarExclusao() {
             location.reload();
         },
         error: function(xhr, status, error) {
-            alert('❌ Erro ao excluir o circuito!');
-            console.log(xhr.responseText);
+            let mensagemErro = '❌ Erro ao excluir o circuito!';
+            
+            // Tenta pegar a mensagem do servidor
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                mensagemErro = xhr.responseJSON.message;
+            } else if (xhr.status === 409) {
+                mensagemErro = '❌ Não é possível excluir este circuito!\n\n' +
+                               'Existem registros relacionados na tabela de Alternativas.\n\n' +
+                               '⚠️ Remova todos os registros relacionados antes de excluir o circuito.';
+            }
+            
+            alert(mensagemErro);
+            console.error('Erro detalhado:', xhr.responseText);
         }
     });
 }
+
     
 function abrirModalAdicionar() {
     const $modalBody = $('#modalAdicionarBody');
-
     // Spinner enquanto carrega
     $modalBody.html(`
         <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
@@ -699,17 +724,14 @@ function abrirModalAdicionar() {
             </div>
         </div>
     `);
-
     const modal = new bootstrap.Modal($('#modalAdicionar')[0]);
     modal.show();
-
     // Busca lista de ESTADOS (EDPs)
     $.get('/circuitos/edps/api')
         .done(function (edps) {
-            let edpOptions = edps.map(edp => 
+            let edpOptions = edps.map(edp =>
                 `<option value="${edp.id}">${edp.empresa}</option>`
             ).join('');
-
             // HTML dinâmico do formulário
             const addHtml = `
                 <form id="formAdicionar" novalidate>
@@ -725,18 +747,16 @@ function abrirModalAdicionar() {
                                     ${edpOptions}
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label"><strong>Subestação:</strong> <span class="text-danger">*</span></label>
                                 <select class="form-select" name="id_subestacao" id="subestacao-select" disabled required>
                                     <option value="">Selecione o Estado primeiro...</option>
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label"><strong>Circuito:</strong> <span class="text-danger">*</span></label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     class="form-control"
                                     name="circuito"
                                     id="campo-circuito"
@@ -746,46 +766,45 @@ function abrirModalAdicionar() {
                                 >
                                 <span class="form-text text-muted" id="dica-circuito"></span>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label"><strong>Tensão:</strong> <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" name="tensao" required>
+                                <select class="form-select" name="tensao" id="tensao-select" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="11.4">11.4 kV</option>
+                                    <option value="13.2">13.2 kV</option>
+                                    <option value="13.8">13.8 kV</option>
+                                    <option value="34.5">34.5 kV</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </form>
             `;
-
             $modalBody.html(addHtml);
-
             // Inicializa Select2 dentro do modal
-            $('#edp-select, #subestacao-select').select2({
+            $('#edp-select, #subestacao-select, #tensao-select').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Selecione...',
                 allowClear: true,
                 width: '100%',
                 dropdownParent: $('#modalAdicionar')
             });
-
             // Quando muda o Estado (EDP), carregar Subestações
             $('#edp-select').on('change', function () {
                 const edpId = $(this).val();
                 const $sub = $('#subestacao-select');
                 const $circuito = $('#campo-circuito');
                 const $dica = $('#dica-circuito');
-
                 $sub
                     .prop('disabled', true)
                     .html('<option>Carregando...</option>')
                     .trigger('change');
-
                 if (!edpId) {
                     $sub.html('<option value="">Selecione o Estado primeiro...</option>').prop('disabled', true);
                     $circuito.prop('disabled', true).val('');
                     $dica.text('');
                     return;
                 }
-
                 // Buscar subestações válidas
                 $.get(`/circuitos/subestacoes/api/${edpId}`)
                     .done(function (subs) {
@@ -803,10 +822,8 @@ function abrirModalAdicionar() {
                         $sub.html('<option value="">Erro ao carregar subestações</option>').prop('disabled', true);
                     });
             });
-
             // Quando muda Subestação → habilitar campo Circuito
             $modalBody.on('change', '#subestacao-select', prepararCampoCircuito);
-
             // Valida formato dinamicamente conforme a digitação
             $modalBody.on('input', '#campo-circuito', function () {
                 let edp = $("#edp-select option:selected").text().trim();
@@ -815,7 +832,6 @@ function abrirModalAdicionar() {
                 let valor = $(this).val().replace(/\s+/g, ' ');
                 const $dica = $('#dica-circuito');
                 if (!sigla) return;
-
                 if (edp === 'ES') {
                     // Exemplo: ABC01 (2 números obrigatórios)
                     const regex = new RegExp(`^${sigla}\\d{0,2}$`);
@@ -835,7 +851,6 @@ function abrirModalAdicionar() {
                     $dica.text(`Formato: ${prefixo}NNNN (4 números obrigatórios, ex: ${prefixo}0001)`);
                 }
             });
-
             // Controla habilitação e prefixo do campo Circuito
             function prepararCampoCircuito() {
                 let edp = $("#edp-select option:selected").text().trim();
@@ -843,13 +858,11 @@ function abrirModalAdicionar() {
                 let sigla = $subOpt.data('sigla');
                 let $campo = $('#campo-circuito');
                 let $dica = $('#dica-circuito');
-
                 if (!$("#edp-select").val() || !$("#subestacao-select").val() || !sigla) {
                     $campo.prop('disabled', true).val('');
                     $dica.text('Selecione primeiro o Estado e depois a Subestação.');
                     return;
                 }
-
                 if (edp === 'ES') {
                     $campo.prop('disabled', false)
                         .val(sigla)
@@ -866,30 +879,50 @@ function abrirModalAdicionar() {
                     $dica.text('Selecione um Estado válido (ES ou SP).');
                 }
             }
-
             // 🔹 Removeu o botão de salvar — o submit será tratado externamente
         })
         .fail(function () {
             $modalBody.html('<div class="alert alert-danger">Erro ao carregar EDPs!</div>');
         });
 }
-
-    
 function salvarNovoCircuito() {
     const form = document.getElementById('formAdicionar');
-    
     // Validação HTML5
     if (!form.checkValidity()) {
-        form.reportValidity(); // Mostra mensagens de erro nativas
+        form.reportValidity();
         return;
     }
-
+    // 🔹 VALIDAÇÃO CUSTOMIZADA: Quantidade de dígitos
+    const edp = $("#edp-select option:selected").text().trim();
+    const sigla = $("#subestacao-select option:selected").data('sigla');
+    const circuito = $('#campo-circuito').val().trim();
+    if (edp === 'ES') {
+        // Deve ter exatamente 2 números após a sigla
+        const regex = new RegExp(`^${sigla}\\d{2}$`);
+        if (!regex.test(circuito)) {
+            alert(`❌ Para ES, o circuito deve ter exatamente 2 números.\nExemplo: ${sigla}01`);
+            $('#campo-circuito').focus();
+            return;
+        }
+    } else if (edp === 'SP') {
+        // Deve ter exatamente 4 números após "R[SIGLA] "
+        const prefixo = `R${sigla} `;
+        const regex = new RegExp(`^${prefixo}\\d{4}$`);
+        if (!regex.test(circuito)) {
+            alert(`❌ Para SP, o circuito deve ter exatamente 4 números.\nExemplo: ${prefixo}0001`);
+            $('#campo-circuito').focus();
+            return;
+        }
+    } else {
+        alert('❌ Estado inválido. Selecione ES ou SP.');
+        return;
+    }
+    // Se passou na validação, envia os dados
     const formData = new FormData(form);
     const data = {};
     formData.forEach((value, key) => {
         data[key] = value;
     });
-
     $.ajax({
         url: `/circuitos/adicionar`,
         method: 'POST',
@@ -897,15 +930,16 @@ function salvarNovoCircuito() {
         contentType: 'application/json',
         success: function(response) {
             bootstrap.Modal.getInstance(document.getElementById('modalAdicionar')).hide();
-            alert('Circuito adicionado com sucesso!');
+            alert('✅ Circuito adicionado com sucesso!');
             location.reload();
         },
         error: function(xhr, status, error) {
-            alert('Erro ao adicionar o circuito. Tente novamente.');
+            alert('❌ Erro ao adicionar o circuito. Tente novamente.');
             console.log(xhr.responseText);
         }
     });
 }
+
 
     // Funcionalidades adicionais
 
