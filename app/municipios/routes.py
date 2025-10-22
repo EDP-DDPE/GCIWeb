@@ -62,7 +62,8 @@ def get_municipio_api(id):
             'empresa': municipio.edp.empresa if municipio.edp else None
         } if municipio.edp else None,
         'regional': {
-            'regional': municipio.regional.regional if municipio.regional else None
+            "id": municipio.regional.id_regional,
+            'nome': municipio.regional.regional if municipio.regional else None
         } if municipio.regional else None
     })
 
@@ -72,6 +73,6 @@ def listar_regionais_por_estado(id_estado):
     regionais = Regional.query.filter_by(id_edp=id_estado).all()
     
     return jsonify([
-        {"id": r.id_regional, "": r.regional}
+        {"id": r.id_regional, "nome": r.regional}
         for r in regionais
     ])

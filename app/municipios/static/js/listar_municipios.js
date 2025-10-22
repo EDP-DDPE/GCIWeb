@@ -557,15 +557,13 @@ function editarDetalhes(municipioId) {
       </div>
     </div>
   `);
-
   const modal = new bootstrap.Modal($('#modalEditar')[0]);
   modal.show();
-
+  
   // Faz a requisição para pegar dados do município
   $.get(`/municipios/${municipioId}/api`)
     .done(function (data) {
-      console.log('Dados recebidos do Flask:', data);
-
+      
       // Monta o HTML do formulário
       const editarHtml = `
         <form id="formEdicao" data-municipio-id="${municipioId}">
@@ -576,61 +574,55 @@ function editarDetalhes(municipioId) {
                   <i class="fas fa-info-circle me-2"></i>Editar Município
                 </div>
                 <div class="card-body">
-
                   <div class="mb-3">
                     <label class="form-label"><strong>ID:</strong></label>
                     <input type="text" class="form-control" value="${data.id}" readonly>
                   </div>
-
                   <div class="mb-3">
                     <label class="form-label"><strong>Município:</strong></label>
                     <input type="text" class="form-control" value="${data.municipio}" readonly>
                   </div>
-
                   <div class="mb-3">
                     <label class="form-label"><strong>Empresa (EDP):</strong></label>
                     <input type="text" class="form-control" value="${data.edp?.empresa || ''}" readonly>
                   </div>
-
                   <div class="mb-3">
                     <label class="form-label"><strong>Regional:</strong></label>
                     <select class="form-control" name="id_regional" id="selectRegional">
                       <option value="">Carregando regionais...</option>
                     </select>
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </form>
       `;
-
       $modalBody.html(editarHtml);
-
-      // Agora busca as regionais associadas ao EDP do município
-      console.log('ID EDP:',data.edp?.id);
       
       if (data.edp?.id) {
-        
-        $.get(`/municipios/${data.edp?.id}/regional`)
+        $.get(`/municipios/${data.edp.id}/regional`)
           .done(function (regionais) {
-            const select = $('#selectRegional');
             
+            const select = $('#selectRegional');
             select.empty();
-
+            
             if (regionais.length === 0) {
               select.append('<option value="">Nenhuma regional encontrada</option>');
               return;
             }
-
+            
+            // Pega o ID da regional atual (pode vir como id_regional ou id)
+            const regionalAtualId = data.regional?.id_regional || data.regional?.id || data.id_regional;
+            
             regionais.forEach(r => {
-              // Marca como selected a regional atual
-              const selected = r.id === data.regional?.id ? 'selected' : '';
+              // Compara convertendo ambos para string para evitar problemas de tipo
+              const selected = String(r.id) === String(regionalAtualId) ? 'selected' : '';
               select.append(`<option value="${r.id}" ${selected}>${r.nome}</option>`);
             });
           })
-          .fail(() => {
+          .fail((xhr) => {
+            console.error('Erro ao carregar regionais:', xhr.responseJSON || xhr.responseText);
             $('#selectRegional').html('<option value="">Erro ao carregar regionais</option>');
           });
       } else {
@@ -642,6 +634,7 @@ function editarDetalhes(municipioId) {
       $modalBody.html(`<div class="alert alert-danger">Erro ao carregar dados do município.</div>`);
     });
 }
+
 
 function salvarEdicao() {
   const form = document.getElementById('formEdicao');
