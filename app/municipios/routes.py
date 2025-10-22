@@ -1,5 +1,5 @@
-from app.models import Municipio, Regional
-from flask import Blueprint, render_template, jsonify
+from app.models import Municipio, Regional, db
+from flask import Blueprint, render_template, jsonify, request
 from sqlalchemy.orm import joinedload
 from app.auth import requires_permission, get_usuario_logado
 
@@ -58,6 +58,7 @@ def get_municipio_api(id):
         'id': municipio.id_municipio,
         'municipio': municipio.municipio,
         'edp': {
+            'id': municipio.edp.id_edp if municipio.edp else None,
             'empresa': municipio.edp.empresa if municipio.edp else None
         } if municipio.edp else None,
         'regional': {
@@ -65,7 +66,7 @@ def get_municipio_api(id):
         } if municipio.regional else None
     })
 
-@municipio_bp.route('/municipios/<int:id_estado>/api', methods=['GET'])
+@municipio_bp.route('/municipios/<int:id_estado>/regional', methods=['GET'])
 def listar_regionais_por_estado(id_estado):
     # Busca todas as regionais deste estado
     regionais = Regional.query.filter_by(id_edp=id_estado).all()

@@ -546,106 +546,142 @@ function setupColumnResizing() {
     }
 
 
-    function editarDetalhes(municipioId) {
-        const $modalBody = $('#modalEditarBody');
+function editarDetalhes(municipioId) {
+  const $modalBody = $('#modalEditarBody');
 
-        // Loading spinner
-        $modalBody.html(`
-            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-                <div class="spinner-border text-warning" role="status">
-                    <span class="visually-hidden">Carregando...</span>
+  // Exibe spinner de carregamento enquanto busca do servidor
+  $modalBody.html(`
+    <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+      <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  `);
+
+  const modal = new bootstrap.Modal($('#modalEditar')[0]);
+  modal.show();
+
+  // Faz a requisição para pegar dados do município
+  $.get(`/municipios/${municipioId}/api`)
+    .done(function (data) {
+      console.log('Dados recebidos do Flask:', data);
+
+      // Monta o HTML do formulário
+      const editarHtml = `
+        <form id="formEdicao" data-municipio-id="${municipioId}">
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                  <i class="fas fa-info-circle me-2"></i>Editar Município
                 </div>
+                <div class="card-body">
+
+                  <div class="mb-3">
+                    <label class="form-label"><strong>ID:</strong></label>
+                    <input type="text" class="form-control" value="${data.id}" readonly>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label"><strong>Município:</strong></label>
+                    <input type="text" class="form-control" value="${data.municipio}" readonly>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label"><strong>Empresa (EDP):</strong></label>
+                    <input type="text" class="form-control" value="${data.edp?.empresa || ''}" readonly>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label"><strong>Regional:</strong></label>
+                    <select class="form-control" name="id_regional" id="selectRegional">
+                      <option value="">Carregando regionais...</option>
+                    </select>
+                  </div>
+
+                </div>
+              </div>
             </div>
-        `);
-    
-        const modal = new bootstrap.Modal($('#modalEditar')[0]);
-        modal.show();
+          </div>
+        </form>
+      `;
 
-        // Requisição AJAX para pegar os dados
-        $.get(`/municipios/${municipioId}/api`)
+      $modalBody.html(editarHtml);
+
+      // Agora busca as regionais associadas ao EDP do município
+      console.log('ID EDP:',data.edp?.id);
+      
+      if (data.edp?.id) {
+        
+        $.get(`/municipios/${data.edp?.id}/regional`)
+          .done(function (regionais) {
+            const select = $('#selectRegional');
             
-            .done(function(data) {
-                console.log('ID passado:', data);
-                console.log('Objeto retornado do Flask:', data);
-                if (data.error) {
-                    $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
-                    return;
-                }
-    
-                // HTML do modal com apenas tensao editável
-                const editarHtml = `
-                    <form id="formEdicao" data-circuito-id="${municipioId}">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <div class="card shadow-sm">
-                                    <div class="card-header bg-secondary text-white">
-                                        <i class="fas fa-info-circle me-2"></i>Detalhes do Circuito
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>ID:</strong></label>
-                                            <input type="text" class="form-control" value="${data.id}" readonly>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Circuito:</strong></label>
-                                            <input type="text" class="form-control" value="${data.municipio}" readonly>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Subestação:</strong></label>
-                                            <input type="text" class="form-control" value="${data.edp?.empresa}" readonly>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Estado:</strong></label>
-                                            <input type="text" class="form-control" value="${data.regional?.regional}" readonly>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                `;
-    
-                $modalBody.html(editarHtml);
-            })
-            .fail(function(xhr, status, error) {
-                console.error('Erro:', error);
-                $modalBody.html(`<div class="alert alert-danger">Erro ao carregar dados do circuito</div>`);
-            });
-    }
+            select.empty();
 
-    function salvarEdicao() {
-        const form = document.getElementById('formEdicao');
-        const municipioId = form.getAttribute('data-municipio-id');
-        console.log('municipioId:', municipioId);
-        const formData = new FormData(form);
-    
-        // Converter FormData para objeto
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-    
-        $.ajax({
-            url: `/municipios/${municipioId}/editar`,
-            method: 'POST', // ou 'PATCH' dependendo da sua API
-            data: JSON.stringify(data),
-            contentType: 'application/json',
-            success: function(response) {
-                // Fechar modal
-                bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
-                
-                // Mostrar mensagem de sucesso
-                alert('Documento atualizado com sucesso!');
-                
-                // Recarregar a página ou tabela
-                location.reload();
-            },
-            error: function(xhr, status, error) {
-                console.error('Erro ao salvar:', error);
-                alert('Erro ao salvar as alterações. Tente novamente.');
+            if (regionais.length === 0) {
+              select.append('<option value="">Nenhuma regional encontrada</option>');
+              return;
             }
-        });
+
+            regionais.forEach(r => {
+              // Marca como selected a regional atual
+              const selected = r.id === data.regional?.id ? 'selected' : '';
+              select.append(`<option value="${r.id}" ${selected}>${r.nome}</option>`);
+            });
+          })
+          .fail(() => {
+            $('#selectRegional').html('<option value="">Erro ao carregar regionais</option>');
+          });
+      } else {
+        $('#selectRegional').html('<option value="">Nenhum EDP associado</option>');
+      }
+    })
+    .fail(function (xhr, status, error) {
+      console.error('Erro ao buscar município:', error);
+      $modalBody.html(`<div class="alert alert-danger">Erro ao carregar dados do município.</div>`);
+    });
+}
+
+function salvarEdicao() {
+  const form = document.getElementById('formEdicao');
+  if (!form) {
+    alert('Formulário não encontrado!');
+    return;
+  }
+
+  const municipioId = form.getAttribute('data-municipio-id');
+  const id_regional = $('#selectRegional').val();
+
+  if (!id_regional) {
+    alert('Selecione uma regional antes de salvar.');
+    return;
+  }
+
+  $.ajax({
+    url: `/municipios/${municipioId}/editar`,
+    method: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({ id_regional: id_regional }),
+    success: function (response) {
+      console.log('Resposta do servidor:', response);
+
+      // Fecha o modal
+      const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalEditar'));
+      modalInstance.hide();
+
+      // Mensagem de sucesso
+      alert('Município atualizado com sucesso!');
+
+      // Recarrega a página (ou poderia atualizar só a linha da tabela, se preferir)
+      location.reload();
+    },
+    error: function (xhr, status, error) {
+      console.error('Erro ao salvar:', error);
+      alert('Erro ao salvar as alterações. Tente novamente.');
     }
+  });
+}
     
 
     // Funcionalidades adicionais
