@@ -72,55 +72,12 @@
     border-right: 2px solid #007bff;
 }
 
-/* .table-actions {
+.table-actions {
     display: flex;
     gap: 5px;
     align-items: center;
     justify-content: space-between;
-} */
-.table-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
 }
-
- .pagination-controls {  /* === NOVO === */
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.page-jump-controls {  /* === NOVO === */
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-.page-jump-label {  /* === NOVO === */
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
-.page-jump-input {  /* === NOVO === */
-    width: 60px;
-    text-align: center;
-}
-
-.page-jump-btn {  /* === NOVO === */
-    min-width: 40px;
-}
-
-.page-total {  /* === NOVO === */
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
-
-
 
 .pagination-info {
     font-size: 0.875rem;
@@ -182,15 +139,6 @@
         flex-direction: column;
         gap: 10px;
     }
-    
-    .pagination-controls {
-        justify-content: center;
-    }
-    
-    .page-jump-controls {
-        justify-content: center;
-        margin-top: 10px;
-    }
 }
 
 .btn-group .btn {
@@ -244,23 +192,12 @@
     border-radius: 12px 12px 0 0;
   }
 
-.page-size-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Aumentei um pouco o gap */
-    flex-wrap: nowrap; /* Evita quebra de linha */
+  #pageSize {
+    height: calc(1.5em + 0.5rem + 2px); /* força a altura do select pequena */
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
-.page-size-controls .form-label,
-.page-size-controls span {
-    margin-bottom: 0 !important;
-    line-height: 1.5;
-    white-space: nowrap; /* Evita quebra do texto */
-}
-
-/* Ajuste específico para o select */
-#pageSize.form-select-sm {
-    min-width: 70px; /* Aumentei um pouco para garantir espaço */
-    max-width: 80px; /* Limita o tamanho máximo */
-    flex-shrink: 0; /* Evita que o select encolha */
+.select2-selection__clear {
+  display: none !important;
 }
