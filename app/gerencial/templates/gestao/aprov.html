@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('gestao.static', filename='css/aprovacao.css') }}">
+
+<div class="container-fluid mt-4">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-clipboard-check me-2"></i>Gestão de Aprovação de Projetos</h2>
+
+    <div class="d-flex gap-2 align-items-center">
+      <label class="form-label mb-0 fw-bold text-muted">Custo Mínimo (R$)</label>
+      <input type="number" id="valorFiltro" value="{{ valor_minimo }}" class="form-control form-control-sm" style="width:150px;">
+      <button class="btn btn-outline-primary btn-sm" onclick="filtrarValor()">
+        <i class="bi bi-funnel"></i> Filtrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Gráfico de resumo -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
+      <small>Distribuição de projetos por status</small>
+    </div>
+    <div class="card-body text-center">
+      <canvas id="graficoResumo" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-list-task me-2"></i>Projetos acima de R$ {{ "{:,.2f}".format(valor_minimo or 0) }}</span>
+      <small>Gestores podem aprovar, reprovar ou comentar projetos.</small>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="tabelaAprovacao">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Projeto</th>
+              <th>Empresa</th>
+              <th>Município</th>
+              <th>Custo Modular</th>
+              <th>Status</th>
+              <th>Comentário</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for doc in documentos %}
+            <tr id="estudo-{{ doc.id }}">
+              <td>{{ doc.id }}</td>
+              <td>{{ doc.nome_projeto or '-' }}</td>
+              <td>{{ doc.empresa or '-' }}</td>
+              <td>{{ doc.municipio or '-' }}</td>
+              <td>R$ {{ "{:,.2f}".format(doc.custo_modular or 0) }}</td>
+              <td>
+                <span class="badge {% if doc.status == 'Aprovado' %}bg-success{% elif doc.status == 'Reprovado' %}bg-danger{% else %}bg-secondary{% endif %}">
+                  {{ doc.status or 'Pendente' }}
+                </span>
+              </td>
+              <td>
+                <textarea class="form-control form-control-sm" rows="1" id="comentario-{{ doc.id }}" placeholder="Digite um comentário..."></textarea>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-success btn-sm me-1" onclick="aprovarProjeto({{ doc.id }})" data-bs-toggle="tooltip" title="Aprovar">
+                  <i class="bi bi-hand-thumbs-up"></i>
+                </button>
+                <button class="btn btn-danger btn-sm me-1" onclick="reprovarProjeto({{ doc.id }})" data-bs-toggle="tooltip" title="Reprovar">
+                  <i class="bi bi-hand-thumbs-down"></i>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="salvarComentario({{ doc.id }})" data-bs-toggle="tooltip" title="Salvar comentário">
+                  <i class="bi bi-chat-dots"></i>
+                </button>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Nenhum projeto encontrado acima desse valor.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer text-muted small text-end">
+      Total de projetos: {{ documentos|length }}
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('gestao.static', filename='js/aprovacao.js') }}"></script>
+
+<script>
+  // Dados do gráfico vindos do backend
+  const dataResumo = {
+    aprovado: {{ documentos | selectattr('status', 'equalto', 'Aprovado') | list | length }},
+    reprovado: {{ documentos | selectattr('status', 'equalto', 'Reprovado') | list | length }},
+    pendente: {{ documentos | rejectattr('status', 'equalto', 'Aprovado') | rejectattr('status', 'equalto', 'Reprovado') | list | length }}
+  };
+</script>
+
+{% endblock %}

@@ -11,10 +11,10 @@ main_bp = Blueprint("main", __name__, template_folder='templates', static_folder
 def msg_boas_vidas(nome):
     if 12 > datetime.datetime.now().hour > 4:
         return f"Bom dia, {nome}."
-    elif 18 > datetime.datetime.now().hour > 12:
+    elif 18 > datetime.datetime.now().hour >= 12:
         return f"Boa tarde, {nome}."
     else:
-        return f"Bom noite, {nome}."
+        return f"Boa noite, {nome}."
 
 
 @main_bp.route("/")

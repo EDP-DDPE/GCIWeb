@@ -7,7 +7,7 @@ def create_auth_blueprint(redirect_path="/auth/callback"):
     """
     Cria e retorna o Blueprint de autenticação, com rotas:
       - /login
-      - redirect_path (callback, ex.: /auth/callback)
+      - redirect_path (callback, ex.: /auth/)
       - /logout
     O redirect_path é definido ANTES do registro do blueprint
     para evitar o AssertionError.
