@@ -142,6 +142,12 @@ def editar(id_alternativa):
     imagem_base64 = base64.b64encode(alternativa_obj.blob_image).decode('utf-8') if alternativa_obj.blob_image else None
 
     if request.method == 'GET':
+        letra_alternativa = alternativa_obj.letra_alternativa
+        if isinstance(letra_alternativa, (list, tuple)):
+            letra_alternativa = letra_alternativa[0] if letra_alternativa else None
+        elif isinstance(letra_alternativa, str) and len(letra_alternativa) > 1:
+            letra_alternativa = letra_alternativa.strip("() ").replace("'", "").replace(",", "")
+
         # Retornar dados da alternativa como JSON para popular o formulário
         return jsonify({
             'id_circuito': alternativa_obj.id_circuito,
@@ -164,7 +170,7 @@ def editar(id_alternativa):
             'ERD': float(alternativa_obj.ERD) if alternativa_obj.ERD else None,
             'demanda_disponivel_ponto': float(alternativa_obj.demanda_disponivel_ponto) if alternativa_obj.demanda_disponivel_ponto else None,
             'imagem_base64': imagem_base64,
-            'letra_alternativa': alternativa_obj.letra_alternativa,
+            'letra_alternativa': letra_alternativa,
             'id_k': alternativa_obj.id_k,
             'proporcionalidade': alternativa_obj.proporcionalidade
         })
@@ -190,7 +196,7 @@ def editar(id_alternativa):
             alternativa_obj.observacao = form.observacao.data
             alternativa_obj.ERD = form.ERD.data
             alternativa_obj.demanda_disponivel_ponto = form.demanda_disponivel_ponto.data
-            alternativa_obj.letra_alternativa = form.letra_alternativa.data,
+            alternativa_obj.letra_alternativa = form.letra_alternativa.data
             alternativa_obj.id_k = get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
             alternativa_obj.proporcionalidade = calc_prop(form)
 
