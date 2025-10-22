@@ -662,8 +662,23 @@ $(document).ready(function(){
             // Busca os dados no servidor
             $.get('/alternativas/' + id, function(data) {
                 // Preenche os campos (use os IDs ou names conforme o seu form)
-                $('#circuito_select').val(data.id_circuito);
-                $('#letra_select').val(data.letra_alternativa);
+                const circuitoSelect = $('#circuito_select');
+                const circuitoValue = data.id_circuito !== null && data.id_circuito !== undefined
+                    ? String(data.id_circuito)
+                    : '';
+                if (circuitoValue && circuitoSelect.find(`option[value="${circuitoValue}"]`).length) {
+                    circuitoSelect.val(circuitoValue);
+                } else {
+                    circuitoSelect.prop('selectedIndex', 0);
+                }
+
+                const letraSelect = $('#letra_select');
+                const letraValue = (data.letra_alternativa || '').toString().trim();
+                if (letraValue && letraSelect.find(`option[value="${letraValue}"]`).length) {
+                    letraSelect.val(letraValue);
+                } else {
+                    letraSelect.prop('selectedIndex', 0);
+                }
                 $('#ERD').val(data.ERD);
                 $('#dem_p_antes').val(data.dem_p_ant);
                 $('#dem_p_depois').val(data.dem_p_dep);
