@@ -26,7 +26,6 @@ class AlternativaForm(FlaskForm):
     # Informações básicas
     descricao = TextAreaField(
         'Descrição',
-        validators=[DataRequired('A descrição é obrigatória')],
         render_kw={
             'placeholder': 'Descreva a alternativa...',
             'rows': 3
@@ -237,7 +236,7 @@ class AlternativaForm(FlaskForm):
         self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
                                    [(circuito.id_circuito, f"{circuito.circuito}") for circuito in Circuito.query.all()]
 
-        print(self.id_circuito.choices)
+
 
     def validate_flags(self):
         """Validação customizada para flags"""

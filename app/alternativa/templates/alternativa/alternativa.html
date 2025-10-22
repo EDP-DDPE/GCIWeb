@@ -361,9 +361,23 @@
                 <h5 class="modal-title" id="alternativaModalLabel">Nova Alternativa</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <form id="formAlternativa" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     {{ form.hidden_tag() }}
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erros de validação encontrados:</strong>
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items() %}
+                                {% for error in errors %}
+                                    <li><strong>{{ getattr(form, field).label.text }}:</strong> {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
 
                     <div class="row">
                         <!-- Informações Básicas -->
@@ -373,23 +387,50 @@
                             <div class="mb-3">
                                 {{ form.id_circuito.label(class="form-label") }}
                                 {{ form.id_circuito(class="form-select", id="circuito_select") }}
+                                {% if form.id_circuito.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.id_circuito.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="mb-3">
                                 {{ form.descricao.label(class="form-label") }}
                                 {{ form.descricao(class="form-control", rows="3") }}
+                                {% if form.descricao.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.descricao.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="mb-3">
                                 {{ form.custo_modular.label(class="form-label") }}
                                 {{ form.custo_modular(class="form-control", step="0.01") }}
+                                {% if form.custo_modular.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.custo_modular.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="mb-3">
                                 {{ form.subgrupo_tarif.label(class="form-label") }}
                                 {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
+                                {% if form.subgrupo_tarif.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.subgrupo_tarif.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-
                         </div>
 
                         <!-- Demandas -->
@@ -401,12 +442,26 @@
                                     <div class="mb-3">
                                         {{ form.dem_fp_ant.label(class="form-label") }}
                                         {{ form.dem_fp_ant(class="form-control", step="0.01", id="dem_fp_antes") }}
+                                        {% if form.dem_fp_ant.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_fp_ant.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_p_ant.label(class="form-label") }}
                                         {{ form.dem_p_ant(class="form-control", step="0.01", id="dem_p_antes") }}
+                                        {% if form.dem_p_ant.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_p_ant.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -416,12 +471,26 @@
                                     <div class="mb-3">
                                         {{ form.dem_fp_dep.label(class="form-label") }}
                                         {{ form.dem_fp_dep(class="form-control", step="0.01", id="dem_fp_depois") }}
+                                        {% if form.dem_fp_dep.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_fp_dep.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.dem_p_dep.label(class="form-label") }}
                                         {{ form.dem_p_dep(class="form-control", step="0.01", id="dem_p_depois") }}
+                                        {% if form.dem_p_dep.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_p_dep.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -429,6 +498,13 @@
                             <div class="mb-3">
                                 {{ form.demanda_disponivel_ponto.label(class="form-label") }}
                                 {{ form.demanda_disponivel_ponto(class="form-control", step="0.01", id="dem_disponivel") }}
+                                {% if form.demanda_disponivel_ponto.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.demanda_disponivel_ponto.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="row">
@@ -464,12 +540,26 @@
                                     <div class="mb-3">
                                         {{ form.latitude_ponto_conexao.label(class="form-label") }}
                                         {{ form.latitude_ponto_conexao(class="form-control", step="0.00000001") }}
+                                        {% if form.latitude_ponto_conexao.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.latitude_ponto_conexao.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="mb-3">
                                         {{ form.longitude_ponto_conexao.label(class="form-label") }}
                                         {{ form.longitude_ponto_conexao(class="form-control", step="0.00000001") }}
+                                        {% if form.longitude_ponto_conexao.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.longitude_ponto_conexao.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -482,8 +572,15 @@
                                     </div>
                                     {{ form.imagem_blob(class="form-control", id="imagem_alternativa", style="display:none") }}
                                     <img id="preview_imagem" src="" alt="Pré-visualização" style="max-width: 100%; margin-top: 10px; display: none;">
+                                    {% if form.imagem_blob.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.imagem_blob.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
-
+                                {{ form.id_estudo(class="form-control", id="id_estudo", style="display:none") }}
                             </div>
                         </div>
 
@@ -494,6 +591,13 @@
                             <div class="mb-3">
                                 {{ form.ERD.label(class="form-label") }}
                                 {{ form.ERD(class="form-control", step="0.001", id="ERD") }}
+                                {% if form.ERD.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.ERD.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
 
                             <div class="row">
@@ -511,11 +615,17 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <p></p>
+                            <div class="row mt-3">
                                 <div class="mb-3">
                                     {{ form.letra_alternativa.label(class="form-label") }}
                                     {{ form.letra_alternativa(class="form-control", id="letra_select") }}
+                                    {% if form.letra_alternativa.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.letra_alternativa.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -526,10 +636,18 @@
                             <div class="mb-3">
                                 {{ form.observacao.label(class="form-label") }}
                                 {{ form.observacao(class="form-control", rows="3") }}
+                                {% if form.observacao.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.observacao.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-danger" id="btnExcluirAlternativa" style="display: none;">Excluir</button>
@@ -539,6 +657,7 @@
         </div>
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
@@ -663,13 +782,21 @@ $(document).ready(function(){
             $.get('/alternativas/' + id, function(data) {
                 // Preenche os campos (use os IDs ou names conforme o seu form)
                 const circuitoSelect = $('#circuito_select');
-                const circuitoValue = data.id_circuito !== null && data.id_circuito !== undefined
-                    ? String(data.id_circuito)
-                    : '';
-                if (circuitoValue && circuitoSelect.find(`option[value="${circuitoValue}"]`).length) {
-                    circuitoSelect.val(circuitoValue);
-                } else {
-                    circuitoSelect.prop('selectedIndex', 0);
+                const circuitoValue = data.id_circuito ? data.id_circuito.toString() : '';
+
+                console.log("Circuito retornado:", circuitoValue);
+                console.log("Opções disponíveis:", circuitoSelect.html());
+
+                if (circuitoValue) {
+                    circuitoSelect.val(circuitoValue).change();
+                    if (circuitoSelect.val() !== circuitoValue) {
+                        // força seleção mesmo se WTForms renderizou como int
+                        circuitoSelect.find('option').each(function() {
+                            if (parseInt($(this).val()) === parseInt(circuitoValue)) {
+                                $(this).prop('selected', true);
+                            }
+                        });
+                    }
                 }
 
                 const letraSelect = $('#letra_select');
@@ -693,6 +820,8 @@ $(document).ready(function(){
                 $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
                 $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
                 $('#custo_modular').val(data.custo_modular);
+                console.log(data.id_estudo);
+                $('#id_estudo').val(data.id_estudo);
 
                 // Imagem
                 if (data.imagem_base64) {

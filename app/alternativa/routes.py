@@ -14,12 +14,15 @@ def format_date(value, fmt='%d/%m/%Y'):
         return '—'
     return value.strftime(fmt)
 
+
 def calc_prop(form):
     dif_dem_fp = form.dem_fp_dep.data - form.dem_fp_ant.data
     dif_dem_p = form.dem_p_dep.data - form.dem_p_ant.data
     dif_dem = max(dif_dem_p, dif_dem_fp)
     prop = dif_dem / form.demanda_disponivel_ponto.data
     return prop
+
+
 def get_fator_k(subgrupo, data, edp):
     fator_k = FatorK.query.filter(
         and_(
@@ -148,9 +151,15 @@ def editar(id_alternativa):
         elif isinstance(letra_alternativa, str) and len(letra_alternativa) > 1:
             letra_alternativa = letra_alternativa.strip("() ").replace("'", "").replace(",", "")
 
-        # Retornar dados da alternativa como JSON para popular o formulário
+        # circuito = alternativa_obj.circuito
+        # if isinstance(circuito, (list, tuple)):
+        #     circuito = circuito[0] if circuito else None
+        # elif isinstance(letra_alternativa, str) and len(letra_alternativa) > 1:
+        #     circuito = circuito.strip("() ").replace("'", "").replace(",", "")
+
         return jsonify({
             'id_circuito': alternativa_obj.id_circuito,
+            'id_estudo': alternativa_obj.id_estudo,
             'descricao': alternativa_obj.descricao,
             'dem_fp_ant': float(alternativa_obj.dem_fp_ant) if alternativa_obj.dem_fp_ant else None,
             'dem_p_ant': float(alternativa_obj.dem_p_ant) if alternativa_obj.dem_p_ant else None,
@@ -172,15 +181,15 @@ def editar(id_alternativa):
             'imagem_base64': imagem_base64,
             'letra_alternativa': letra_alternativa,
             'id_k': alternativa_obj.id_k,
-            'proporcionalidade': alternativa_obj.proporcionalidade
-        })
+            'proporcionalidade': alternativa_obj.proporcionalidade})
 
     # POST - Atualizar alternativa
     form = AlternativaForm()
-
     if form.validate_on_submit():
+        print('vou tentar atualizar a alternativa')
         try:
             estudo = Estudo.query.get_or_404(form.id_estudo.data)
+            alternativa_obj.id_estudo = form.id_estudo.data
             alternativa_obj.id_circuito = form.id_circuito.data
             alternativa_obj.descricao = form.descricao.data
             alternativa_obj.dem_fp_ant = form.dem_fp_ant.data
@@ -192,24 +201,26 @@ def editar(id_alternativa):
             alternativa_obj.flag_menor_custo_global = form.flag_menor_custo_global.data
             alternativa_obj.flag_alternativa_escolhida = form.flag_alternativa_escolhida.data
             alternativa_obj.custo_modular = form.custo_modular.data
-            alternativa_obj.id_estudo = form.id_estudo.data
             alternativa_obj.observacao = form.observacao.data
             alternativa_obj.ERD = form.ERD.data
             alternativa_obj.demanda_disponivel_ponto = form.demanda_disponivel_ponto.data
             alternativa_obj.letra_alternativa = form.letra_alternativa.data
-            alternativa_obj.id_k = get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
+            alternativa_obj.id_k = get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp)
             alternativa_obj.proporcionalidade = calc_prop(form)
 
             db.session.commit()
             flash('Alternativa atualizada com sucesso!', 'success')
 
         except IntegrityError as e:
+            print(e)
             db.session.rollback()
-            flash('Erro ao atualizar alternativa. Verifique se os dados estão corretos.', 'error')
+            flash(f'Erro ao atualizar alternativa. Verifique se os dados estão corretos. {str(e)}', 'error')
         except Exception as e:
+            print(e)
             db.session.rollback()
             flash(f'Erro inesperado: {str(e)}', 'error')
     else:
+        print(form.errors.items())
         for field, errors in form.errors.items():
             for error in errors:
                 flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'error')
