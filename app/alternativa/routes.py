@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models import Alternativa, Estudo, Circuito, db, FatorK
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
-from sqlalchemy import func, and_
+from sqlalchemy import literal_column, and_
 
 alternativa_bp = Blueprint('alternativa', __name__, template_folder='templates')
 
@@ -14,14 +14,19 @@ def format_date(value, fmt='%d/%m/%Y'):
         return '—'
     return value.strftime(fmt)
 
-
+def calc_prop(form):
+    dif_dem_fp = form.dem_fp_dep.data - form.dem_fp_ant.data
+    dif_dem_p = form.dem_p_dep.data - form.dem_p_ant.data
+    dif_dem = max(dif_dem_p, dif_dem_fp)
+    prop = dif_dem / form.demanda_disponivel_ponto.data
+    return prop
 def get_fator_k(subgrupo, data, edp):
     fator_k = FatorK.query.filter(
         and_(
             FatorK.id_edp == edp,
             FatorK.subgrupo_tarif == subgrupo,
             FatorK.data_ref <= data,
-            func.DATEADD('day', 365, FatorK.data_ref) >= data
+            literal_column("DATEADD(day, 365, data_ref)") >= data,
         )
     ).order_by(FatorK.data_ref.desc()).first()
     return fator_k.id_k
@@ -56,6 +61,7 @@ def listar(id_estudo):
     form.dem_p_ant.data = max(estudo.dem_carga_atual_p, estudo.dem_ger_atual_p)
     form.dem_fp_dep.data = max(estudo.dem_carga_solicit_fp, estudo.dem_ger_solicit_fp)
     form.dem_p_dep.data = max(estudo.dem_carga_solicit_p, estudo.dem_ger_solicit_p)
+
     form.latitude_ponto_conexao.data = estudo.latitude_cliente
     form.longitude_ponto_conexao.data = estudo.longitude_cliente
 
@@ -70,6 +76,8 @@ def listar(id_estudo):
             if arquivo:
                 blob = arquivo.read()
                 print('reconheci um arquivo')
+
+
             # Criar novo estudo
             nova_alternativa = Alternativa(
                 id_circuito=form.id_circuito.data,
@@ -84,14 +92,14 @@ def listar(id_estudo):
                 flag_alternativa_escolhida=form.flag_alternativa_escolhida.data,
                 flag_carga=form.flag_carga.data,
                 flag_geracao=form.flag_geracao.data,
-                flag_fluxo=form.flag_fluxo_reverso.data,
-                proporcionalide=form.proporcionalidade.data,
+                flag_fluxo_reverso=form.flag_fluxo_reverso.data,
+                proporcionalidade=calc_prop(form),
                 letra_alternativa=form.letra_alternativa.data,
-                custo_modular=form.custo_modular.data,
+                custo_modular=float(str(form.custo_modular.data).replace('.', '').replace(',', '.').replace('R$','').replace(' ', '')),
                 id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
                 id_estudo=id_estudo,
                 observacao=form.observacao.data,
-                ERD=form.ERD.data,
+                ERD=float(str(form.ERD.data).replace('.', '').replace(',', '.').replace('R$','').replace(' ', '')),
                 demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
                 blob_image=blob
 
@@ -121,11 +129,17 @@ def listar(id_estudo):
     )
 
 
-@alternativa_bp.route('/alternativas/<int:id>/editar', methods=['GET', 'POST'])
+@alternativa_bp.route('/alternativas/<id_alternativa>', methods=['GET', 'POST'])
 @requires_permission('editar')
-def editar(id):
+def editar(id_alternativa):
     """Editar alternativa existente"""
-    alternativa_obj = Alternativa.query.get_or_404(id)
+    alternativa_obj = Alternativa.query.get_or_404(id_alternativa)
+
+    if not alternativa_obj:
+        return jsonify({'error': 'Alternativa não encontrada'}), 404
+
+    import base64
+    imagem_base64 = base64.b64encode(alternativa_obj.blob_image).decode('utf-8') if alternativa_obj.blob_image else None
 
     if request.method == 'GET':
         # Retornar dados da alternativa como JSON para popular o formulário
@@ -142,12 +156,17 @@ def editar(id):
                 alternativa_obj.longitude_ponto_conexao) if alternativa_obj.longitude_ponto_conexao else None,
             'flag_menor_custo_global': alternativa_obj.flag_menor_custo_global,
             'flag_alternativa_escolhida': alternativa_obj.flag_alternativa_escolhida,
+            'flag_carga': alternativa_obj.flag_carga,
+            'flag_geracao': alternativa_obj.flag_geracao,
+            'flag_fluxo_reverso': alternativa_obj.flag_fluxo_reverso,
             'custo_modular': float(alternativa_obj.custo_modular) if alternativa_obj.custo_modular else None,
-            'id_estudo': alternativa_obj.id_estudo,
             'observacao': alternativa_obj.observacao,
             'ERD': float(alternativa_obj.ERD) if alternativa_obj.ERD else None,
-            'demanda_disponivel_ponto': float(
-                alternativa_obj.demanda_disponivel_ponto) if alternativa_obj.demanda_disponivel_ponto else None
+            'demanda_disponivel_ponto': float(alternativa_obj.demanda_disponivel_ponto) if alternativa_obj.demanda_disponivel_ponto else None,
+            'imagem_base64': imagem_base64,
+            'letra_alternativa': alternativa_obj.letra_alternativa,
+            'id_k': alternativa_obj.id_k,
+            'proporcionalidade': alternativa_obj.proporcionalidade
         })
 
     # POST - Atualizar alternativa
@@ -155,6 +174,7 @@ def editar(id):
 
     if form.validate_on_submit():
         try:
+            estudo = Estudo.query.get_or_404(form.id_estudo.data)
             alternativa_obj.id_circuito = form.id_circuito.data
             alternativa_obj.descricao = form.descricao.data
             alternativa_obj.dem_fp_ant = form.dem_fp_ant.data
@@ -170,6 +190,9 @@ def editar(id):
             alternativa_obj.observacao = form.observacao.data
             alternativa_obj.ERD = form.ERD.data
             alternativa_obj.demanda_disponivel_ponto = form.demanda_disponivel_ponto.data
+            alternativa_obj.letra_alternativa = form.letra_alternativa.data,
+            alternativa_obj.id_k = get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
+            alternativa_obj.proporcionalidade = calc_prop(form)
 
             db.session.commit()
             flash('Alternativa atualizada com sucesso!', 'success')
@@ -185,96 +208,30 @@ def editar(id):
             for error in errors:
                 flash(f'Erro no campo {getattr(form, field).label.text}: {error}', 'error')
 
-    return redirect(url_for('alternativa.listar'))
+    return redirect(url_for('alternativa.listar', id_estudo=alternativa_obj.id_estudo))
 
 
-@alternativa_bp.route('/alternativas/<int:id>/excluir', methods=['DELETE'])
+@alternativa_bp.route('/alternativas/excluir/<int:id>', methods=['DELETE'])
 @requires_permission('deletar')
-def excluir(id):
-    """Excluir alternativa"""
+def excluir_alternativa(id):
     try:
-        alternativa_obj = Alternativa.query.get_or_404(id)
+        alt = Alternativa.query.get_or_404(id)
+        if not alt:
+            return jsonify({'error': 'Alternativa não encontrada'}), 404
 
         # Verificar se há obras relacionadas
-        if alternativa_obj.obras:
+        if alt.obras:
             return jsonify({
                 'success': False,
-                'message': f'Não é possível excluir esta alternativa pois ela possui {len(alternativa_obj.obras)} obra(s) relacionada(s).'
+                'message': f'Não é possível excluir esta alternativa pois ela possui {len(alt.obras)} obra(s) relacionada(s).'
             }), 400
 
-        db.session.delete(alternativa_obj)
+        db.session.delete(alt)
         db.session.commit()
-
-        return jsonify({
-            'success': True,
-            'message': 'Alternativa excluída com sucesso!'
-        })
-
+        return jsonify({'status': 'ok'})
     except Exception as e:
         db.session.rollback()
         return jsonify({
             'success': False,
             'message': f'Erro ao excluir alternativa: {str(e)}'
         }), 500
-
-
-@alternativa_bp.route('/alternativas/<int:id>/')
-@requires_permission('visualizar')
-def visualizar(id):
-    """Visualizar detalhes da alternativa"""
-    alternativa_obj = Alternativa.query.get_or_404(id)
-
-    html_content = f"""
-    <div class="row">
-        <div class="col-md-6">
-            <h6 class="text-primary">Informações Básicas</h6>
-            <table class="table table-sm">
-                <tr><td><strong>ID:</strong></td><td>{alternativa_obj.id_alternativa}</td></tr>
-                <tr><td><strong>Descrição:</strong></td><td>{alternativa_obj.descricao or 'N/A'}</td></tr>
-                <tr><td><strong>Estudo:</strong></td><td>{alternativa_obj.estudo.nome if alternativa_obj.estudo else 'N/A'}</td></tr>
-                <tr><td><strong>Circuito:</strong></td><td>{alternativa_obj.circuito.nome if alternativa_obj.circuito else 'N/A'}</td></tr>
-                <tr><td><strong>Custo Modular:</strong></td><td>R$ {"{:,.2f}".format(alternativa_obj.custo_modular) if alternativa_obj.custo_modular else 'N/A'}</td></tr>
-            </table>
-
-            <h6 class="text-primary mt-3">Status</h6>
-            <table class="table table-sm">
-                <tr><td><strong>Menor Custo Global:</strong></td><td>{'Sim' if alternativa_obj.flag_menor_custo_global else 'Não'}</td></tr>
-                <tr><td><strong>Alternativa Escolhida:</strong></td><td>{'Sim' if alternativa_obj.flag_alternativa_escolhida else 'Não'}</td></tr>
-            </table>
-        </div>
-
-        <div class="col-md-6">
-            <h6 class="text-primary">Demandas</h6>
-            <table class="table table-sm">
-                <tr><td><strong>Dem. FP Anterior:</strong></td><td>{alternativa_obj.dem_fp_ant or 'N/A'}</td></tr>
-                <tr><td><strong>Dem. P Anterior:</strong></td><td>{alternativa_obj.dem_p_ant or 'N/A'}</td></tr>
-                <tr><td><strong>Dem. FP Depois:</strong></td><td>{alternativa_obj.dem_fp_dep or 'N/A'}</td></tr>
-                <tr><td><strong>Dem. P Depois:</strong></td><td>{alternativa_obj.dem_p_dep or 'N/A'}</td></tr>
-                <tr><td><strong>Dem. Disponível Ponto:</strong></td><td>{alternativa_obj.demanda_disponivel_ponto or 'N/A'}</td></tr>
-            </table>
-
-            <h6 class="text-primary mt-3">Localização</h6>
-            <table class="table table-sm">
-                <tr><td><strong>Latitude:</strong></td><td>{alternativa_obj.latitude_ponto_conexao or 'N/A'}</td></tr>
-                <tr><td><strong>Longitude:</strong></td><td>{alternativa_obj.longitude_ponto_conexao or 'N/A'}</td></tr>
-            </table>
-
-            <h6 class="text-primary mt-3">Outros</h6>
-            <table class="table table-sm">
-                <tr><td><strong>ERD:</strong></td><td>{alternativa_obj.ERD or 'N/A'}</td></tr>
-            </table>
-        </div>
-    </div>
-
-    {f'<div class="row mt-3"><div class="col-12"><h6 class="text-primary">Observações</h6><p>{alternativa_obj.observacao}</p></div></div>' if alternativa_obj.observacao else ''}
-
-    <div class="row mt-3">
-        <div class="col-12">
-            <h6 class="text-primary">Obras Relacionadas</h6>
-            {f'<p>Esta alternativa possui {len(alternativa_obj.obras)} obra(s) relacionada(s).</p>' if alternativa_obj.obras else '<p>Nenhuma obra relacionada.</p>'}
-        </div>
-    </div>
-    """
-
-    return html_content
-

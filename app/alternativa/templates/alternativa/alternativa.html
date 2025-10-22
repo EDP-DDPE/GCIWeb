@@ -284,7 +284,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Alternativas</h3>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#alternativaModal">
+                    <button type="button" class="btn btn-primary btn-alternativa" data-mode="nova">
                         <i class="fas fa-plus"></i> Nova Alternativa
                     </button>
                 </div>
@@ -328,20 +328,17 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-info"
-                                                    onclick="visualizarAlternativa({{ alternativa.id_alternativa }})"
+                                            <button type="button" class="btn btn-sm btn-info btn-alternativa"
+                                                    data-id="{{ alternativa.id_alternativa }}"
+                                                    data-mode="visualizar"
                                                     title="Visualizar">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-warning"
-                                                    onclick="editarAlternativa({{ alternativa.id_alternativa }})"
+                                            <button type="button" class="btn btn-sm btn-warning btn-alternativa"
+                                                    data-id="{{ alternativa.id_alternativa }}"
+                                                    data-mode="editar"
                                                     title="Editar">
                                                 <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="excluirAlternativa({{ alternativa.id_alternativa }})"
-                                                    title="Excluir">
-                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -521,9 +518,6 @@
                                     {{ form.letra_alternativa(class="form-control", id="letra_select") }}
                                 </div>
                             </div>
-
-
-
                         </div>
                     </div>
 
@@ -538,27 +532,10 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <button type="button" class="btn btn-danger" id="btnExcluirAlternativa" style="display: none;">Excluir</button>
+                    <button type="submit" class="btn btn-primary" id="salvar_alternativa">Salvar</button>
                 </div>
             </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Visualização -->
-<div class="modal fade" id="visualizarModal" tabindex="-1" aria-labelledby="visualizarModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="visualizarModalLabel">Detalhes da Alternativa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="conteudoVisualizacao">
-                <!-- Conteúdo será carregado via JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-            </div>
         </div>
     </div>
 </div>
@@ -568,6 +545,13 @@
 
 <script>
 $(document).ready(function(){
+
+    $(document).on('mousedown', '.btn-alternativa', function() {
+        $(this).addClass('active'); // efeito visual Bootstrap
+    });
+    $(document).on('mouseup mouseleave', '.btn-alternativa', function() {
+        $(this).removeClass('active');
+    });
 
     $('#subgrupo_select').change(function() {
         atualiza_ERD()
@@ -639,7 +623,125 @@ $(document).ready(function(){
             reader.readAsDataURL(file);
         }
     }
+
+    $(document).on('click', '.btn-alternativa', function() {
+        var modo = $(this).data('mode');
+        var id = $(this).data('id');
+
+        // sempre esconde antes de abrir
+        $('#btnExcluirAlternativa').hide();
+
+        // Mostra loading
+        $('#loadingOverlay').fadeIn(150);
+
+         if (modo === 'editar') {
+            $('#btnExcluirAlternativa').show().data('id', id);
+         }
+
+        // Limpa o formulário antes de usar
+        $('#formAlternativa')[0].reset();
+        $('#preview_imagem').hide().attr('src', '');
+        $('#imagem_alternativa').val('');
+
+        // Define o título e comportamento
+        if (modo === 'nova') {
+            $('#alternativaModalLabel').text('Nova Alternativa');
+            $('#formAlternativa').attr('action', '/alternativas/nova');
+            $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
+            $('.btn-primary', '#alternativaModal').show();
+
+            // Oculta loading e mostra modal
+            setTimeout(() => {
+                $('#loadingOverlay').fadeOut(150);
+                $('#alternativaModal').modal('show');
+            }, 300);
+
+            $('#alternativaModal').modal('show');
+        }
+        else {
+            // Busca os dados no servidor
+            $.get('/alternativas/' + id, function(data) {
+                // Preenche os campos (use os IDs ou names conforme o seu form)
+                $('#circuito_select').val(data.id_circuito);
+                $('#letra_select').val(data.letra_alternativa);
+                $('#ERD').val(data.ERD);
+                $('#dem_p_antes').val(data.dem_p_ant);
+                $('#dem_p_depois').val(data.dem_p_dep);
+                $('#dem_fp_antes').val(data.dem_fp_ant);
+                $('#dem_fp_depois').val(data.dem_fp_dep);
+                $('#dem_disponivel').val(data.demanda_disponivel_ponto);
+                $('#descricao').val(data.descricao);
+                $('#observacao').val(data.observacao);
+                $('#flag_carga').prop('checked', data.flag_carga);
+                $('#flag_geracao').prop('checked', data.flag_geracao);
+                $('#flag_fluxo_reverso').prop('checked', data.flag_fluxo_reverso);
+                $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
+                $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
+                $('#custo_modular').val(data.custo_modular);
+
+                // Imagem
+                if (data.imagem_base64) {
+                    $('#preview_imagem').attr('src', 'data:image/jpeg;base64,' + data.imagem_base64).show();
+                } else {
+                    $('#preview_imagem').hide();
+                }
+
+                // Modo editar ou visualizar
+                if (modo === 'editar') {
+                    $('#alternativaModalLabel').text('Editar Alternativa');
+                    $('#formAlternativa').attr('action', '/alternativas/' + id);
+                    $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
+                    $('.btn-primary', '#alternativaModal').show();
+                } else {
+                    $('#alternativaModalLabel').text('Visualizar Alternativa');
+                    $('#salvar_alternativa', '#alternativaModal').hide();
+                    $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', true);
+                }
+
+                $('#loadingOverlay').fadeOut(200, function() {
+                        $('#alternativaModal').modal('show');
+                });
+            })
+            .fail(function(xhr) {
+                    $('#loadingOverlay').fadeOut(200);
+                    alert('Erro ao carregar dados: ' + xhr.responseText);
+                });
+        }
+    });
+
+    // === Evento de exclusão ===
+    $('#btnExcluirAlternativa').on('click', function() {
+        var id = $(this).data('id');
+
+        if (!id) {
+            alert('Nenhuma alternativa selecionada.');
+            return;
+        }
+
+        // Confirmação
+        if (!confirm('Tem certeza que deseja excluir esta alternativa? Essa ação não poderá ser desfeita.')) {
+            return;
+        }
+
+        // Requisição AJAX
+        $.ajax({
+            url: '/alternativas/excluir/' + id,
+            type: 'DELETE',
+            success: function(resp) {
+                alert('Alternativa excluída com sucesso!');
+                $('#alternativaModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                console.error(xhr.responseText);
+                alert('Erro ao excluir alternativa: ' + xhr.responseText);
+            }
+        });
+    });
+
 });
+
+
 
 function atualiza_ERD() {
 
@@ -679,6 +781,13 @@ function atualiza_ERD() {
 </script>
 
 <style>
+
+.btn-alternativa.active {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: all 0.1s ease-in-out;
+}
+
 /* Gradientes personalizados
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
