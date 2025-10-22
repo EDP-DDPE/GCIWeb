@@ -138,6 +138,31 @@
         .select2-selection__clear {
             display: none !important;
         }
+
+        .loading-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(2px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 2000;
+        }
+
+        .spinner {
+          width: 64px;
+          height: 64px;
+          border: 6px solid #d1d1d1;
+          border-top-color: #0d6efd;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -216,6 +241,10 @@
     <!-- Main Content -->
     <main class="container-fluid">
         {% block content %}{% endblock %}
+
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+          <div class="spinner"></div>
+        </div>
     </main>
 
     <!-- Footer -->
