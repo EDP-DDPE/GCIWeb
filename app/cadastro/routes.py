@@ -116,7 +116,7 @@ def cadastro_estudo():
                 descricao=form.descricao.data,
 
                 id_tensao=form.tensao.data,
-                instalacao=int(form.instalacao.data),
+                instalacao=int(form.instalacao.data) if form.instalacao.data else 0,
                 n_alternativas=form.n_alternativas.data or 0,
                 dem_carga_atual_fp=form.dem_carga_atual_fp.data or 0,
                 dem_carga_atual_p=form.dem_carga_atual_p.data or 0,
