@@ -562,6 +562,7 @@ function setupColumnResizing() {
         modal.show();
 
         // Requisição AJAX para pegar os dados
+        console.log('ID tipo_solicitacaoId:', tipo_solicitacaoId);
         $.get(`/tipo_solicitacao/${tipo_solicitacaoId}/api`)
             
             .done(function(data) {
@@ -571,6 +572,7 @@ function setupColumnResizing() {
                     $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
                     return;
                 }
+                console.log('ID HTML:', data.id);
     
                 // HTML do modal com apenas tensao editável
                 const editarHtml = `
@@ -584,19 +586,19 @@ function setupColumnResizing() {
                                     <div class="card-body">
                                         <div class="mb-3">
                                             <label class="form-label"><strong>ID:</strong></label>
-                                            <input type="text" class="form-control" value="${data.id ? 'selected' : ''}" readonly>
+                                            <input type="text" class="form-control" value="${data.id}" readonly>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label"><strong>Viabilidade:</strong></label>
-                                            <input type="text" class="form-control" value="${data.viabilidade ? 'selected' : ''}" required>
+                                            <input type="text" name="viabilidade" class="form-control" value="${data.viabilidade || ''}" required>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label"><strong>Análise:</strong></label>
-                                            <input type="text" class="form-control" value="${data.analise ? 'selected' : ''}" required>
+                                            <input type="text" name="analise" class="form-control" value="${data.analise || ''}" required>
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label"><strong>Pedido:</strong></label>
-                                            <input type="text" class="form-control" value="${data.pedido ? 'selected' : ''}" required>
+                                            <input type="text" name="pedido" class="form-control" value="${data.pedido || ''}" required>
                                         </div>
                                     </div>
                                 </div>
@@ -625,8 +627,8 @@ function setupColumnResizing() {
 
     function salvarEdicao() {
         const form = document.getElementById('formEdicao');
-        const circuitoId = form.getAttribute('data-circuito-id');
-        console.log('circuitoId:', circuitoId);
+        const tipo_solicitacaoId = form.getAttribute('data-tipo_solicitacao-id');
+        console.log('tipoisolicitacao-Id:', tipo_solicitacaoId);
         const formData = new FormData(form);
     
         // Converter FormData para objeto
@@ -636,7 +638,7 @@ function setupColumnResizing() {
         });
     
         $.ajax({
-            url: `/circuitos/${circuitoId}/editar`,
+            url: `/tipo_solicitacao/${tipo_solicitacaoId}/editar`,
             method: 'POST', // ou 'PATCH' dependendo da sua API
             data: JSON.stringify(data),
             contentType: 'application/json',
@@ -660,7 +662,7 @@ function setupColumnResizing() {
     
 function confirmarExclusao() {
     const form = document.getElementById('formEdicao');
-    const circuitoId = form.getAttribute('data-circuito-id');
+    const tipo_solicitacaoId = form.getAttribute('data-tipo_solicitacao-id');
     
     // Primeira confirmação
     if (!confirm('Tem certeza que deseja excluir este circuito? Esta operação não pode ser desfeita.')) {
@@ -675,23 +677,22 @@ function confirmarExclusao() {
     }
     
     $.ajax({
-        url: `/circuitos/${circuitoId}/excluir`,
+        url: `/tipo_solicitacao/${tipo_solicitacaoId}/excluir`,
         method: 'POST',
         success: function(response) {
             bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
-            alert('✅ Circuito excluído com sucesso!');
+            alert('✅ Tipo de solicitação excluído com sucesso!');
             location.reload();
         },
         error: function(xhr, status, error) {
-            let mensagemErro = '❌ Erro ao excluir o circuito!';
+            let mensagemErro = '❌ Erro ao excluir o tipo de solicitação!';
             
             // Tenta pegar a mensagem do servidor
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 mensagemErro = xhr.responseJSON.message;
             } else if (xhr.status === 409) {
                 mensagemErro = '❌ Não é possível excluir este circuito!\n\n' +
-                               'Existem registros relacionados na tabela de Alternativas.\n\n' +
-                               '⚠️ Remova todos os registros relacionados antes de excluir o circuito.';
+                               'Existem registros relacionados na tabela de Estudos.\n\n';
             }
             
             alert(mensagemErro);
@@ -703,6 +704,7 @@ function confirmarExclusao() {
     
 function abrirModalAdicionar() {
     const $modalBody = $('#modalAdicionarBody');
+    
     // Spinner enquanto carrega
     $modalBody.html(`
         <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
@@ -711,221 +713,155 @@ function abrirModalAdicionar() {
             </div>
         </div>
     `);
+    
     const modal = new bootstrap.Modal($('#modalAdicionar')[0]);
     modal.show();
-    // Busca lista de ESTADOS (EDPs)
-    $.get('/circuitos/edps/api')
-        .done(function (edps) {
-            let edpOptions = edps.map(edp =>
-                `<option value="${edp.id}">${edp.empresa}</option>`
-            ).join('');
-            // HTML dinâmico do formulário
-            const addHtml = `
-                <form id="formAdicionar" novalidate>
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-secondary text-white">
-                            <i class="fas fa-info-circle me-2"></i>Novo Circuito
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Estado (EDP):</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="id_edp" id="edp-select" required>
-                                    <option value="">Selecione...</option>
-                                    ${edpOptions}
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Subestação:</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="id_subestacao" id="subestacao-select" disabled required>
-                                    <option value="">Selecione o Estado primeiro...</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Circuito:</strong> <span class="text-danger">*</span></label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    name="circuito"
-                                    id="campo-circuito"
-                                    disabled
-                                    placeholder="Selecione Estado e Subestação"
-                                    required
-                                >
-                                <span class="form-text text-muted" id="dica-circuito"></span>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Tensão:</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="tensao" id="tensao-select" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="11.4">11.4 kV</option>
-                                    <option value="13.2">13.2 kV</option>
-                                    <option value="13.8">13.8 kV</option>
-                                    <option value="34.5">34.5 kV</option>
-                                </select>
-                            </div>
+    
+    // HTML simples - apenas campos de texto obrigatórios
+    const addHtml = `
+        <form id="formAdicionar" novalidate>
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-plus-circle me-2"></i>Novo Tipo de Solicitação
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Viabilidade:</strong> <span class="text-danger">*</span></label>
+                        <input 
+                            type="text" 
+                            name="viabilidade" 
+                            id="campo-viabilidade"
+                            class="form-control" 
+                            placeholder="Digite a viabilidade"
+                            required
+                        >
+                        <div class="invalid-feedback">
+                            Por favor, preencha o campo Viabilidade.
                         </div>
                     </div>
-                </form>
-            `;
-            $modalBody.html(addHtml);
-            // Inicializa Select2 dentro do modal
-            $('#edp-select, #subestacao-select, #tensao-select').select2({
-                theme: 'bootstrap-5',
-                placeholder: 'Selecione...',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: $('#modalAdicionar')
-            });
-            // Quando muda o Estado (EDP), carregar Subestações
-            $('#edp-select').on('change', function () {
-                const edpId = $(this).val();
-                const $sub = $('#subestacao-select');
-                const $circuito = $('#campo-circuito');
-                const $dica = $('#dica-circuito');
-                $sub
-                    .prop('disabled', true)
-                    .html('<option>Carregando...</option>')
-                    .trigger('change');
-                if (!edpId) {
-                    $sub.html('<option value="">Selecione o Estado primeiro...</option>').prop('disabled', true);
-                    $circuito.prop('disabled', true).val('');
-                    $dica.text('');
-                    return;
-                }
-                // Buscar subestações válidas
-                $.get(`/circuitos/subestacoes/api/${edpId}`)
-                    .done(function (subs) {
-                        if (!subs.length) {
-                            $sub.html('<option value="">Nenhuma subestação disponível</option>').prop('disabled', true);
-                        } else {
-                            const options = '<option value="">Selecione...</option>' + subs.map(s =>
-                                `<option value="${s.id}" data-sigla="${s.sigla}">${s.nome}</option>`
-                            ).join('');
-                            $sub.html(options).prop('disabled', false);
-                        }
-                        $sub.trigger('change.select2');
-                    })
-                    .fail(function () {
-                        $sub.html('<option value="">Erro ao carregar subestações</option>').prop('disabled', true);
-                    });
-            });
-            // Quando muda Subestação → habilitar campo Circuito
-            $modalBody.on('change', '#subestacao-select', prepararCampoCircuito);
-            // Valida formato dinamicamente conforme a digitação
-            $modalBody.on('input', '#campo-circuito', function () {
-                let edp = $("#edp-select option:selected").text().trim();
-                let $sub = $("#subestacao-select option:selected");
-                let sigla = $sub.data('sigla');
-                let valor = $(this).val().replace(/\s+/g, ' ');
-                const $dica = $('#dica-circuito');
-                if (!sigla) return;
-                if (edp === 'ES') {
-                    // Exemplo: ABC01 (2 números obrigatórios)
-                    const regex = new RegExp(`^${sigla}\\d{0,2}$`);
-                    if (!regex.test(valor)) {
-                        if (!valor.startsWith(sigla))
-                            $(this).val(sigla);
-                    }
-                    $dica.text(`Formato: ${sigla}NN (2 números obrigatórios, ex: ${sigla}03)`);
-                } else if (edp === 'SP') {
-                    // Exemplo: RABC 0001 (4 números obrigatórios)
-                    const prefixo = `R${sigla} `;
-                    const regex = new RegExp(`^${prefixo}\\d{0,4}$`);
-                    if (!regex.test(valor)) {
-                        if (!valor.startsWith(prefixo))
-                            $(this).val(prefixo);
-                    }
-                    $dica.text(`Formato: ${prefixo}NNNN (4 números obrigatórios, ex: ${prefixo}0001)`);
-                }
-            });
-            // Controla habilitação e prefixo do campo Circuito
-            function prepararCampoCircuito() {
-                let edp = $("#edp-select option:selected").text().trim();
-                let $subOpt = $("#subestacao-select option:selected");
-                let sigla = $subOpt.data('sigla');
-                let $campo = $('#campo-circuito');
-                let $dica = $('#dica-circuito');
-                if (!$("#edp-select").val() || !$("#subestacao-select").val() || !sigla) {
-                    $campo.prop('disabled', true).val('');
-                    $dica.text('Selecione primeiro o Estado e depois a Subestação.');
-                    return;
-                }
-                if (edp === 'ES') {
-                    $campo.prop('disabled', false)
-                        .val(sigla)
-                        .attr('maxlength', sigla.length + 2);
-                    $dica.text(`Formato: ${sigla}NN (2 números obrigatórios)`);
-                } else if (edp === 'SP') {
-                    let prefixo = `R${sigla} `;
-                    $campo.prop('disabled', false)
-                        .val(prefixo)
-                        .attr('maxlength', prefixo.length + 4);
-                    $dica.text(`Formato: ${prefixo}NNNN (4 números obrigatórios)`);
-                } else {
-                    $campo.prop('disabled', true).val('');
-                    $dica.text('Selecione um Estado válido (ES ou SP).');
-                }
-            }
-            // 🔹 Removeu o botão de salvar — o submit será tratado externamente
-        })
-        .fail(function () {
-            $modalBody.html('<div class="alert alert-danger">Erro ao carregar EDPs!</div>');
-        });
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Análise:</strong> <span class="text-danger">*</span></label>
+                        <input 
+                            type="text" 
+                            name="analise" 
+                            id="campo-analise"
+                            class="form-control" 
+                            placeholder="Digite a análise"
+                            required
+                        >
+                        <div class="invalid-feedback">
+                            Por favor, preencha o campo Análise.
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Pedido:</strong> <span class="text-danger">*</span></label>
+                        <input 
+                            type="text" 
+                            name="pedido" 
+                            id="campo-pedido"
+                            class="form-control" 
+                            placeholder="Digite o pedido"
+                            required
+                        >
+                        <div class="invalid-feedback">
+                            Por favor, preencha o campo Pedido.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    `;
+    
+    $modalBody.html(addHtml);
 }
-function salvarNovoCircuito() {
+
+function salvarNovoTipoSolicitacao() {
     const form = document.getElementById('formAdicionar');
-    // Validação HTML5
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-    // 🔹 VALIDAÇÃO CUSTOMIZADA: Quantidade de dígitos
-    const edp = $("#edp-select option:selected").text().trim();
-    const sigla = $("#subestacao-select option:selected").data('sigla');
-    const circuito = $('#campo-circuito').val().trim();
-    if (edp === 'ES') {
-        // Deve ter exatamente 2 números após a sigla
-        const regex = new RegExp(`^${sigla}\\d{2}$`);
-        if (!regex.test(circuito)) {
-            alert(`❌ Para ES, o circuito deve ter exatamente 2 números.\nExemplo: ${sigla}01`);
-            $('#campo-circuito').focus();
-            return;
-        }
-    } else if (edp === 'SP') {
-        // Deve ter exatamente 4 números após "R[SIGLA] "
-        const prefixo = `R${sigla} `;
-        const regex = new RegExp(`^${prefixo}\\d{4}$`);
-        if (!regex.test(circuito)) {
-            alert(`❌ Para SP, o circuito deve ter exatamente 4 números.\nExemplo: ${prefixo}0001`);
-            $('#campo-circuito').focus();
-            return;
-        }
+    
+    // Remove classes de validação anteriores
+    form.classList.remove('was-validated');
+    
+    // Validação manual com mensagens personalizadas
+    const viabilidade = document.getElementById('campo-viabilidade');
+    const analise = document.getElementById('campo-analise');
+    const pedido = document.getElementById('campo-pedido');
+    
+    let camposVazios = [];
+    
+    if (!viabilidade.value.trim()) {
+        camposVazios.push('Viabilidade');
+        viabilidade.classList.add('is-invalid');
     } else {
-        alert('❌ Estado inválido. Selecione ES ou SP.');
+        viabilidade.classList.remove('is-invalid');
+    }
+    
+    if (!analise.value.trim()) {
+        camposVazios.push('Análise');
+        analise.classList.add('is-invalid');
+    } else {
+        analise.classList.remove('is-invalid');
+    }
+    
+    if (!pedido.value.trim()) {
+        camposVazios.push('Pedido');
+        pedido.classList.add('is-invalid');
+    } else {
+        pedido.classList.remove('is-invalid');
+    }
+    
+    // Se houver campos vazios, mostra alerta
+    if (camposVazios.length > 0) {
+        alert(`⚠️ Por favor, preencha o(s) seguinte(s) campo(s) obrigatório(s):\n\n• ${camposVazios.join('\n• ')}`);
+        
+        // Foca no primeiro campo vazio
+        if (!viabilidade.value.trim()) {
+            viabilidade.focus();
+        } else if (!analise.value.trim()) {
+            analise.focus();
+        } else if (!pedido.value.trim()) {
+            pedido.focus();
+        }
+        
         return;
     }
-    // Se passou na validação, envia os dados
+    
+    // Coleta os dados
     const formData = new FormData(form);
     const data = {};
     formData.forEach((value, key) => {
-        data[key] = value;
+        data[key] = value.trim(); // Remove espaços extras
     });
+    
+    console.log('Dados a enviar:', data);
+    
+    // Envia para o backend
     $.ajax({
-        url: `/circuitos/adicionar`,
+        url: `/tipo_solicitacao/adicionar`,
         method: 'POST',
         data: JSON.stringify(data),
         contentType: 'application/json',
         success: function(response) {
+            console.log('Resposta:', response);
+            
+            // Fecha o modal
             bootstrap.Modal.getInstance(document.getElementById('modalAdicionar')).hide();
-            alert('✅ Circuito adicionado com sucesso!');
+            
+            // Mensagem de sucesso
+            alert('✅ Tipo de solicitação adicionado com sucesso!');
+            
+            // Recarrega a página
             location.reload();
         },
         error: function(xhr, status, error) {
-            alert('❌ Erro ao adicionar o circuito. Tente novamente.');
-            console.log(xhr.responseText);
+            console.error('Erro:', error);
+            console.error('Resposta do servidor:', xhr.responseText);
+            alert('❌ Erro ao adicionar. Tente novamente.');
         }
     });
 }
+
 
 
     // Funcionalidades adicionais
