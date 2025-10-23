@@ -609,6 +609,9 @@ function setupColumnResizing() {
                                                 <option value="13.2" ${data.tensao == 13.2 ? 'selected' : ''}>13.2 kV</option>
                                                 <option value="13.8" ${data.tensao == 13.8 ? 'selected' : ''}>13.8 kV</option>
                                                 <option value="34.5" ${data.tensao == 34.5 ? 'selected' : ''}>34.5 kV</option>
+                                                <option value="69" ${data.tensao == 69 ? 'selected' : ''}>69 kV</option>
+                                                <option value="88" ${data.tensao == 88 ? 'selected' : ''}>88 kV</option>
+                                                <option value="138" ${data.tensao == 138 ? 'selected' : ''}>138 kV</option>
                                             </select>
                                         </div>
                                     </div>
@@ -754,6 +757,19 @@ function abrirModalAdicionar() {
                                 </select>
                             </div>
                             <div class="mb-3">
+                                <label class="form-label"><strong>Tensão:</strong> <span class="text-danger">*</span></label>
+                                <select class="form-select" name="tensao" id="tensao-select" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="11.4">11.4 kV</option>
+                                    <option value="13.2">13.2 kV</option>
+                                    <option value="13.8">13.8 kV</option>
+                                    <option value="34.5">34.5 kV</option>
+                                    <option value="69">69 kV</option>
+                                    <option value="88">88 kV</option>
+                                    <option value="138">138 kV</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label"><strong>Circuito:</strong> <span class="text-danger">*</span></label>
                                 <input
                                     type="text"
@@ -765,16 +781,6 @@ function abrirModalAdicionar() {
                                     required
                                 >
                                 <span class="form-text text-muted" id="dica-circuito"></span>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Tensão:</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="tensao" id="tensao-select" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="11.4">11.4 kV</option>
-                                    <option value="13.2">13.2 kV</option>
-                                    <option value="13.8">13.8 kV</option>
-                                    <option value="34.5">34.5 kV</option>
-                                </select>
                             </div>
                         </div>
                     </div>
