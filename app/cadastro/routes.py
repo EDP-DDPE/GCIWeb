@@ -303,12 +303,10 @@ def editar_estudo(id_estudo):
                     db.session.delete(anexo)
 
             db.session.commit()
-            print('fui pro caminho errado')
             flash(f'Estudo {estudo.num_doc} atualizado com sucesso!', 'success')
             return redirect(url_for('alternativa.listar', id_estudo=estudo.id_estudo))
 
         except Exception as e:
-            print('deu erro no caminho errado')
             db.session.rollback()
             current_app.logger.error(f"Erro ao editar estudo: {str(e)}")
             flash('Erro ao salvar alterações. Tente novamente.', 'error')
@@ -316,7 +314,6 @@ def editar_estudo(id_estudo):
 
 
     # Preenche os dados no formulário (GET)
-    print("passei por aqui")
     # Aba Básicas
     form.num_doc.data = estudo.num_doc
     form.protocolo.data = estudo.protocolo
@@ -325,10 +322,11 @@ def editar_estudo(id_estudo):
     form.instalacao.data = estudo.instalacao
     form.tensao.data = estudo.id_tensao
     form.n_alternativas.data = estudo.n_alternativas
-    form.id_empresa.data = estudo.id_empresa
-    form.CNPJ.data = estudo.empresa.cnpj
-    form.nome_empresa.data = estudo.empresa.nome_empresa
-    form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
+    if estudo.id_empresa:
+        form.id_empresa.data = estudo.id_empresa
+        form.CNPJ.data = estudo.empresa.cnpj
+        form.nome_empresa.data = estudo.empresa.nome_empresa
+        form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
 
 
     # Aba Demandas
@@ -364,11 +362,6 @@ def editar_estudo(id_estudo):
     # Aba Observações
 
     form.observacao.data = estudo.observacao
-
-    print(form)
-    print(anexos)
-    print(estudo)
-    print("cheguei aqui")
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos)
 
 
@@ -465,20 +458,6 @@ def upload_anexo(id_estudo):
         flash('Por favor, corrija os erros no formulário.', 'error')
 
     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
-
-
-# @cadastro_bp.route("/estudos")
-# def listar_estudos():
-#     """Rota para listar estudos"""
-#     page = request.args.get('page', 1, type=int)
-#     per_page = 10
-#
-#     estudos = Estudo.query.order_by(Estudo.data_registro.desc()).paginate(
-#         page=page, per_page=per_page, error_out=False
-#     )
-#
-#     return render_template('cadastro/listar_estudos.html', estudos=estudos)
-
 
 @cadastro_bp.route("/estudos/<int:id_estudo>")
 def detalhar_estudo(id_estudo):
