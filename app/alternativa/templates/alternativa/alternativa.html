@@ -284,7 +284,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="card-title">Alternativas</h3>
-                    <button type="button" class="btn btn-primary btn-alternativa" data-mode="nova">
+                    <button type="button" class="btn btn-primary btn-alternativa" data-bs-target="#alternativaModal" data-bs-toggle="modal">
                         <i class="fas fa-plus"></i> Nova Alternativa
                     </button>
                 </div>
@@ -328,13 +328,13 @@
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-info btn-alternativa"
+                                            <button type="button" class="btn btn-sm btn-info btn-alternativa-edit"
                                                     data-id="{{ alternativa.id_alternativa }}"
                                                     data-mode="visualizar"
                                                     title="Visualizar">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-warning btn-alternativa"
+                                            <button type="button" class="btn btn-sm btn-warning btn-alternativa-edit"
                                                     data-id="{{ alternativa.id_alternativa }}"
                                                     data-mode="editar"
                                                     title="Editar">
@@ -665,10 +665,10 @@
 <script>
 $(document).ready(function(){
 
-    $(document).on('mousedown', '.btn-alternativa', function() {
+    $(document).on('mousedown', '.btn-alternativa-edit', function() {
         $(this).addClass('active'); // efeito visual Bootstrap
     });
-    $(document).on('mouseup mouseleave', '.btn-alternativa', function() {
+    $(document).on('mouseup mouseleave', '.btn-alternativa-edit', function() {
         $(this).removeClass('active');
     });
 
@@ -743,9 +743,10 @@ $(document).ready(function(){
         }
     }
 
-    $(document).on('click', '.btn-alternativa', function() {
+    $(document).on('click', '.btn-alternativa-edit', function() {
         var modo = $(this).data('mode');
         var id = $(this).data('id');
+        var id_estudo = $(#id_estudo)
 
         // sempre esconde antes de abrir
         $('#btnExcluirAlternativa').hide();
@@ -765,7 +766,7 @@ $(document).ready(function(){
         // Define o título e comportamento
         if (modo === 'nova') {
             $('#alternativaModalLabel').text('Nova Alternativa');
-            $('#formAlternativa').attr('action', '/alternativas/nova');
+            $('#formAlternativa').attr('action', '/estudo/' + id_estudo + '/alternativas/');
             $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
             $('.btn-primary', '#alternativaModal').show();
 
@@ -926,7 +927,7 @@ function atualiza_ERD() {
 
 <style>
 
-.btn-alternativa.active {
+.btn-alternativa-edit.active {
     transform: scale(0.97);
     opacity: 0.85;
     transition: all 0.1s ease-in-out;

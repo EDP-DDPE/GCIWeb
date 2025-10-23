@@ -50,7 +50,7 @@ class AlternativaForm(FlaskForm):
     dem_fp_ant = DecimalField(
         'Demanda FP Anterior (kW)',
         validators=[
-            DataRequired('A demanda FP anterior é obrigatória'),
+            Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
         ],
         places=2,
@@ -64,7 +64,7 @@ class AlternativaForm(FlaskForm):
     dem_p_ant = DecimalField(
         'Demanda P Anterior (kW)',
         validators=[
-            DataRequired('A demanda P anterior é obrigatória'),
+            Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
         ],
         places=2,
@@ -78,7 +78,7 @@ class AlternativaForm(FlaskForm):
     dem_fp_dep = DecimalField(
         'Demanda FP Depois (kW)',
         validators=[
-            DataRequired('A demanda FP depois é obrigatória'),
+            Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
         ],
         places=2,
@@ -92,7 +92,7 @@ class AlternativaForm(FlaskForm):
     dem_p_dep = DecimalField(
         'Demanda P Depois (kW)',
         validators=[
-            DataRequired('A demanda P depois é obrigatória'),
+            Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
         ],
         places=2,

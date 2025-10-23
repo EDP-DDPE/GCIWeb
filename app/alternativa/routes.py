@@ -16,14 +16,29 @@ def format_date(value, fmt='%d/%m/%Y'):
 
 
 def calc_prop(form):
-    dif_dem_fp = form.dem_fp_dep.data - form.dem_fp_ant.data
-    dif_dem_p = form.dem_p_dep.data - form.dem_p_ant.data
+    dif_dem_fp = (form.dem_fp_dep.data or 0) - (form.dem_fp_ant.data or 0)
+    dif_dem_p = (form.dem_p_dep.data or 0) - (form.dem_p_ant.data or 0)
     dif_dem = max(dif_dem_p, dif_dem_fp)
-    prop = dif_dem / form.demanda_disponivel_ponto.data
+    demanda_disponivel = form.demanda_disponivel_ponto.data or 0
+
+    if demanda_disponivel == 0:
+        return 0
+
+    prop = dif_dem / demanda_disponivel
     return prop
 
+def to_float_safe(value):
+    if not value:
+        return 0.0
+    cleaned = str(value).replace('.', '').replace(',', '.').replace('R$', '').replace(' ', '')
+    return float(cleaned) if cleaned else 0.0
 
 def get_fator_k(subgrupo, data, edp):
+
+    if not all([subgrupo, data, edp]):
+        #print("⚠️ get_fator_k recebeu parâmetro nulo:", subgrupo, data, edp)
+        return None
+
     fator_k = FatorK.query.filter(
         and_(
             FatorK.id_edp == edp,
@@ -98,11 +113,11 @@ def listar(id_estudo):
                 flag_fluxo_reverso=form.flag_fluxo_reverso.data,
                 proporcionalidade=calc_prop(form),
                 letra_alternativa=form.letra_alternativa.data,
-                custo_modular=float(str(form.custo_modular.data).replace('.', '').replace(',', '.').replace('R$','').replace(' ', '')),
+                custo_modular=to_float_safe(form.custo_modular.data),
                 id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
                 id_estudo=id_estudo,
                 observacao=form.observacao.data,
-                ERD=float(str(form.ERD.data).replace('.', '').replace(',', '.').replace('R$','').replace(' ', '')),
+                ERD=to_float_safe(form.ERD.data),
                 demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
                 blob_image=blob
 
