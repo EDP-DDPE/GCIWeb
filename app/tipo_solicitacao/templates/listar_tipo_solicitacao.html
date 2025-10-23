@@ -2,14 +2,20 @@
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ url_for('municipios.static', filename='css/listar_municipios.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('tipo_solicitacao.static', filename='css/listar_tipo_solicitacao.css') }}">
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-file-alt me-2"></i>Lista de Tipos de Solicitação</h2>
         <div class="d-flex gap-2">
             <button class="btn btn-success" onclick="refreshData()">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button> 
+            <button class="btn btn-sm btn-primary" 
+                    onclick="abrirModalAdicionar()"
+                    {% if usuario.criar == 0 %}disabled{% endif %}>
+                <i class="bi bi-plus-circle"></i> Novo Tipo de Solicitação
+            </button>
         </div>
     </div>
 
@@ -52,16 +58,16 @@
                                 <label class="form -check-label" for="col-id">ID</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="municipio" id="col-municipio" checked>
-                                <label class="form-check-label" for="col-municipio">Município</label>
+                                <input class="form-check-input column-toggle" type="checkbox" value="viabilidade" id="col-viabilidade" checked>
+                                <label class="form-check-label" for="col-circuito">Viabilidade</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="edp" id="col-edp" checked>
-                                <label class="form-check-label" for="col-edp">Estado</label>
+                                <input class="form-check-input column-toggle" type="checkbox" value="analise" id="col-analise" checked>
+                                <label class="form-check-label" for="col-subestacao">Análise</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="regional" id="col-regional" checked>
-                                <label class="form-check-label" for="col-regional">Regional</label>
+                                <input class="form-check-input column-toggle" type="checkbox" value="pedido" id="col-pedido" checked>
+                                <label class="form-check-label" for="col-edp">Pedido</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
@@ -113,29 +119,29 @@
                                     </div>
                                 </div>
                             </th>
-                            <th class="resizable-header" data-column="municipio" style="min-width: 120px;">
+                            <th class="resizable-header" data-column="viabilidade" style="min-width: 120px;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>Município</span>
+                                    <span>Viabilidade</span>
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="municipio" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <i class="fas fa-sort sort-icon" data-sort="viabilidade" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
                             </th>
-                            <th class="resizable-header" data-column="edp" style="min-width: 200px;">
+                            <th class="resizable-header" data-column="analise" style="min-width: 200px;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>Estado</span>
+                                    <span>Análise</span>
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="edp" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <i class="fas fa-sort sort-icon" data-sort="analise" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
                             </th>
-                            <th class="resizable-header" data-column="regional" style="min-width: 150px;">
+                            <th class="resizable-header" data-column="pedido" style="min-width: 150px;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>Regional</span>
+                                    <span>Pedido</span>
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="regional" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <i class="fas fa-sort sort-icon" data-sort="pedido" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
@@ -152,14 +158,14 @@
                             <th data-column="id">
                                 <input type="text" class="filter-input" placeholder="Filtrar ID..." data-filter="id">
                             </th>
-                            <th data-column="municipio">
-                                <input type="text" class="filter-input" placeholder="Filtrar Município..." data-filter="municipio">
+                            <th data-column="viabilidade">
+                                <input type="text" class="filter-input" placeholder="Filtrar Viabilidade..." data-filter="viabilidade">
                             </th>
-                            <th data-column="edp">
-                                <input type="text" class="filter-input" placeholder="Filtrar Estado..." data-filter="edp">
+                            <th data-column="analise">
+                                <input type="text" class="filter-input" placeholder="Filtrar Análise..." data-filter="analise">
                             </th>
-                            <th data-column="regional">
-                                <input type="text" class="filter-input" placeholder="Filtrar Regional..." data-filter="regional">
+                            <th data-column="pedido">
+                                <input type="text" class="filter-input" placeholder="Filtrar Pedido..." data-filter="pedido">
                             </th>
                             <th data-column="acoes">
                                 <!-- Sem filtro para ações -->
@@ -169,16 +175,16 @@
                     <tbody id="tableBody">
                         {% for doc in documentos %}
                         <tr>
-                            <td data-column="id">{{ doc.id_municipio }}</td>
-                            <td data-column="municipio">{{ doc.municipio }}</td>
-                            <td data-column="edp">{{ doc.edp.empresa }}</td>
-                            <td data-column="regional">{{ doc.regional.regional }}</td>
+                            <td data-column="id">{{ doc.id_tipo_solicitacao }}</td>
+                            <td data-column="viabilidade">{{ doc.viabilidade }}</td>
+                            <td data-column="analise">{{ doc.analise }}</td>
+                            <td data-column="pedido">{{ doc.pedido }}</td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-sm btn-warning"
-                                        onclick="editarDetalhes({{ doc.id_municipio }})"
+                                        onclick="editarDetalhes({{ doc.id_tipo_solicitacao }})"
                                         data-bs-toggle="tooltip"
-                                        title="Editar documento"
+                                        title="Editar Tipo de Solicitação"
                                         {% if usuario.editar == 0 %}disabled{% endif %}>
                                     <i class="bi bi-pencil-square"></i>
                                     </button>
@@ -215,7 +221,7 @@
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
                 <h5 class="modal-title" id="modalEditarLabel">
-                    <i class="fas fa-edit me-2"></i>Editar Municipio
+                    <i class="fas fa-edit me-2"></i>Editar Tipo de Solicitação
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -225,13 +231,35 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-success" onclick="salvarEdicao()">Salvar Alterações</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarExclusao()" {% if usuario.deletar == 0 %}disabled{% endif %}>Excluir Circuito</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal para adicionar Circuito -->
+<div class="modal fade" id="modalAdicionar" tabindex="-1" aria-labelledby="modalAdicionarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalAdicionarLabel">
+          <i class="fas fa-plus me-2"></i>Novo Tipo de Solicitação
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="modalAdicionarBody">
+        <!-- Conteúdo carregado por JS -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-success" onclick="salvarNovoCircuito()">Salvar Tipo de Solicitação</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src=" {{ url_for('municipios.static', filename='js/listar_municipios.js') }}"></script>
+<script src=" {{ url_for('tipo_solicitacao.static', filename='js/listar_tipo_solicitacao.js') }}"></script>
 
 {% endblock %}
