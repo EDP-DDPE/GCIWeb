@@ -173,52 +173,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-<!--    &lt;!&ndash; Navbar &ndash;&gt;-->
-<!--    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">-->
-<!--        <div class="container-fluid">-->
-<!--            <a class="navbar-brand" href="{{ url_for('main.home') }}">-->
-<!--                <i class="fas fa-bolt me-2"></i>Atlas-->
-<!--            </a>-->
-
-<!--            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">-->
-<!--                <span class="navbar-toggler-icon"></span>-->
-<!--            </button>-->
-
-<!--            <div class="collapse navbar-collapse" id="navbarNav">-->
-<!--                <ul class="navbar-nav me-auto">-->
-<!--                    <li class="nav-item dropdown">-->
-<!--                        <a class="nav-link dropdown-toggle" href="#" id="estudosDropdown" role="button" data-bs-toggle="dropdown">-->
-<!--                            <i class="fas fa-file-alt me-1"></i>Estudos-->
-<!--                        </a>-->
-<!--                        <ul class="dropdown-menu">-->
-<!--                            <li><a class="dropdown-item" href="{{ url_for('cadastro.cadastro_estudo') }}">-->
-<!--                                <i class="fas fa-plus me-2"></i>Novo Estudo-->
-<!--                            </a></li>-->
-<!--                            <li><a class="dropdown-item" href="{{ url_for('listar.listar') }}">-->
-<!--                                <i class="fas fa-list me-2"></i>Listar Estudos-->
-<!--                            </a></li>-->
-<!--                        </ul>-->
-<!--                    </li>-->
-<!--                </ul>-->
-
-<!--                <ul class="navbar-nav">-->
-<!--                    <li class="nav-item dropdown">-->
-<!--                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">-->
-<!--                            <i class="fas fa-user me-1"></i>-->
-<!--                            {% if session.user %}-->
-<!--                                {{session.user.name}}-->
-<!--                            {% endif %}-->
-<!--                        </a>-->
-<!--                        <ul class="dropdown-menu dropdown-menu-end">-->
-<!--                            <li><a class="dropdown-item" href="{{ url_for('user.user') }}"><i class="fas fa-user-cog me-2"></i>Perfil</a></li>-->
-<!--                            <li><hr class="dropdown-divider"></li>-->
-<!--                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>-->
-<!--                        </ul>-->
-<!--                    </li>-->
-<!--                </ul>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </nav>-->
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div class="container-fluid">
                 <!-- Logo / Home -->
@@ -246,6 +200,10 @@
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('listar.listar') }}">
                                     <i class="fas fa-list me-2"></i>Listar Estudos
+                                </a></li>
+
+                                <li><a class="dropdown-item" href="{{ url_for('gestao.gestao_aprovacao') }}">
+                                    <i class="fas fa-bar-chart me-2"></i>Gestão
                                 </a></li>
                             </ul>
                         </li>
