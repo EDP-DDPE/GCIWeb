@@ -24,6 +24,7 @@ def listar():
     return render_template("listar_circuitos.html", documentos=registros, usuario=usuario)
 
 @circuito_bp.route('/circuitos/<int:id>/editar', methods=['POST'])
+@requires_permission('editar')
 def editar_circuito(id):
     circuito = Circuito.query.get_or_404(id)
     
@@ -71,32 +72,38 @@ def get_circuito_api(id):
 
 
 @circuito_bp.route('/circuitos/<int:id>/excluir', methods=['POST'])
+@requires_permission('excluir')
 def excluir_circuito(id):
     circuito = Circuito.query.get_or_404(id)
-    try:
-        db.session.delete(circuito)
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Circuito excluído com sucesso!'})
     
-    except IntegrityError as e:
-        db.session.rollback()
-        error_message = str(e.orig)
-        
-        # Extrai o nome da tabela do erro
-        tabela_match = re.search(r'table "([^"]+)"', error_message)
-        if tabela_match:
-            tabela = tabela_match.group(1)
-            tabela_nome = tabela.split('.')[-1] if '.' in tabela else tabela
-            mensagem = f'Não é possível excluir este circuito! Existem registros relacionados na tabela "{tabela_nome}". Remova os registros relacionados antes de excluir o circuito.'
-        else:
-            mensagem = 'Não é possível excluir este circuito! Existem registros relacionados a ele em outras tabelas. Remova os registros relacionados primeiro.'
-        
-        return jsonify({'status': 'error', 'message': mensagem}), 409
-    
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
-
+    # Verifica se NÃO há registros relacionados (ajuste conforme seu modelo)
+    # Exemplo: se Circuito tem um relacionamento 'estudos' ou outro
+    if not circuito.alternativas:  # Substitua 'estudos' pelo relacionamento correto
+        try:
+            db.session.delete(circuito)
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Circuito excluído com sucesso!'})
+        except IntegrityError as e:
+            db.session.rollback()
+            error_message = str(e.orig)
+            # Extrai o nome da tabela do erro
+            tabela_match = re.search(r'table "([^"]+)"', error_message)
+            if tabela_match:
+                tabela = tabela_match.group(1)
+                tabela_nome = tabela.split('.')[-1] if '.' in tabela else tabela
+                mensagem = f'Não é possível excluir este circuito! Existem registros relacionados na tabela "{tabela_nome}". Remova os registros relacionados antes de excluir o circuito.'
+            else:
+                mensagem = 'Não é possível excluir este circuito! Existem registros relacionados a ele em outras tabelas. Remova os registros relacionados primeiro.'
+            return jsonify({'status': 'error', 'message': mensagem}), 409
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
+    else:
+        # Se houver registros relacionados, retorna erro
+        return jsonify({
+            'status': 'error', 
+            'message': 'Não foi possível apagar, pois há registros relacionados a este circuito.'
+        }), 400
     
 @circuito_bp.route('/circuitos/adicionar', methods=['POST'])
 def adicionar_circuito():

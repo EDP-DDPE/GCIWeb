@@ -21,6 +21,7 @@ def listar_municipios():
     return render_template("listar_municipios.html", documentos=registros, usuario=usuario)
 
 @municipio_bp.route('/municipios/<int:id>/editar', methods=['POST'])
+@requires_permission('editar')
 def editar_municipio(id):
     municipio = Municipio.query.get_or_404(id)
     
