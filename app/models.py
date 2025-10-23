@@ -235,7 +235,7 @@ class TipoSolicitacao(db.Model):
     analise = db.Column(db.String(255), nullable=False)
     pedido = db.Column(db.String(255), nullable=False)
 
-    estudos = db.relationship("Estudo", back_populates="tipo_solicitacao")
+    estudos = db.relationship("Estudo", back_populates="tipo_solicitacao", passive_deletes=True)
 
 
 class Estudo(db.Model):

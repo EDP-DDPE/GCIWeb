@@ -20,8 +20,9 @@ def listar():
     return render_template("listar_tipo_solicitacao.html", documentos=registros, usuario=usuario)
 
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/editar', methods=['POST'])
+@requires_permission('editar')
 def editar_circuito(id):
-    circuito = Circuito.query.get_or_404(id)
+    tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
     # CORREÇÃO: Verificar se é JSON ou FormData
     if request.is_json:
@@ -33,14 +34,14 @@ def editar_circuito(id):
     
     # Atualiza os campos recebidos
     for campo in data:
-        if hasattr(circuito, campo):
-            print(f"Atualizando {campo}: {getattr(circuito, campo)} -> {data[campo]}")  # Para debug
-            setattr(circuito, campo, data[campo])
+        if hasattr(tipo_solicitacao, campo):
+            print(f"Atualizando {campo}: {getattr(tipo_solicitacao, campo)} -> {data[campo]}")  # Para debug
+            setattr(tipo_solicitacao, campo, data[campo])
     
     try:
         db.session.commit()
         print("Commit realizado com sucesso!")  # Para debug
-        return jsonify({'status': 'success', 'message': 'Circuito atualizado com sucesso!'})
+        return jsonify({'status': 'success', 'message': 'Tipo atualizado com sucesso!'})
     except Exception as e:
         db.session.rollback()
         print(f"Erro no commit: {e}")  # Para debug
@@ -59,35 +60,33 @@ def get_tipo_solicitacao_api(id):
     })
 
 
-@tipo_solicitacao_bp.route('/circuitos/<int:id>/excluir', methods=['POST'])
+@tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/excluir', methods=['POST'])
+@requires_permission('excluir')
 def excluir_circuito(id):
-    circuito = Circuito.query.get_or_404(id)
-    try:
-        db.session.delete(circuito)
-        db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Circuito excluído com sucesso!'})
+    tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
-    except IntegrityError as e:
-        db.session.rollback()
-        error_message = str(e.orig)
-        
-        # Extrai o nome da tabela do erro
-        tabela_match = re.search(r'table "([^"]+)"', error_message)
-        if tabela_match:
-            tabela = tabela_match.group(1)
-            tabela_nome = tabela.split('.')[-1] if '.' in tabela else tabela
-            mensagem = f'Não é possível excluir este circuito! Existem registros relacionados na tabela "{tabela_nome}". Remova os registros relacionados antes de excluir o circuito.'
-        else:
-            mensagem = 'Não é possível excluir este circuito! Existem registros relacionados a ele em outras tabelas. Remova os registros relacionados primeiro.'
-        
-        return jsonify({'status': 'error', 'message': mensagem}), 409
+    # Verifica se NÃO há estudos associados
+    if not tipo_solicitacao.estudos:
+        try:
+            db.session.delete(tipo_solicitacao)
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Tipo excluído com sucesso!'})
+        except IntegrityError as e:
+            db.session.rollback()
+            error_message = str(e.orig)
+            return jsonify({'status': 'error', 'message': error_message}), 409
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
+    else:
+        # Se houver estudos associados, retorna erro
+        return jsonify({
+            'status': 'error', 
+            'message': 'Não foi possível apagar, pois há um estudo com esse tipo de solicitação.'
+        }), 400
     
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
-
-    
-@tipo_solicitacao_bp.route('/circuitos/adicionar', methods=['POST'])
+@tipo_solicitacao_bp.route('/tipo_solicitacao/adicionar', methods=['POST'])
+@requires_permission('criar')
 def adicionar_circuito():
     if request.is_json:
         data = request.get_json()
@@ -95,7 +94,7 @@ def adicionar_circuito():
         data = request.form.to_dict()
     
     # Validação de campos obrigatórios
-    campos_obrigatorios = ['circuito', 'tensao', 'id_subestacao', 'id_edp']
+    campos_obrigatorios = ['viabilidade', 'analise', 'pedido']
     campos_faltantes = [campo for campo in campos_obrigatorios if not data.get(campo)]
     
     if campos_faltantes:
@@ -105,18 +104,17 @@ def adicionar_circuito():
         }), 400
     
     try:
-        novo_circuito = Circuito(
-            circuito=data.get('circuito'),
-            tensao=data.get('tensao'),
-            id_subestacao=data.get('id_subestacao'),
-            id_edp=data.get('id_edp')
+        novo_tipo_solicitacao = TipoSolicitacao(
+            viabilidade=data.get('viabilidade'),
+            analise=data.get('analise'),
+            pedido=data.get('pedido')
         )
-        db.session.add(novo_circuito)
+        db.session.add(novo_tipo_solicitacao)
         db.session.commit()
-        return jsonify({'status': 'success', 'message': 'Circuito adicionado com sucesso!'})
+        return jsonify({'status': 'success', 'message': 'Tipo de solicitação adicionado com sucesso!'})
     except Exception as e:
         db.session.rollback()
-        print(f"Erro ao adicionar circuito: {e}")
+        print(f"Erro ao adicionar tipo de solicitação: {e}")
         return jsonify({'status': 'error', 'message': str(e)}), 500
     
 
