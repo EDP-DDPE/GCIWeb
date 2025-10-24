@@ -1,84 +1,123 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from app.models import db,Subestacao, Municipio, EDP
 from sqlalchemy.orm import joinedload
-from sqlalchemy import asc, desc
+from app.auth import requires_permission, get_usuario_logado
 
-subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates")
+subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates", static_folder="static", static_url_path='/subestacoes/static')
 
 @subestacao_bp.route("/subestacoes", methods=["GET", "POST"])
+@requires_permission('visualizar')
 def listar_subestacoes():
-    query = (
-        Subestacao.query.options(
-            joinedload(Subestacao.municipio),
-            joinedload(Subestacao.edp),
-            joinedload(Subestacao.circuitos)
-        )
-    )
- 
-    total_subestacoes = Subestacao.query.count()
-    lista = query.order_by(Subestacao.id_subestacao.asc()).all()
-    
-    return render_template(
-        "subestacoes.html",
-        subestacoes=lista,
-        total_subestacoes=total_subestacoes
-    )
 
-@subestacao_bp.route("/subestacoes/<int:id>/editar", methods=["GET", "POST"])
+    registros = Subestacao.query.options(
+        joinedload(Subestacao.municipio),
+        joinedload(Subestacao.circuitos)
+    ).all()
+    
+    usuario = get_usuario_logado()
+    
+    return render_template("listar_subestacoes.html",documentos=registros,usuario=usuario)
+
+@subestacao_bp.route('/subestacoes/<int:id>/api', methods=['GET'])
+def api_subestacao(id):
+    sub = Subestacao.query.get_or_404(id)
+    return jsonify({
+        "id": sub.id_subestacao,
+        "nome": sub.nome,
+        "sigla": sub.sigla,
+        "id_municipio": sub.id_municipio,
+        "id_edp": sub.id_edp,
+        "lat": sub.lat,
+        # Caso o campo correto seja 'long' e não 'longitude':
+        "longitude": getattr(sub, 'long', None),
+        "municipio": sub.municipio.municipio if hasattr(sub, 'municipio') else None,
+        "edp": sub.edp.empresa if hasattr(sub, 'edp') else None
+    })
+
+
+@subestacao_bp.route('/subestacoes/<int:id>/editar', methods=['POST'])
+@requires_permission('editar')
 def editar_subestacao(id):
     sub = Subestacao.query.get_or_404(id)
-    municipios = Municipio.query.all()
-    edps = EDP.query.all()
 
-    if request.method == "POST":
-        if "delete" in request.form:
-            try:
-                db.session.delete(sub)
-                db.session.commit()
-                flash("Subestação apagada com sucesso!", "success")
-                return redirect(url_for("subestacoes.listar_subestacoes"))
-            except Exception as e:
-                db.session.rollback()
-                flash("Não foi possível apagar a suestação", "danger")
+    # ✅ Verifica tipo de requisição (JSON ou Form)
+    if request.is_json:
+        data = request.get_json()
+        print("📨 Dados recebidos (JSON):", data)
+    else:
+        data = request.form.to_dict()
+        print("📨 Dados recebidos (FormData):", data)
 
-        # Atualizar subestação
-        sub.nome = request.form["nome"]
-        sub.sigla = request.form["sigla"]
-        sub.id_municipio = request.form["id_municipio"]
-        sub.id_edp = request.form["id_edp"]
-        sub.lat = request.form["lat"]
-        sub.long = request.form["long"]
+    # ✅ Campos permitidos para edição
+    campos_editaveis = {'nome', 'sigla', 'id_municipio', 'id_edp', 'lat', 'longitude'}
+
+    for campo, valor in data.items():
+        if campo not in campos_editaveis:
+            continue
+        if hasattr(sub, campo):
+            print(f"✏️ Atualizando {campo}: {getattr(sub, campo)} -> {valor}")
+            setattr(sub, campo, valor)
+
+    try:
         db.session.commit()
-        flash("Subestação atualizada com sucesso!", "success")
-        return redirect(url_for("subestacoes.listar_subestacoes"))
+        print("✅ Commit bem-sucedido")
+        return jsonify({'status': 'success', 'message': 'Subestação atualizada com sucesso!'})
+    except Exception as e:
+        db.session.rollback()
+        print("❌ Erro no commit:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
-    return render_template(
-        "editar_subestacao.html",
-        sub=sub,
-        municipios=municipios,
-        edps=edps
-    )
 
+# 🔹 1. Página/modal de novo cadastro
 @subestacao_bp.route("/subestacoes/nova", methods=["GET", "POST"])
 def nova_subestacao():
     municipios = Municipio.query.all()
     edps = EDP.query.all()
 
     if request.method == "POST":
-        nome = request.form["nome"]
-        sigla = request.form["sigla"]
-        id_municipio = request.form["id_municipio"]
-        id_edp = request.form["id_edp"]
+        data = request.get_json() or request.form
+
+        nome = data.get("nome")
+        sigla = data.get("sigla")
+        id_municipio = data.get("id_municipio")
+        id_edp = data.get("id_edp")
+        lat = data.get("lat")
+        longitude = data.get("longitude")
+
+        if not all([nome, sigla, id_municipio, id_edp]):
+            return jsonify({"erro": "Campos obrigatórios ausentes."}), 400
 
         nova = Subestacao(
-            nome=nome,
-            sigla=sigla,
-            id_municipio=id_municipio,
-            id_edp=id_edp
+            nome=nome.strip(),
+            sigla=sigla.strip(),
+            id_municipio=int(id_municipio),
+            id_edp=int(id_edp),
+            lat=lat.strip(),
+            long=longitude.strip()
         )
         db.session.add(nova)
         db.session.commit()
-        flash("Subestação cadastrada com sucesso!", "success")
-        return redirect(url_for("subestacoes.listar_subestacoes"))
+
+        return jsonify({"msg": "Subestação cadastrada com sucesso!"}), 201
 
     return render_template("nova_subestacao.html", municipios=municipios, edps=edps)
+
+
+# 🔹 2. Endpoint para listar EDPs
+@subestacao_bp.route("/subestacoes/edps/api", methods=["GET"])
+def listar_edps():
+    edps = EDP.query.all()
+    return jsonify([
+        {"id": e.id_edp, "empresa": e.empresa}
+        for e in edps
+    ])
+
+
+# 🔹 3. Endpoint para listar municípios por EDP
+@subestacao_bp.route("/subestacoes/municipios/api/<int:edp_id>", methods=["GET"])
+def listar_municipios_por_edp(edp_id):
+    municipios = Municipio.query.filter_by(id_edp=edp_id).all()
+    return jsonify([
+        {"id": m.id_municipio, "municipio": m.municipio}
+        for m in municipios
+    ])
