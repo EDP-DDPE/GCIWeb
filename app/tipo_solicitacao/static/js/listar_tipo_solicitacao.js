@@ -647,7 +647,7 @@ function setupColumnResizing() {
                 bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
                 
                 // Mostrar mensagem de sucesso
-                alert('Documento atualizado com sucesso!');
+                alert('Tipo de solicitação atualizado com sucesso!');
                 
                 // Recarregar a página ou tabela
                 location.reload();
@@ -665,7 +665,7 @@ function confirmarExclusao() {
     const tipo_solicitacaoId = form.getAttribute('data-tipo_solicitacao-id');
     
     // Primeira confirmação
-    if (!confirm('Tem certeza que deseja excluir este circuito? Esta operação não pode ser desfeita.')) {
+    if (!confirm('Tem certeza que deseja excluir este tipo de solicitação? Esta operação não pode ser desfeita.')) {
         return;
     }
     

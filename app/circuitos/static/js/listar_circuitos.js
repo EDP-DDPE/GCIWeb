@@ -661,7 +661,7 @@ function setupColumnResizing() {
                 bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
                 
                 // Mostrar mensagem de sucesso
-                alert('Documento atualizado com sucesso!');
+                alert('Circuito atualizado com sucesso!');
                 
                 // Recarregar a página ou tabela
                 location.reload();
