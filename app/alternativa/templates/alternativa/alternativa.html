@@ -13,9 +13,9 @@
                         <div>
                             <h3 class="card-title mb-1 fw-bold">
                                 <i class="fas fa-file-alt me-2"></i>
-                                Cadastro de Alternativas
+                                {{ estudo.nome_projeto }}
                             </h3>
-                            <p class="mb-0 opacity-75">{{ estudo.nome_projeto }}</p>
+<!--                            <p class="mb-0 opacity-75"></p>-->
                         </div>
                         <div class="text-end">
                             <span class="badge bg-white text-primary px-3 py-2 fs-6 rounded-pill">
@@ -658,273 +658,6 @@
     </div>
 </div>
 
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
-
-<script>
-$(document).ready(function(){
-
-    $(document).on('mousedown', '.btn-alternativa-edit', function() {
-        $(this).addClass('active'); // efeito visual Bootstrap
-    });
-    $(document).on('mouseup mouseleave', '.btn-alternativa-edit', function() {
-        $(this).removeClass('active');
-    });
-
-    $('#subgrupo_select').change(function() {
-        atualiza_ERD()
-    });
-
-    $('#flag_carga').change(function() {
-        atualiza_ERD()
-    });
-
-    $('#flag_geracao').change(function() {
-        atualiza_ERD()
-    });
-
-    var dropZone = $('#drop_zone');
-    var fileInput = $('#imagem_alternativa');
-    var preview = $('#preview_imagem');
-    var uploadedFile = null;
-
-    // Clique na área abre o file input
-    dropZone.on('click', function() {
-        fileInput.click();
-    });
-
-    // Seleção via file input
-    fileInput.on('change', function(e) {
-        handleFiles(this.files);
-    });
-
-    // Drag & Drop
-    dropZone.on('dragover', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.css('background-color', '#e9ecef');
-    });
-
-    dropZone.on('dragleave', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.css('background-color', '');
-    });
-
-    dropZone.on('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.css('background-color', '');
-        var files = e.originalEvent.dataTransfer.files;
-        handleFiles(files);
-    });
-
-    function handleFiles(files) {
-        if (files.length > 0) {
-            var file = files[0];
-            if (!file.type.startsWith('image/')) {
-                alert('Apenas imagens são permitidas!');
-                return;
-            }
-
-            // define o arquivo no input file do WTForms
-            var fileInput = document.getElementById('imagem_alternativa');
-            var dataTransfer = new DataTransfer(); // necessário para setar arquivos
-            dataTransfer.items.add(file);
-            fileInput.files = dataTransfer.files;
-
-            // pré-visualização
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                $('#preview_imagem').attr('src', e.target.result).show();
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    $(document).on('click', '.btn-alternativa-edit', function() {
-        var modo = $(this).data('mode');
-        var id = $(this).data('id');
-        var id_estudo = $(#id_estudo)
-
-        // sempre esconde antes de abrir
-        $('#btnExcluirAlternativa').hide();
-
-        // Mostra loading
-        $('#loadingOverlay').fadeIn(150);
-
-         if (modo === 'editar') {
-            $('#btnExcluirAlternativa').show().data('id', id);
-         }
-
-        // Limpa o formulário antes de usar
-        $('#formAlternativa')[0].reset();
-        $('#preview_imagem').hide().attr('src', '');
-        $('#imagem_alternativa').val('');
-
-        // Define o título e comportamento
-        if (modo === 'nova') {
-            $('#alternativaModalLabel').text('Nova Alternativa');
-            $('#formAlternativa').attr('action', '/estudo/' + id_estudo + '/alternativas/');
-            $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
-            $('.btn-primary', '#alternativaModal').show();
-
-            // Oculta loading e mostra modal
-            setTimeout(() => {
-                $('#loadingOverlay').fadeOut(150);
-                $('#alternativaModal').modal('show');
-            }, 300);
-
-            $('#alternativaModal').modal('show');
-        }
-        else {
-            // Busca os dados no servidor
-            $.get('/alternativas/' + id, function(data) {
-                // Preenche os campos (use os IDs ou names conforme o seu form)
-                const circuitoSelect = $('#circuito_select');
-                const circuitoValue = data.id_circuito ? data.id_circuito.toString() : '';
-
-                console.log("Circuito retornado:", circuitoValue);
-                console.log("Opções disponíveis:", circuitoSelect.html());
-
-                if (circuitoValue) {
-                    circuitoSelect.val(circuitoValue).change();
-                    if (circuitoSelect.val() !== circuitoValue) {
-                        // força seleção mesmo se WTForms renderizou como int
-                        circuitoSelect.find('option').each(function() {
-                            if (parseInt($(this).val()) === parseInt(circuitoValue)) {
-                                $(this).prop('selected', true);
-                            }
-                        });
-                    }
-                }
-
-                const letraSelect = $('#letra_select');
-                const letraValue = (data.letra_alternativa || '').toString().trim();
-                if (letraValue && letraSelect.find(`option[value="${letraValue}"]`).length) {
-                    letraSelect.val(letraValue);
-                } else {
-                    letraSelect.prop('selectedIndex', 0);
-                }
-                $('#ERD').val(data.ERD);
-                $('#dem_p_antes').val(data.dem_p_ant);
-                $('#dem_p_depois').val(data.dem_p_dep);
-                $('#dem_fp_antes').val(data.dem_fp_ant);
-                $('#dem_fp_depois').val(data.dem_fp_dep);
-                $('#dem_disponivel').val(data.demanda_disponivel_ponto);
-                $('#descricao').val(data.descricao);
-                $('#observacao').val(data.observacao);
-                $('#flag_carga').prop('checked', data.flag_carga);
-                $('#flag_geracao').prop('checked', data.flag_geracao);
-                $('#flag_fluxo_reverso').prop('checked', data.flag_fluxo_reverso);
-                $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
-                $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
-                $('#custo_modular').val(data.custo_modular);
-                console.log(data.id_estudo);
-                $('#id_estudo').val(data.id_estudo);
-
-                // Imagem
-                if (data.imagem_base64) {
-                    $('#preview_imagem').attr('src', 'data:image/jpeg;base64,' + data.imagem_base64).show();
-                } else {
-                    $('#preview_imagem').hide();
-                }
-
-                // Modo editar ou visualizar
-                if (modo === 'editar') {
-                    $('#alternativaModalLabel').text('Editar Alternativa');
-                    $('#formAlternativa').attr('action', '/alternativas/' + id);
-                    $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
-                    $('.btn-primary', '#alternativaModal').show();
-                } else {
-                    $('#alternativaModalLabel').text('Visualizar Alternativa');
-                    $('#salvar_alternativa', '#alternativaModal').hide();
-                    $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', true);
-                }
-
-                $('#loadingOverlay').fadeOut(200, function() {
-                        $('#alternativaModal').modal('show');
-                });
-            })
-            .fail(function(xhr) {
-                    $('#loadingOverlay').fadeOut(200);
-                    alert('Erro ao carregar dados: ' + xhr.responseText);
-                });
-        }
-    });
-
-    // === Evento de exclusão ===
-    $('#btnExcluirAlternativa').on('click', function() {
-        var id = $(this).data('id');
-
-        if (!id) {
-            alert('Nenhuma alternativa selecionada.');
-            return;
-        }
-
-        // Confirmação
-        if (!confirm('Tem certeza que deseja excluir esta alternativa? Essa ação não poderá ser desfeita.')) {
-            return;
-        }
-
-        // Requisição AJAX
-        $.ajax({
-            url: '/alternativas/excluir/' + id,
-            type: 'DELETE',
-            success: function(resp) {
-                alert('Alternativa excluída com sucesso!');
-                $('#alternativaModal').modal('hide');
-                location.reload();
-            },
-            error: function(xhr) {
-                console.error(xhr.responseText);
-                alert('Erro ao excluir alternativa: ' + xhr.responseText);
-            }
-        });
-    });
-
-});
-
-
-
-function atualiza_ERD() {
-
-    var cleaveERD = new Cleave('#ERD', {
-      numeral: true,
-      numeralThousandsGroupStyle: 'thousand',
-      prefix: 'R$ ',
-      numeralDecimalMark: ',',
-      delimiter: '.'
-    });
-
-    var subgrupo = $('#subgrupo_select').val();
-    var dem_p_antes = parseFloat($('#dem_p_antes').val().replace(',', '.'));
-    var dem_fp_antes = parseFloat($('#dem_fp_antes').val().replace(',', '.'));
-    var dem_p_depois = parseFloat($('#dem_p_depois').val().replace(',', '.'));
-    var dem_fp_depois = parseFloat($('#dem_fp_depois').val().replace(',', '.'));
-    var carga_flegada = $('#flag_carga').is(':checked');
-    var geracao_flegada = $('#flag_geracao').is(':checked');
-    var tipo;
-
-    if (!carga_flegada && !geracao_flegada){
-        cleaveERD.setRawValue(0);
-        return;
-    }
-
-    tipo = carga_flegada ? 1 : 0;
-
-    var dif_p = dem_p_depois - dem_p_antes;
-    var dif_fp = dem_fp_depois - dem_fp_antes;
-    var maior_demanda = Math.max(dif_p, dif_fp);
-
-    $.get('/api/fator_k/{{estudo.id_edp}}/' + subgrupo + '/{{estudo.data_abertura_cliente}}/' + tipo, function(data) {
-        var valor = data.k * maior_demanda;
-        cleaveERD.setRawValue(valor);  // número puro, Cleave vai formatar
-    });
-}
-</script>
-
 <style>
 
 .btn-alternativa-edit.active {
@@ -1094,4 +827,327 @@ textarea {
 
 </style>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+<script>
+
+(function waitForJQuery() {
+    if (typeof window.jQuery === 'undefined') {
+        return setTimeout(waitForJQuery, 50);
+    }
+    $(document).ready(function() {
+        console.log("✅ jQuery detectado, inicializando eventos do modal de alternativas...");
+
+        // Inicializa Select2 apenas uma vez, com configurações corretas
+        function initSelect2(selector) {
+            const $select = $(selector);
+
+            // Marca como inicialização manual
+            $select.addClass('select2-manual-init');
+
+            // Destroi instância anterior se existir
+            if ($select.data('select2')) {
+                $select.select2('destroy');
+            }
+
+            // Inicializa com configurações adequadas
+            $select.select2({
+                dropdownParent: $('#alternativaModal'),
+                width: '100%',
+                theme: 'bootstrap-5',
+                placeholder: 'Selecione uma opção',
+                allowClear: true,
+                dropdownAutoWidth: false,
+                dropdownCssClass: 'select2-dropdown-below' // força dropdown abaixo
+            });
+        }
+
+        // Inicializa os selects
+        initSelect2('#circuito_select');
+        initSelect2('#letra_select');
+
+        // Comportamento ao abrir o dropdown - ajusta scroll do modal
+        $('#letra_select, #circuito_select').on('select2:opening', function (e) {
+          const $el = $(this);
+          const $modalBody = $('#alternativaModal .modal-body');
+
+          // Pequeno delay para garantir que o DOM está pronto
+          setTimeout(function() {
+              const elTop = $el.offset().top - $modalBody.offset().top + $modalBody.scrollTop();
+              const targetScroll = Math.max(elTop - 120, 0);
+
+              // Scroll suave do modal body
+              $modalBody.stop(true).animate({
+                  scrollTop: targetScroll
+              }, 150);
+          }, 10);
+        });
+
+        // Libera scroll quando fechar o dropdown
+        $('#letra_select, #circuito_select').on('select2:close', function () {
+            $('body').css('overflow', '');
+            $('#alternativaModal').css('overflow-y', 'auto');
+        });
+
+
+
+        $(document).on('mousedown', '.select2-container--open .select2-results__option', function (e) {
+            e.stopPropagation();
+        });
+
+        $(document).on('mousedown', '.btn-alternativa-edit', function() {
+            $(this).addClass('active'); // efeito visual Bootstrap
+        });
+        $(document).on('mouseup mouseleave', '.btn-alternativa-edit', function() {
+            $(this).removeClass('active');
+        });
+
+        $('#subgrupo_select').change(function() {
+            atualiza_ERD()
+        });
+
+        $('#flag_carga').change(function() {
+            atualiza_ERD()
+        });
+
+        $('#flag_geracao').change(function() {
+            atualiza_ERD()
+        });
+
+        var dropZone = $('#drop_zone');
+        var fileInput = $('#imagem_alternativa');
+        var preview = $('#preview_imagem');
+        var uploadedFile = null;
+
+        // Clique na área abre o file input
+        dropZone.on('click', function() {
+            fileInput.click();
+        });
+
+        // Seleção via file input
+        fileInput.on('change', function(e) {
+            handleFiles(this.files);
+        });
+
+        // Drag & Drop
+        dropZone.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.css('background-color', '#e9ecef');
+        });
+
+        dropZone.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.css('background-color', '');
+        });
+
+        dropZone.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.css('background-color', '');
+            var files = e.originalEvent.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                var file = files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Apenas imagens são permitidas!');
+                    return;
+                }
+
+                // define o arquivo no input file do WTForms
+                var fileInput = document.getElementById('imagem_alternativa');
+                var dataTransfer = new DataTransfer(); // necessário para setar arquivos
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                // pré-visualização
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#preview_imagem').attr('src', e.target.result).show();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        $(document).on('click', '.btn-alternativa-edit', function() {
+
+            var modo = $(this).data('mode');
+            var id = $(this).data('id');
+            var id_estudo = $('#id_estudo').val();
+
+            // sempre esconde antes de abrir
+            $('#btnExcluirAlternativa').hide();
+
+            // Mostra loading
+            $('#loadingOverlay').fadeIn(150);
+
+             if (modo === 'editar') {
+                $('#btnExcluirAlternativa').show().data('id', id);
+             }
+
+            // Limpa o formulário antes de usar
+            $('#formAlternativa')[0].reset();
+            $('#preview_imagem').hide().attr('src', '');
+            $('#imagem_alternativa').val('');
+
+            // Define o título e comportamento
+            if (modo === 'nova') {
+
+            }
+            else {
+                // Busca os dados no servidor
+                $.get('/alternativas/' + id, function(data) {
+                    // Preenche os campos (use os IDs ou names conforme o seu form)
+                    const circuitoSelect = $('#circuito_select');
+                    const circuitoValue = data.id_circuito ? data.id_circuito.toString() : '';
+
+                    console.log("Circuito retornado:", circuitoValue);
+                    console.log("Opções disponíveis:", circuitoSelect.html());
+
+                    if (circuitoValue) {
+                        circuitoSelect.val(circuitoValue).trigger('change.select2');
+                        if (circuitoSelect.val() !== circuitoValue) {
+                            // força seleção mesmo se WTForms renderizou como int
+                            circuitoSelect.find('option').each(function() {
+                                if (parseInt($(this).val()) === parseInt(circuitoValue)) {
+                                    $(this).prop('selected', true);
+                                }
+                            });
+                        }
+                    }
+
+                    const letraSelect = $('#letra_select');
+                    const letraValue = (data.letra_alternativa || '').toString().trim();
+                    if (letraValue && letraSelect.find(`option[value="${letraValue}"]`).length) {
+                        letraSelect.val(letraValue);
+                    } else {
+                        letraSelect.prop('selectedIndex', 0);
+                    }
+                    $('#ERD').val(data.ERD);
+                    $('#dem_p_antes').val(data.dem_p_ant);
+                    $('#dem_p_depois').val(data.dem_p_dep);
+                    $('#dem_fp_antes').val(data.dem_fp_ant);
+                    $('#dem_fp_depois').val(data.dem_fp_dep);
+                    $('#dem_disponivel').val(data.demanda_disponivel_ponto);
+                    $('#descricao').val(data.descricao);
+                    $('#observacao').val(data.observacao);
+                    $('#flag_carga').prop('checked', data.flag_carga);
+                    $('#flag_geracao').prop('checked', data.flag_geracao);
+                    $('#flag_fluxo_reverso').prop('checked', data.flag_fluxo_reverso);
+                    $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
+                    $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
+                    $('#custo_modular').val(data.custo_modular);
+                    console.log(data.id_estudo);
+                    $('#id_estudo').val(data.id_estudo);
+
+                    // Imagem
+                    if (data.imagem_base64) {
+                        $('#preview_imagem').attr('src', 'data:image/jpeg;base64,' + data.imagem_base64).show();
+                    } else {
+                        $('#preview_imagem').hide();
+                    }
+
+                    // Modo editar ou visualizar
+                    if (modo === 'editar') {
+                        $('#alternativaModalLabel').text('Editar Alternativa');
+                        $('#formAlternativa').attr('action', '/alternativas/' + id);
+                        $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
+                        $('.btn-primary', '#alternativaModal').show();
+                    } else {
+                        $('#alternativaModalLabel').text('Visualizar Alternativa');
+                        $('#salvar_alternativa', '#alternativaModal').hide();
+                        $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', true);
+                    }
+
+                    $('#loadingOverlay').fadeOut(200, function() {
+                            $('#alternativaModal').modal('show');
+                    });
+                })
+                .fail(function(xhr) {
+                        $('#loadingOverlay').fadeOut(200);
+                        alert('Erro ao carregar dados: ' + xhr.responseText);
+                    });
+            }
+        });
+
+        // === Evento de exclusão ===
+        $('#btnExcluirAlternativa').on('click', function() {
+            var id = $(this).data('id');
+
+            if (!id) {
+                alert('Nenhuma alternativa selecionada.');
+                return;
+            }
+
+            // Confirmação
+            if (!confirm('Tem certeza que deseja excluir esta alternativa? Essa ação não poderá ser desfeita.')) {
+                return;
+            }
+
+            // Requisição AJAX
+            $.ajax({
+                url: '/alternativas/excluir/' + id,
+                type: 'DELETE',
+                success: function(resp) {
+                    alert('Alternativa excluída com sucesso!');
+                    $('#alternativaModal').modal('hide');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    alert('Erro ao excluir alternativa: ' + xhr.responseText);
+                }
+            });
+        });
+
+        const cleaveERD = new Cleave('#ERD', {
+          numeral: true,
+          numeralThousandsGroupStyle: 'thousand',
+          prefix: 'R$ ',
+          numeralDecimalMark: ',',
+          delimiter: '.'
+        });
+
+        function atualiza_ERD() {
+
+            var subgrupo = $('#subgrupo_select').val();
+            var dem_p_antes = parseFloat($('#dem_p_antes').val().replace(',', '.'));
+            var dem_fp_antes = parseFloat($('#dem_fp_antes').val().replace(',', '.'));
+            var dem_p_depois = parseFloat($('#dem_p_depois').val().replace(',', '.'));
+            var dem_fp_depois = parseFloat($('#dem_fp_depois').val().replace(',', '.'));
+            var carga_flegada = $('#flag_carga').is(':checked');
+            var geracao_flegada = $('#flag_geracao').is(':checked');
+            var tipo;
+
+            if (!carga_flegada && !geracao_flegada){
+                cleaveERD.setRawValue(0);
+                return;
+            }
+
+            tipo = carga_flegada ? 1 : 0;
+
+            var dif_p = dem_p_depois - dem_p_antes;
+            var dif_fp = dem_fp_depois - dem_fp_antes;
+            var maior_demanda = Math.max(dif_p, dif_fp);
+
+            try {
+                $.get('/api/fator_k/{{estudo.id_edp}}/' + subgrupo + '/{{estudo.data_abertura_cliente}}/' + tipo, function(data) {
+                    var valor = data.k * maior_demanda;
+                    cleaveERD.setRawValue(valor);  // número puro, Cleave vai formatar
+                });
+            } catch (err) {
+                console.error("Erro ao calcular ERD:", err);
+            }
+        }
+
+
+    }); // fecha document.ready
+})(); // fecha função de espera
+</script>
 {% endblock %}

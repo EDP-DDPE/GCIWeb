@@ -202,7 +202,7 @@ class AlternativaForm(FlaskForm):
             'placeholder': '0.00',
             'step': '0.01',
             'min': '0',
-            'max':'1'
+            'max': '1'
         }
     )
 
@@ -236,7 +236,11 @@ class AlternativaForm(FlaskForm):
         self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
                                    [(circuito.id_circuito, f"{circuito.circuito}") for circuito in Circuito.query.all()]
 
+    def atualizar_circuitos(self, regiao: int):
 
+        circuitos = Circuito.query.filter_by(id_edp=regiao).order_by(Circuito.circuito).all()
+        self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
+                                   [(circuito.id_circuito, f"{circuito.circuito}") for circuito in circuitos]
 
     def validate_flags(self):
         """Validação customizada para flags"""
