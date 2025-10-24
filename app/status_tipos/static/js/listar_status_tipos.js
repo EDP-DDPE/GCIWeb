@@ -178,32 +178,29 @@ function changePageSize() {
 // Renderizar tabela
 function renderTable() {
     showLoading();
-
     setTimeout(() => {
         const $tbody = $('#tableBody');
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
         const pageData = filteredData.slice(start, end);
-
         $tbody.empty();
-
         pageData.forEach(item => {
+            console.log('Ativo: ', item.ativo);
             const row = $('<tr>').html(`
                 <td data-column="id">${item.id}</td>
                 <td data-column="viabilidade">${item.status}</td>
                 <td data-column="analise">${item.descricao}</td>
-                <td data-column="ativo">${item.ativo}</td>
+                <td data-column="ativo" class="text-center">
+                    ${item.ativo == 1 || item.ativo === true || item.ativo === 'True' ? '<i class="fas fa-check-circle text-success" title="Ativo"></i>' : '<i class="fas fa-times-circle text-danger" title="Inativo"></i>'}
+                </td>
                 <td data-column="acoes">${item.acoes}</td>
             `);
             $tbody.append(row);
         });
-
         // Aplicar visibilidade das colunas
         applyColumnVisibility();
-
         // Reativar tooltips
         initializeTooltips();
-
         hideLoading();
     }, 200);
 }
