@@ -1007,8 +1007,8 @@ function verDetalhes(id) {
                             <div class="card-body">
                                 <p><strong>Nome:</strong> ${data.nome || 'N/A'}</p>
                                 <p><strong>Sigla:</strong> ${data.sigla || 'N/A'}</p>
-                                <p><strong>Município:</strong> ${data.municipio?.municipio || 'N/A'}</p>
-                                <p><strong>Estado (EDP):</strong> ${data.edp?.empresa || 'N/A'}</p>
+                                <p><strong>Município:</strong> ${data.municipio || 'N/A'}</p>
+                                <p><strong>Estado (EDP):</strong> ${data.edp || 'N/A'}</p>
                             </div>
                         </div>
                     </div>
