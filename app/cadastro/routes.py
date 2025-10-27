@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app, jsonify
 from werkzeug.utils import secure_filename
 from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
@@ -326,8 +326,10 @@ def editar_estudo(id_estudo):
         form.id_empresa.data = estudo.id_empresa
         form.CNPJ.data = estudo.empresa.cnpj
         form.nome_empresa.data = estudo.empresa.nome_empresa
-        form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
-
+        try:
+            form.demanda.data = Instalacao.query.filter(Instalacao.CNPJ == estudo.empresa.cnpj).first().CARGA
+        except AttributeError as e:
+            pass
 
     # Aba Demandas
     form.dem_carga_atual_fp.data = estudo.dem_carga_atual_fp
@@ -365,47 +367,47 @@ def editar_estudo(id_estudo):
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos, datetime=datetime)
 
 
-@cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
-def cadastro_alternativa(id_estudo):
-    """Rota para cadastro de alternativas de um estudo"""
-    estudo = Estudo.query.get_or_404(id_estudo)
-    form = AlternativaForm()
-    carregar_choices_alternativa(form, estudo.id_edp)
-
-    if request.method == 'POST' and form.validate_on_submit():
-        try:
-            nova_alternativa = Alternativa(
-                id_circuito=form.circuito.data,
-                descricao=form.descricao.data,
-                dem_fp_dep=form.dem_fp_dep.data,
-                dem_p_dep=form.dem_p_dep.data,
-                latitude_ponto_conexao=form.latitude_ponto_conexao.data,
-                longitude_ponto_conexao=form.longitude_ponto_conexao.data,
-                custo_modular=form.custo_modular.data,
-                id_estudo=id_estudo,
-                observacao=form.observacao.data,
-                ERD=form.ERD.data,
-                demanda_disponivel_ponto=form.demanda_disponivel_ponto.data
-            )
-
-            db.session.add(nova_alternativa)
-
-            # Atualizar número de alternativas no estudo
-            estudo.n_alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).count() + 1
-
-            db.session.commit()
-            flash('Alternativa cadastrada com sucesso!', 'success')
-            return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
-
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Erro ao cadastrar alternativa: {str(e)}")
-            flash('Erro ao cadastrar alternativa. Tente novamente.', 'error')
-
-    elif request.method == 'POST':
-        flash('Por favor, corrija os erros no formulário.', 'error')
-
-    return render_template('cadastro/cadastrar_alternativa.html', form=form, estudo=estudo)
+# @cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
+# def cadastro_alternativa(id_estudo):
+#     """Rota para cadastro de alternativas de um estudo"""
+#     estudo = Estudo.query.get_or_404(id_estudo)
+#     form = AlternativaForm()
+#     carregar_choices_alternativa(form, estudo.id_edp)
+#
+#     if request.method == 'POST' and form.validate_on_submit():
+#         try:
+#             nova_alternativa = Alternativa(
+#                 id_circuito=form.circuito.data,
+#                 descricao=form.descricao.data,
+#                 dem_fp_dep=form.dem_fp_dep.data,
+#                 dem_p_dep=form.dem_p_dep.data,
+#                 latitude_ponto_conexao=form.latitude_ponto_conexao.data,
+#                 longitude_ponto_conexao=form.longitude_ponto_conexao.data,
+#                 custo_modular=form.custo_modular.data,
+#                 id_estudo=id_estudo,
+#                 observacao=form.observacao.data,
+#                 ERD=form.ERD.data,
+#                 demanda_disponivel_ponto=form.demanda_disponivel_ponto.data
+#             )
+#
+#             db.session.add(nova_alternativa)
+#
+#             # Atualizar número de alternativas no estudo
+#             estudo.n_alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).count() + 1
+#
+#             db.session.commit()
+#             flash('Alternativa cadastrada com sucesso!', 'success')
+#             return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
+#
+#         except Exception as e:
+#             db.session.rollback()
+#             current_app.logger.error(f"Erro ao cadastrar alternativa: {str(e)}")
+#             flash('Erro ao cadastrar alternativa. Tente novamente.', 'error')
+#
+#     elif request.method == 'POST':
+#         flash('Por favor, corrija os erros no formulário.', 'error')
+#
+#     return render_template('cadastro/cadastrar_alternativa.html', form=form, estudo=estudo)
 
 
 @cadastro_bp.route("/estudos/<int:id_estudo>/anexos/upload", methods=["GET", "POST"])
@@ -470,3 +472,26 @@ def detalhar_estudo(id_estudo):
                            estudo=estudo,
                            alternativas=alternativas,
                            anexos=anexos)
+
+
+@cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])
+@requires_permission('excluir')
+def excluir_estudo(id_estudo):
+    user = get_usuario_logado()
+    try:
+        estudo = Estudo.query.get_or_404(id_estudo)
+
+        id_resp = getattr(estudo.id_resp_regiao, "id_usuario", None)
+        if user.id_usuario not in [id_resp, estudo.id_criado_por] and not user.admin:
+            return jsonify({'success': False, 'message': 'Você não tem permissão para deletar esse estudo.'}), 403
+
+        db.session.delete(estudo)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Estudo excluído com sucesso!'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Erro ao excluir estudo: {e}")
+        return jsonify({'success': False, 'message': 'Erro ao excluir o estudo.'}), 500
+

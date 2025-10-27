@@ -644,6 +644,11 @@
                         <!-- Botões fixos no final -->
                         <div class="border-top p-3 bg-light">
                             <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-danger ms-auto" id="btn-excluir-estudo"
+                                        data-id="{{ estudo.id_estudo }}">
+                                    <i class="fas fa-trash-alt me-2"></i>Excluir Estudo
+                                </button>
+
                                 <a href="#" class="btn btn-secondary" id="btn-cancelar">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a>
@@ -1333,6 +1338,48 @@ $(document).ready(function() {
             // Se não houver referrer (ex: acesso direto), vai pra home
             window.location.href = "{{ url_for('main.home') }}";
         }
+    });
+
+    // Excluir Estudo
+    $(document).on('click', '#btn-excluir-estudo', function() {
+        const idEstudo = $(this).data('id');
+
+        Swal.fire({
+            title: 'Excluir Estudo?',
+            text: 'Esta ação é irreversível e excluirá todas as alternativas, anexos e histórico relacionados.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sim, excluir',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/estudos/excluir/${idEstudo}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Excluído!',
+                            text: data.message || 'O estudo foi excluído com sucesso.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Redireciona de volta à lista ou à página inicial
+                            window.location.href = "/listar";
+                        });
+                    } else {
+                        Swal.fire('Erro!', data.message || 'Não foi possível excluir o estudo.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Erro!', 'Ocorreu um problema ao se comunicar com o servidor.', 'error');
+                });
+            }
+        });
     });
 
 
