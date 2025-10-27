@@ -53,7 +53,7 @@ def carregar_choices_estudo(form):
 
         # Responsáveis por região
         form.resp_regiao.choices = [(0, 'Selecione um responsável...')] + \
-                                   [(rr.id_resp_regiao, f"{rr.usuario.nome} - {rr.regional.regional}")
+                                   [(rr.id_resp_regiao, f"{rr.usuario.nome} - {rr.regional.regional} ({rr.ano_ref})")
                                     for rr in RespRegiao.query.join(Usuario).join(Regional).all()]
 
         viabilidades = (

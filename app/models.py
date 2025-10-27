@@ -21,6 +21,7 @@ class EDP(db.Model):
     subestacoes = db.relationship('Subestacao', back_populates='edp', lazy='select')
     circuitos = db.relationship('Circuito', back_populates='edp', lazy='select')
     estudos = db.relationship('Estudo', back_populates='edp', lazy='select')
+    usuarios = db.relationship('Usuario', back_populates='edp', lazy='select')
 
 
 class FatorK(db.Model):
@@ -70,8 +71,12 @@ class Usuario(db.Model):
     editar = db.Column(db.Boolean, nullable=False)
     deletar = db.Column(db.Boolean, nullable=False)
     bloqueado = db.Column(db.Boolean, nullable=False, default=False)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+
 
     # Relacionamentos
+    edp = db.relationship('EDP', back_populates='usuarios', lazy='joined')
+
     resp_regioes = db.relationship('RespRegiao', back_populates='usuario', lazy='select')
     estudos_criados = db.relationship('Estudo', foreign_keys='Estudo.id_criado_por', back_populates='criado_por',
                                       lazy='select')

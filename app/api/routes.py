@@ -282,7 +282,7 @@ def get_circuitos_by_edp(id_edp):
 def get_resp_by_regional(id_regional):
     """API para buscar responsáveis por regional"""
     responsaveis = RespRegiao.query.filter_by(id_regional=id_regional).join(Usuario).all()
-    return {'responsaveis': [{'id': r.id_resp_regiao, 'nome': r.usuario.nome}
+    return {'responsaveis': [{'id': r.id_resp_regiao, 'nome': f"{r.usuario.nome} ({r.ano_ref})"}
                              for r in responsaveis]}
 
 

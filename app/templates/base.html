@@ -266,15 +266,18 @@
                                 <li><hr class="dropdown-divider"></li>
 
                                 <li><h6 class="dropdown-header text-muted">Parâmetros</h6></li>
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="fas fa-battery-full me-2 text-secondary"></i>Tensões
-                                </a></li>
-                                <li><a class="dropdown-item" href="#">
+<!--                                <li><a class="dropdown-item" href="#">-->
+<!--                                    <i class="fas fa-battery-full me-2 text-secondary"></i>Tensões-->
+<!--                                </a></li>-->
+                                <li><a class="dropdown-item" href="{{ url_for('status_tipos.listar') }}">
                                     <i class="fas fa-layer-group me-2 text-secondary"></i>Tipos de Solicitação
                                 </a></li>
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="fas fa-toolbox me-2 text-secondary"></i>Kits de Obras
+                                <li><a class="dropdown-item" href="{{ url_for('resp_regioes.listar') }}">
+                                    <i class="fas fa-solid fa-users-line me-2 text-secondary"></i>Responsáveis por Região
                                 </a></li>
+<!--                                <li><a class="dropdown-item" href="#">-->
+<!--                                    <i class="fas fa-toolbox me-2 text-secondary"></i>Kits de Obras-->
+<!--                                </a></li>-->
                             </ul>
                         </li>
 

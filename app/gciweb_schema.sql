@@ -32,7 +32,8 @@ CREATE TABLE "gciweb"."usuarios"(
     "criar" BIT NOT NULL,
     "editar" BIT NOT NULL,
     "deletar" BIT NOT NULL,
-    "bloqueado" BIT NOT NULL DEFAULT 0
+    "bloqueado" BIT NOT NULL DEFAULT 0,
+    "id_edp" BIGINT NOT NULL DEFAULT 1
 );
 ALTER TABLE "gciweb"."usuarios" ADD CONSTRAINT "gciweb_usuarios_id_usuario_primary" PRIMARY KEY("id_usuario");
 
@@ -301,6 +302,9 @@ ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_alternativa_foreign
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_obra_foreign" FOREIGN KEY("id_obra") REFERENCES "gciweb"."obras"("id_obra");
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_k_foreign" FOREIGN KEY("id_k") REFERENCES "gciweb"."FATOR_K"("id_k");
 ALTER TABLE "gciweb"."FATOR_K" ADD CONSTRAINT "gciweb_fator_k_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp")
+
+ALTER TABLE "gciweb.usuarios" ADD CONSTRAINT "gciweb_usuarios_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp");
+
 
 -- ÍNDICES ADICIONAIS PARA PERFORMANCE
 CREATE INDEX "idx_estudos_empresa" ON "gciweb"."estudos"("id_empresa");

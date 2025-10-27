@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('resp_regioes.static', filename='css/listar_resp_regioes.css') }}">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+            <button class="btn btn-primary {% if not usuario.criar and not usuario.admin %}disabled{% endif %}" onclick="abrirModalCriar()">
+                <i class="fas fa-plus"></i> Novo vínculo
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-header-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-center w-100">
+                <!-- Busca global -->
+                <div class="flex-grow-1" style="max-width: 300px;">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="globalSearch" class="form-control" placeholder="Buscar em todas as colunas...">
+                    </div>
+                </div>
+
+                <!-- Registros por página -->
+                <div class="d-flex align-items-center">
+                    <label class="form-label mb-0 me-2">Exibir:</label>
+                    <div class="d-flex align-items-center">
+                        <select id="pageSize" class="form-select form-select-sm me-1">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span>registros</span>
+                    </div>
+                </div>
+
+                <!-- Seletor de colunas -->
+                <div class="column-selector">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleColumnSelector()">
+                        <i class="fas fa-columns"></i> Colunas
+                    </button>
+                    <div id="columnDropdown" class="column-dropdown">
+                        <h6 class="mb-2">Selecionar Colunas</h6>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="id_resp_regiao" id="col-id_resp_regiao" checked>
+                            <label class="form-check-label" for="col-id_resp_regiao">ID</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="regional" id="col-regional" checked>
+                            <label class="form-check-label" for="col-regional">Regional</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="usuario" id="col-usuario" checked>
+                            <label class="form-check-label" for="col-usuario">Usuário</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="ano_ref" id="col-ano_ref" checked>
+                            <label class="form-check-label" for="col-ano_ref">Ano</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
+                            <label class="form-check-label" for="col-acoes">Ações</label>
+                        </div>
+
+                        <hr>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllColumns()">Todas</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllColumns()">Nenhuma</button>
+                    </div>
+                </div>
+
+                <!-- Exportar -->
+                <div class="export-dropdown">
+                    <button class="btn btn-outline-info btn-sm" onclick="toggleExportMenu()">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <div id="exportMenu" class="export-menu">
+                        <a href="#" onclick="exportData('csv')"><i class="fas fa-file-csv me-2"></i>CSV</a>
+                        <a href="#" onclick="exportData('excel')"><i class="fas fa-file-excel me-2"></i>Excel</a>
+                        <a href="#" onclick="exportData('pdf')"><i class="fas fa-file-pdf me-2"></i>PDF</a>
+                    </div>
+                </div>
+
+                <!-- Limpar filtros -->
+                <button class="btn btn-outline-warning btn-sm" onclick="clearAllFilters()">
+                    <i class="fas fa-times"></i> Limpar Filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="table-responsive-custom">
+                <table class="table table-hover table-sm mb-0" id="respRegioesTable">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="resizable-header" data-column="id_resp_regiao" style="min-width: 90px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>ID</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="id_resp_regiao" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="regional" style="min-width: 200px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Regional</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="regional" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="usuario" style="min-width: 220px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Usuário</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="usuario" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="ano_ref" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Ano</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="ano_ref" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Ações</span>
+                                    <div class="resize-handle"></div>
+                                </div>
+                            </th>
+                        </tr>
+
+                        <!-- Linha de filtros -->
+                        <tr class="filter-row">
+                            <th data-column="id_resp_regiao">
+                                <input type="text" class="filter-input" placeholder="Filtrar ID..." data-filter="id_resp_regiao">
+                            </th>
+                            <th data-column="regional">
+                                <input type="text" class="filter-input" placeholder="Filtrar Regional..." data-filter="regional">
+                            </th>
+                            <th data-column="usuario">
+                                <input type="text" class="filter-input" placeholder="Filtrar Usuário..." data-filter="usuario">
+                            </th>
+                            <th data-column="ano_ref">
+                                <input type="number" class="filter-input" placeholder="AAAA" data-filter="ano_ref">
+                            </th>
+                            <th data-column="acoes"><!-- sem filtro --></th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tableBody">
+                        {% for doc in documentos %}
+                        <tr data-id="{{ doc.id_resp_regiao }}">
+                            <td data-column="id_resp_regiao">#{{ doc.id_resp_regiao }}</td>
+                            <td data-column="regional">{{ doc.regional.regional if doc.regional else '-' }}</td>
+                            <td data-column="usuario">{{ doc.usuario.nome if doc.usuario else '-' }}</td>
+                            <td data-column="ano_ref">{{ doc.ano_ref }}</td>
+                            <td data-column="acoes">
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-warning {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                                            data-bs-toggle="tooltip" title="Editar vínculo"
+                                            onclick="abrirModalEditar({ id: {{ doc.id_resp_regiao }}, id_regional: {{ doc.id_regional }}, id_usuario: {{ doc.id_usuario }}, ano_ref: {{ doc.ano_ref }} })">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-danger {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+                                            data-bs-toggle="tooltip" title="Excluir vínculo"
+                                            onclick="confirmarExclusao({{ doc.id_resp_regiao }})">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rodapé com paginação e informações -->
+        <div class="card-footer">
+            <div class="table-actions">
+                <div class="pagination-info">
+                    Exibindo <span id="startRecord">1</span> a <span id="endRecord">25</span> de <span id="totalRecords">{{ documentos|length }}</span> registros
+                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ documentos|length }}</span> registros)</span>
+                </div>
+
+                <nav aria-label="Paginação da tabela">
+                    <ul class="pagination pagination-sm mb-0" id="pagination">
+                        <!-- Páginas geradas via JS -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Criar/Editar vínculo -->
+<div class="modal fade" id="respModal" tabindex="-1" aria-labelledby="respModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="respModalLabel">
+          <i class="bi bi-people me-2"></i><span id="respModalTitle">Novo vínculo</span>
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="respForm">
+          {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+          <input type="hidden" id="registro_id" name="id_resp_regiao" value="">
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Regional</label>
+              <select class="form-select" id="id_regional" name="id_regional" required>
+                <option value="">Selecione...</option>
+                {% for r in regionais %}
+                  <option value="{{ r.id_regional }}">{{ r.regional }}</option>
+                {% endfor %}
+              </select>
+              <div class="invalid-feedback">Selecione uma regional.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Usuário</label>
+              <select class="form-select" id="id_usuario" name="id_usuario" required>
+                <option value="">Selecione...</option>
+                {% for u in usuarios %}
+                  <option value="{{ u.id_usuario }}">{{ u.nome }}</option>
+                {% endfor %}
+              </select>
+              <div class="invalid-feedback">Selecione um usuário.</div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+              <label class="form-label fw-bold">Ano</label>
+              <select class="form-select" id="ano_ref" name="ano_ref" required>
+                <option value="">Selecione...</option>
+                {% for a in anos %}
+                  <option value="{{ a }}">{{ a }}</option>
+                {% endfor %}
+              </select>
+              <div class="invalid-feedback">Selecione o ano.</div>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('respForm').reset();">
+              <i class="bi bi-x-circle me-1"></i>Limpar
+            </button>
+            <button type="submit" class="btn btn-success">
+              <span class="btn-text"><i class="bi bi-check-circle me-1"></i>Salvar</span>
+              <span class="btn-loading spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i>Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: confirmar exclusão -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 id="confirmModalLabel" class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar exclusão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir este vínculo?
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmExcluir">
+          <i class="bi bi-trash me-1"></i>Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1080;">
+  <div id="mainToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">Ação realizada.</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{{ url_for('resp_regioes.static', filename='js/listar_resp_regioes.js') }}"></script>
+
+{% endblock %}
