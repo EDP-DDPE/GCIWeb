@@ -74,6 +74,8 @@ def listar(id_estudo):
 
     form = AlternativaForm()
 
+    form.atualizar_circuitos(estudo.id_edp)
+
     form.id_estudo.data = id_estudo
     form.dem_fp_ant.data = max(estudo.dem_carga_atual_fp, estudo.dem_ger_atual_fp)
     form.dem_p_ant.data = max(estudo.dem_carga_atual_p, estudo.dem_ger_atual_p)

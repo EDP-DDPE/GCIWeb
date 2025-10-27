@@ -144,6 +144,33 @@
             display: none !important;
         }
 
+        .select2-container {
+            z-index: 999999 !important; /* acima do modal */
+        }
+
+        /* Garante que o dropdown fique acima do modal */
+        .modal-open .select2-container--open {
+          z-index: 200000 !important;
+        }
+
+        /* Força dropdown a respeitar o fluxo do modal (evita “pular” pra cima) */
+        .modal-open .select2-container--open .select2-dropdown {
+          position: absolute !important;
+          top: auto !important;
+        }
+
+        /* Limita altura e ativa scroll no próprio dropdown (lista grande) */
+        .select2-results__options {
+          max-height: 260px !important;
+          overflow-y: auto !important;
+        }
+
+        /* Mantém o container do select2 acima de conteúdos do modal */
+        .select2-container {
+          z-index: 200000 !important;
+        }
+
+
         .loading-overlay {
           position: fixed;
           inset: 0;
@@ -326,27 +353,54 @@
     <!-- Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
-            // Inicializar Select2 global
-            $('select').each(function() {
-                let parentModal = $(this).closest('.modal');
+      $(document).ready(function () {
 
-                $(this).select2({
-                    theme: 'bootstrap-5',
-                    placeholder: $(this).data('placeholder') || 'Selecione uma opção...',
-                    allowClear: true,
-                    width: '100%',
-                    // se estiver dentro de modal, define dropdownParent
-                    dropdownParent: parentModal.length ? parentModal : $(document.body)
-                });
+        // Re-inicializa com segurança quando o modal abre
+        $(document).on('shown.bs.modal', '.modal', function () {
+          $(this).find('select').each(function () {
+            const $sel = $(this);
+
+            // IGNORA selects que já têm configuração específica
+            if ($sel.hasClass('select2-manual-init')) {
+              return; // pula este select
+            }
+
+            if ($sel.data('select2')) {
+              $sel.select2('close');
+              $sel.select2('destroy');
+            }
+            $sel.select2({
+              theme: 'bootstrap-5',
+              width: '100%',
+              dropdownParent: $sel.closest('.modal'),
+              dropdownAutoWidth: true,
+              selectOnClose: false,
+              scrollAfterSelect: true
             });
-
-            // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').fadeOut();
-            }, 5000);
+          });
         });
+
+        // Scroll correto: corpo bloqueado, modal livre
+        $(document).on('select2:open', function () {
+                  document.body.style.overflow = 'hidden';
+                  $('.modal.show').css('overflow', 'auto');
+                });
+                $(document).on('select2:close', function () {
+                  document.body.style.overflow = '';
+                });
+
+                // Evita “selecionar no mesmo clique” ao abrir
+                $(document).on('mousedown', '.select2-container--open .select2-results__option', function (e) {
+                  e.stopPropagation();
+                });
+
+                // Auto-hide alerts
+                setTimeout(function () { $('.alert').fadeOut(); }, 5000);
+              });
+
+
     </script>
+
 
     {% block extra_js %}{% endblock %}
 </body>
