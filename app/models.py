@@ -46,7 +46,7 @@ class Instalacao(db.Model):
     EMPRESA = db.Column(db.Text, nullable=True)
     INSTALACAO = db.Column(db.Text, nullable=True)
     CNPJ = db.Column(db.Text, nullable=True)
-    #CPF = db.Column(db.Text, nullable=True)
+    # CPF = db.Column(db.Text, nullable=True)
     STATUS_INSTALACAO = db.Column(db.Text, nullable=True)
     DESCRICAO_STATUS = db.Column(db.Text, nullable=True)
     DESCRICAO_CLASSE = db.Column(db.Text, nullable=True)
@@ -73,7 +73,6 @@ class Usuario(db.Model):
     bloqueado = db.Column(db.Boolean, nullable=False, default=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
 
-
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='usuarios', lazy='joined')
 
@@ -81,7 +80,7 @@ class Usuario(db.Model):
     estudos_criados = db.relationship('Estudo', foreign_keys='Estudo.id_criado_por', back_populates='criado_por',
                                       lazy='select')
     resp_alteracao = db.relationship('Estudo', foreign_keys='Estudo.id_resp_alteracao', back_populates='alterado_por',
-                                      lazy='select')
+                                     lazy='select')
     status_estudos = db.relationship('StatusEstudo', back_populates='criado_por', lazy='select')
 
     @classmethod
@@ -244,7 +243,6 @@ class TipoSolicitacao(db.Model):
 
 
 class Estudo(db.Model):
-
     __tablename__ = 'estudos'
     __table_args__ = {'schema': 'gciweb'}
 
@@ -276,7 +274,8 @@ class Estudo(db.Model):
     id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'))
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
     id_tensao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tensao.id_tensao'), nullable=False)
-    id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'), nullable=False)
+    id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'),
+                                    nullable=False)
     data_registro = db.Column(db.Date, nullable=False)
     data_abertura_cliente = db.Column(db.Date, nullable=False)
     data_desejada_cliente = db.Column(db.Date, nullable=False)
@@ -288,8 +287,10 @@ class Estudo(db.Model):
     # Relacionamentos com lazy estratégico
     edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
     regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
-    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados', lazy='joined')
-    alterado_por = db.relationship('Usuario', foreign_keys=[id_resp_alteracao], back_populates='resp_alteracao', lazy='joined')
+    criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados',
+                                 lazy='joined')
+    alterado_por = db.relationship('Usuario', foreign_keys=[id_resp_alteracao], back_populates='resp_alteracao',
+                                   lazy='joined')
     resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='joined')
     empresa = db.relationship('Empresa', back_populates='estudos', lazy='joined')
     municipio = db.relationship('Municipio', back_populates='estudos', lazy='joined')
@@ -335,7 +336,6 @@ class Estudo(db.Model):
         Data DDPE: {self.data_vencimento_ddpe}
         '''
         return string
-
 
     @classmethod
     def get_list_with_basic_relations(cls):
@@ -385,7 +385,8 @@ class StatusEstudo(db.Model):
 
     id_status = db.Column(db.BigInteger, primary_key=True)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
-    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False, index=True)
+    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False,
+                               index=True)
     observacao = db.Column(db.Text)
     id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
     id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
@@ -453,7 +454,6 @@ class Alternativa(db.Model):
     proporcionalidade = db.Column(db.Numeric(3, 2), nullable=True)
     id_k = db.Column(db.BigInteger, db.ForeignKey('gciweb.FATOR_K.id_k'), nullable=True)
 
-
     # Relacionamentos simples - sem ambiguidade
     circuito = db.relationship('Circuito', back_populates='alternativas', lazy='joined')
     estudo = db.relationship('Estudo', back_populates='alternativas', lazy='joined')
@@ -486,9 +486,6 @@ class Obra(db.Model):
 
     # Relacionamento N:1 - Várias obras podem pertencer a uma alternativa
     alternativa = db.relationship('Alternativa', back_populates='obras', lazy='joined')
-
-
-
 
 
 # Funções utilitárias para queries otimizadas
@@ -538,7 +535,6 @@ def listar_estudos(page, per_page):
             per_page=per_page,
             error_out=False
         )
-
 
         estudos_data = []
         for estudo in estudos_paginated.items:
@@ -626,7 +622,10 @@ def obter_estudo(estudo_id):
 
             'tipo_solicitacao': {
                 'id': estudo.tipo_solicitacao.id_tipo_solicitacao,
-                'viabilidade': estudo.tipo_solicitacao.viabilidade
+                'viabilidade': estudo.tipo_solicitacao.viabilidade,
+                'analise': estudo.tipo_solicitacao.analise,
+                'pedido': estudo.tipo_solicitacao.pedido
+
             } if estudo.tipo_solicitacao else None,
 
             'criado_por': {
@@ -674,10 +673,11 @@ def obter_estudo(estudo_id):
                     'descricao': alt.descricao,
                     'custo_modular': float(alt.custo_modular),
                     'flag_alternativa_escolhida': alt.flag_alternativa_escolhida,
+                    'has_image': alt.blob_image is not None,
                     'circuito': {
                         'id': alt.circuito.id_circuito,
                         'nome': alt.circuito.circuito,
-                        'tensao': alt.circuito.tensao
+                        'tensao': alt.circuito.tensao,
                     } if alt.circuito else None
                 }
                 for alt in estudo.alternativas
@@ -708,4 +708,3 @@ def get_dashboard_stats():
             func.count(StatusEstudo.id_status)
         ).group_by(StatusEstudo.status).all()
     }
-

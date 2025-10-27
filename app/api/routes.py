@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, Response
 from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
-    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio, FatorK
+    Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio, FatorK, Alternativa
 import requests
 import re
 from datetime import datetime
 from sqlalchemy import func, and_, literal_column
+import base64
 
 api_bp = Blueprint("api", __name__)
 
@@ -314,3 +315,14 @@ def get_fator_k(id_edp, subgrupo, data_ref, carga):
         return jsonify({"k": k.k})
     else:
         return jsonify({"k": k.kg})
+
+@api_bp.route('/api/imagem_alternativa/<int:id_alt>')
+def imagem_alternativa(id_alt):
+    alt = Alternativa.query.get_or_404(id_alt)
+    if not alt.blob_image:
+        return jsonify({'error': 'Sem imagem'}), 404
+
+    # converte o blob em base64
+    base64_img = base64.b64encode(alt.blob_image).decode('utf-8')
+    mime_type = "image/png"  # ou "image/jpeg" conforme o tipo real
+    return jsonify({'imagem': f"data:{mime_type};base64,{base64_img}"})
