@@ -473,10 +473,20 @@
         // Simular reload dos dados (em uma aplicação real, faria uma nova requisição)
         setTimeout(() => {
             // Aqui você faria uma nova requisição para buscar dados atualizados
-            // $.get('/api/estudos').done(function(data) {
-            //     // Atualizar currentData com novos dados
-            //     initializeData();
-            // });
+             $.get('/listar').done(function(data) {
+                const tempDOM = $('<div>').html(data);
+                const newRows = tempDOM.find('#tableBody > tr');
+
+                if (newRows.length > 0) {
+                    // Substitui o conteúdo do tbody atual
+                    const $tbody = $('#tableBody');
+                    $tbody.empty().append(newRows);
+
+                    initializeData();
+                    initializeTooltips();
+                }
+
+             });
 
             hideLoading();
 
