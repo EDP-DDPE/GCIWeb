@@ -970,6 +970,153 @@ function salvarNova() {
     }
 
 
+function verDetalhes(id) {
+    const $modalBody = $('#modalDetalhesBody');
+    
+    // Mostra spinner de carregamento
+    $modalBody.html(`
+        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    `);
+    
+    // Abre o modal
+    const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
+    modal.show();
+    
+    // Busca dados da subestação
+    $.get(`/subestacoes/${id}/api`)
+        .done(function(data) {
+            if (data.error) {
+                $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
+            console.log('🔹 Dados carregados:', data);
+            
+            const detalhesHtml = `
+                <div class="row g-3">
+                    <!-- Card: Informações Básicas -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <i class="fas fa-bolt me-2"></i>Informações Básicas
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Nome:</strong> ${data.nome || 'N/A'}</p>
+                                <p><strong>Sigla:</strong> ${data.sigla || 'N/A'}</p>
+                                <p><strong>Município:</strong> ${data.municipio?.municipio || 'N/A'}</p>
+                                <p><strong>Estado (EDP):</strong> ${data.edp?.empresa || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card: Coordenadas -->
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <i class="fas fa-map-marker-alt me-2"></i>Localização
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Latitude:</strong> ${data.longitude || 'N/A'}</p>
+                                <p><strong>Longitude:</strong> ${data.lat || 'N/A'}</p>
+                                ${data.longitude && data.lat ? `
+                                    <a href="https://www.google.com/maps?q=${data.longitude},${data.lat}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>Ver no Google Maps
+                                    </a>
+                                ` : '<p class="text-muted">Coordenadas não disponíveis</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mapa -->
+                ${data.longitude && data.lat ? `
+                    <div class="row g-3 mt-3">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <i class="fas fa-map me-2"></i>Mapa
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="mapaDetalhes" style="height: 400px; width: 100%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            $modalBody.html(detalhesHtml);
+            
+            // Inicializa o mapa se houver coordenadas
+            if (data.longitude && data.lat) {
+                inicializarMapaDetalhes(data.longitude, data.lat, data.nome);
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Erro:', error);
+            $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes da subestação</div>`);
+        });
+}
+
+// Função para inicializar o mapa no modal de detalhes
+function inicializarMapaDetalhes(lat, lng, nome) {
+    // Aguarda um pouco para garantir que o elemento está renderizado
+    setTimeout(() => {
+        const mapaDiv = document.getElementById('mapaDetalhes');
+        
+        if (!mapaDiv) {
+            console.error('Elemento do mapa não encontrado');
+            return;
+        }
+        
+        // Remove mapa existente se houver
+        if (mapaDiv._leaflet_id) {
+            const mapInstance = mapaDiv._map;
+            if (mapInstance) {
+                mapInstance.remove();
+            }
+        }
+        
+        // Cria novo mapa
+        const map = L.map('mapaDetalhes').setView([lat, lng], 13);
+        
+        // Adiciona camada de tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Adiciona marcador
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup(`<strong>${nome}</strong><br>Lat: ${lat}<br>Lng: ${lng}`)
+            .openPopup();
+        
+        // Força redimensionamento
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+        
+        // Armazena referência
+        mapaDiv._map = map;
+    }, 200);
+}
+
+// Limpa o mapa quando o modal é fechado
+$('#modalDetalhes').on('hidden.bs.modal', function() {
+    const mapaDiv = document.getElementById('mapaDetalhes');
+    if (mapaDiv && mapaDiv._map) {
+        mapaDiv._map.remove();
+        mapaDiv._map = null;
+    }
+});
+
+
 
 
 

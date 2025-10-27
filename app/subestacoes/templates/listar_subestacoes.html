@@ -231,6 +231,12 @@
                             <td data-column="longitude">{{ doc.long }}</td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-info"
+                                        onclick="verDetalhes({{ doc.id_subestacao }})"
+                                        data-bs-toggle="tooltip"
+                                        title="Ver detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                     <button class="btn btn-sm btn-warning"
                                         onclick="editarSubestacao({{ doc.id_subestacao }})"
                                         data-bs-toggle="tooltip"
@@ -306,6 +312,26 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Modal Ver Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetalhesLabel">
+                    <i class="fas fa-info-circle me-2"></i>Detalhes da Subestação
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo carregado por JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 
