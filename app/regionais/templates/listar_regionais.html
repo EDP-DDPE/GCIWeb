@@ -2,7 +2,7 @@
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ url_for('status_tipos.static', filename='css/listar_status_tipos.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('regionais.static', filename='css/listar_regionais.css') }}">
 
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -13,7 +13,7 @@
             <button class="btn btn-sm btn-primary" 
                     onclick="abrirModalAdicionar()"
                     {% if usuario.criar == 0 %}disabled{% endif %}>
-                <i class="bi bi-plus-circle"></i> Novo Tipo
+                <i class="bi bi-plus-circle"></i> Nova Regional
             </button>
         </div>
     </div>
@@ -57,16 +57,12 @@
                                 <label class="form -check-label" for="col-id">ID</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="status" id="col-status" checked>
-                                <label class="form-check-label" for="col-circuito">Status</label>
+                                <input class="form-check-input column-toggle" type="checkbox" value="regional" id="col-regional" checked>
+                                <label class="form-check-label" for="col-circuito">Regional</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="descricao" id="col-descricao" checked>
-                                <label class="form-check-label" for="col-subestacao">Descrição</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input column-toggle" type="checkbox" value="ativo" id="col-ativo" checked>
-                                <label class="form-check-label" for="col-edp">Ativo</label>
+                                <input class="form-check-input column-toggle" type="checkbox" value="edp" id="col-edp" checked>
+                                <label class="form-check-label" for="col-subestacao">Estado</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
@@ -118,29 +114,20 @@
                                     </div>
                                 </div>
                             </th>
-                            <th class="resizable-header" data-column="status" style="min-width: 120px;">
+                            <th class="resizable-header" data-column="regional" style="min-width: 120px;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>Status</span>
+                                    <span>Regional</span>
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="status" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <i class="fas fa-sort sort-icon" data-sort="regional" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
                             </th>
-                            <th class="resizable-header" data-column="descricao" style="min-width: 200px;">
+                            <th class="resizable-header" data-column="edp" style="min-width: 200px;">
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <span>Descrição</span>
+                                    <span>Estado</span>
                                     <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="descricao" style="cursor: pointer; margin-left: 5px;"></i>
-                                        <div class="resize-handle"></div>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="resizable-header" data-column="ativo" style="min-width: 150px;">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <span>Ativo</span>
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-sort sort-icon" data-sort="ativo" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <i class="fas fa-sort sort-icon" data-sort="edp" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
@@ -157,14 +144,11 @@
                             <th data-column="id">
                                 <input type="text" class="filter-input" placeholder="Filtrar ID..." data-filter="id">
                             </th>
-                            <th data-column="status">
-                                <input type="text" class="filter-input" placeholder="Filtrar Status..." data-filter="status">
+                            <th data-column="regional">
+                                <input type="text" class="filter-input" placeholder="Filtrar Regional..." data-filter="regional">
                             </th>
-                            <th data-column="descricao">
-                                <input type="text" class="filter-input" placeholder="Filtrar Descrição..." data-filter="descricao">
-                            </th>
-                            <th data-column="ativo">
-                                <input type="text" class="filter-input" placeholder="Filtrar Ativo..." data-filter="ativo">
+                            <th data-column="edp">
+                                <input type="text" class="filter-input" placeholder="Filtrar Estado..." data-filter="edp">
                             </th>
                             <th data-column="acoes">
                                 <!-- Sem filtro para ações -->
@@ -174,15 +158,14 @@
                     <tbody id="tableBody">
                         {% for doc in documentos %}
                         <tr>
-                            <td data-column="id">{{ doc.id_status_tipo }}</td>
-                            <td data-column="status">{{ doc.status }}</td>
-                            <td data-column="descricao">{{ doc.descricao }}</td>
-                            <td data-column="ativo">{{ doc.ativo }}</td>
+                            <td data-column="id">{{ doc.id_regional }}</td>
+                            <td data-column="regional">{{ doc.regional }}</td>
+                            <td data-column="edp">{{ doc.edp.empresa }}</td>
                             </td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-sm btn-warning"
-                                        onclick="editarDetalhes({{ doc.id_status_tipo }})"
+                                        onclick="editarDetalhes({{ doc.id_regional }})"
                                         data-bs-toggle="tooltip"
                                         title="Editar Tipo de Status"
                                         {% if usuario.editar == 0 %}disabled{% endif %}>
@@ -221,7 +204,7 @@
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
                 <h5 class="modal-title" id="modalEditarLabel">
-                    <i class="fas fa-edit me-2"></i>Editar Tipo de Status
+                    <i class="fas fa-edit me-2"></i>Editar Regional
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -231,7 +214,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 <button type="button" class="btn btn-success" onclick="salvarEdicao()">Salvar Alterações</button>
-                <button type="button" class="btn btn-danger" onclick="confirmarExclusao()" {% if usuario.deletar == 0 %}disabled{% endif %}>Excluir Tipo</button>
+                <button type="button" class="btn btn-danger" onclick="confirmarExclusao()" {% if usuario.deletar == 0 %}disabled{% endif %}>Excluir Regional</button>
             </div>
         </div>
     </div>
@@ -243,7 +226,7 @@
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="modalAdicionarLabel">
-          <i class="fas fa-plus me-2"></i>Novo Tipo de Status
+          <i class="fas fa-plus me-2"></i>Nova Regional
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
@@ -252,7 +235,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-success" onclick="salvarNovoTipoSolicitacao()">Salvar Tipo</button>
+        <button type="button" class="btn btn-success" onclick="salvarNova()">Salvar Regional</button>
       </div>
     </div>
   </div>
@@ -260,6 +243,6 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src=" {{ url_for('status_tipos.static', filename='js/listar_status_tipos.js') }}"></script>
+<script src=" {{ url_for('regionais.static', filename='js/listar_regionais.js') }}"></script>
 
 {% endblock %}

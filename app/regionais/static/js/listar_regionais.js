@@ -24,13 +24,9 @@ function initializeData() {
         const cells = $(this).find('td');
         return {
             id: cells.eq(0).text().trim(),
-            nome: cells.eq(1).text().trim(),
-            sigla: cells.eq(2).text().trim(),
-            municipio: cells.eq(3).text().trim(),
-            edp: cells.eq(4).text().trim(),
-            lat: cells.eq(5).text().trim(),
-            longitude: cells.eq(6).text().trim(),
-            acoes: cells.eq(7).html(),
+            regional: cells.eq(1).text().trim(),
+            edp: cells.eq(2).text().trim(),
+            acoes: cells.eq(3).html(),
             element: this
         };
     }).get();
@@ -38,6 +34,7 @@ function initializeData() {
     updatePagination();
     renderTable();
 }
+
 
 // Configurar event listeners
 function setupEventListeners() {
@@ -180,38 +177,30 @@ function changePageSize() {
 // Renderizar tabela
 function renderTable() {
     showLoading();
-
     setTimeout(() => {
         const $tbody = $('#tableBody');
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
         const pageData = filteredData.slice(start, end);
-
         $tbody.empty();
-
         pageData.forEach(item => {
+            console.log('Ativo: ', item.ativo);
             const row = $('<tr>').html(`
                 <td data-column="id">${item.id}</td>
-                <td data-column="nome">${item.nome}</td>
-                <td data-column="sigla">${item.sigla}</td>
-                <td data-column="municipio">${item.municipio}</td>
+                <td data-column="regional">${item.regional}</td>
                 <td data-column="edp">${item.edp}</td>
-                <td data-column="lat">${item.lat}</td>
-                <td data-column="longitude">${item.longitude}</td>
                 <td data-column="acoes">${item.acoes}</td>
             `);
             $tbody.append(row);
         });
-
         // Aplicar visibilidade das colunas
         applyColumnVisibility();
-
         // Reativar tooltips
         initializeTooltips();
-
         hideLoading();
     }, 200);
 }
+
 
 // Atualizar paginação (versão com input)
 function updatePagination() {
@@ -395,12 +384,8 @@ function setupColumnResizing() {
     function exportData(format) {
         const exportData = filteredData.map(item => ({
             ID: item.id,
-            'Subestacao': item.nome,
-            'Sigla': item.sigla,
-            'Municipio': item.municipio,
-            'EDP': item.edp,
-            'Latitude': item.lat,
-            'Longitude': item.long
+            'Regional': item.regional,
+            'Estado': item.edp
         }));
 
         switch(format) {
@@ -425,18 +410,18 @@ function setupColumnResizing() {
             ...data.map(row => headers.map(header => `"${row[header]}"`).join(','))
         ].join('\n');
 
-        downloadFile(csv, 'subestacoes.csv', 'text/csv');
+        downloadFile(csv, 'regionais.csv', 'text/csv');
     }
 
     function exportToExcel(data) {
         // Simulação de export Excel (seria necessário uma biblioteca como SheetJS)
         const csv = exportToCSV(data);
-        downloadFile(csv, 'subestacoes.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        downloadFile(csv, 'regionais.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     }
 
     function exportToPDF(data) {
         // Simulação de export PDF (seria necessário uma biblioteca como jsPDF)
-        let content = 'LISTA DE SUBESTACOES\n\n';
+        let content = 'LISTA DE Regionais\n\n';
 
         const headers = Object.keys(data[0]);
         content += headers.join('\t') + '\n';
@@ -446,7 +431,7 @@ function setupColumnResizing() {
             content += headers.map(header => row[header]).join('\t') + '\n';
         });
 
-        downloadFile(content, 'subestacoes.pdf', 'application/pdf');
+        downloadFile(content, 'regionais.pdf', 'application/pdf');
     }
 
     function downloadFile(content, filename, mimeType) {
@@ -552,156 +537,99 @@ function setupColumnResizing() {
     }
 
 
-function editarSubestacao(id) {
+function editarDetalhes(regionaisId) {
     const $modalBody = $('#modalEditarBody');
+    
     $modalBody.html(`
-        <div class="d-flex justify-content-center align-items-center" style="height: 200;">
+        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
             <div class="spinner-border text-warning" role="status">
                 <span class="visually-hidden">Carregando...</span>
             </div>
         </div>
     `);
-
+    
     const modal = new bootstrap.Modal($('#modalEditar')[0]);
     modal.show();
-
-    // 🔹 1. Buscar dados da subestação
-    $.get(`/subestacoes/${id}/api`)
-        .done(function (data) {
-            console.log('🔹 Dados carregados:', data);
-
+    
+    $.get(`/regionais/${regionaisId}/api`)
+        .done(function(data) {
+            console.log('✅ Dados carregados:', data);
+            
+            if (data.error) {
+                $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
+                return;
+            }
+            
             const editarHtml = `
-                <form id="formEditarSubestacao" data-subestacao-id="${id}">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-secondary text-white">
-                            <i class="fas fa-bolt me-2"></i>Editar Subestação
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Nome:</strong></label>
-                                <input type="text" name="nome" class="form-control" value="${data.nome || ''}" required>
+                <form id="formEdicao" data-id-regional="${regionaisId}">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <i class="fas fa-info-circle me-2"></i>Editar Regional
+                                </div>
+                                <div class="card-body">
+                                    <!-- ID (readonly, sem name) -->
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>ID:</strong></label>
+                                        <input type="text" class="form-control" value="${data.id}" readonly>
+                                    </div>
+                                    
+                                    <!-- Estado (readonly, sem name) -->
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Estado:</strong></label>
+                                        <input type="text" class="form-control" value="${data.edp || ''}" readonly>
+                                    </div>
+                                    
+                                    <!-- Regional (editável, COM name) -->
+                                    <div class="mb-3">
+                                        <label class="form-label"><strong>Regional:</strong> <span class="text-danger">*</span></label>
+                                        <input type="text" name="regional" class="form-control" value="${data.regional || ''}" required>
+                                    </div>
+                                </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Sigla:</strong></label>
-                                <input type="text" name="sigla" class="form-control" value="${data.sigla || ''}" required maxlength="10">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Latitude:</strong></label>
-                                <input type="text" name="lat" class="form-control" value="${data.lat || ''}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Longitude:</strong></label>
-                                <input type="text" name="longitude" class="form-control" value="${data.longitude || ''}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Município:</strong></label>
-                                <select name="id_municipio" class="form-select" id="municipio-edit-select" required></select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>EDP (Estado):</strong></label>
-                                <select name="id_edp" class="form-select" id="edp-edit-select" required></select>
-                            </div>
-
                         </div>
                     </div>
                 </form>
             `;
-
+            
             $modalBody.html(editarHtml);
-
-            // 🔹 Carregar selects de EDP e Município
-            carregarEdpsSelect(data.id_edp, data.id_municipio);
         })
-        .fail(function () {
-            $modalBody.html('<div class="alert alert-danger">Erro ao carregar dados da subestação.</div>');
+        .fail(function(xhr, status, error) {
+            console.error('❌ Erro:', error);
+            $modalBody.html(`<div class="alert alert-danger">Erro ao carregar dados da regional</div>`);
         });
 }
 
-
-// 🔹 2. Carregar EDPs e depois Municípios
-function carregarEdpsSelect(edpSelecionado, municipioSelecionado) {
-    $.get('/subestacoes/edps/api')
-        .done(function (edps) {
-            const $edpSelect = $('#edp-edit-select');
-            const options = edps.map(e => `<option value="${e.id}" ${e.id === edpSelecionado ? 'selected' : ''}>${e.empresa}</option>`);
-            $edpSelect.html('<option value="">Selecione...</option>' + options.join(''));
-
-            $edpSelect.select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('#modalEditar')
-            });
-
-            // Carrega municípios correspondentes ao EDP atual
-            if (edpSelecionado) {
-                carregarMunicipiosSelect(edpSelecionado, municipioSelecionado);
-            }
-
-            // Sempre que mudar o EDP, atualiza os municípios
-            $edpSelect.on('change', function () {
-                carregarMunicipiosSelect($(this).val(), null);
-            });
-        });
-}
-
-
-function carregarMunicipiosSelect(edpId, municipioSelecionado) {
-    const $municipioSelect = $('#municipio-edit-select');
-
-    if (!edpId) {
-        $municipioSelect.html('<option>Selecione o Estado primeiro...</option>').prop('disabled', true);
-        return;
-    }
-
-    $.get(`/subestacoes/municipios/api/${edpId}`)
-        .done(function (municipios) {
-            if (!municipios.length) {
-                $municipioSelect.html('<option value="">Nenhum município encontrado</option>').prop('disabled', true);
-            } else {
-                const options = municipios.map(m =>
-                    `<option value="${m.id}" ${m.id === municipioSelecionado ? 'selected' : ''}>${m.municipio}</option>`
-                ).join('');
-                $municipioSelect.html('<option value="">Selecione...</option>' + options).prop('disabled', false);
-            }
-
-            $municipioSelect.select2({
-                theme: 'bootstrap-5',
-                dropdownParent: $('#modalEditar')
-            });
-        })
-        .fail(() => $municipioSelect.html('<option>Erro ao carregar municípios</option>').prop('disabled', true));
-}
-
-
-// 🔹 3. Função para salvar a edição
 function salvarEdicao() {
-    const form = document.getElementById('formEditarSubestacao');
-    const id = form.getAttribute('data-subestacao-id');
-
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
-    const formData = Object.fromEntries(new FormData(form).entries());
-
+    console.log('Passei aqui 1!');
+    const form = document.getElementById('formEdicao');
+    console.log('Passei aqui 2!');
+    const regionalId = form.getAttribute('data-id-regional');
+    console.log('Passei aqui 3!');
+    const formData = new FormData(form);
+    // Converter FormData para objeto
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+    
     $.ajax({
-        url: `/subestacoes/${id}/editar`,
+        url: `/regionais/${regionalId}/editar`,
         method: 'POST',
-        data: JSON.stringify(formData),
+        data: JSON.stringify(data),
         contentType: 'application/json',
-        success: function (response) {
-            alert(response.message || '✅ Subestação atualizada com sucesso!');
+        success: function(response) {
+            // Fechar modal
             bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
+            // Mostrar mensagem de sucesso
+            alert('Regional atualizado com sucesso!');
+            // Recarregar a página ou tabela
             location.reload();
         },
-        error: function (xhr) {
-            console.error('Erro:', xhr.responseText);
-            alert('❌ Erro ao salvar alterações.');
+        error: function(xhr, status, error) {
+            console.error('Erro ao salvar:', error);
+            alert('Erro ao salvar as alterações. Tente novamente.');
         }
     });
 }
@@ -709,43 +637,63 @@ function salvarEdicao() {
     
     
 function confirmarExclusao() {
-    const form = document.getElementById('formEditarSubestacao');
-    const id = form.getAttribute('data-subestacao-id');
+    const form = document.getElementById('formEdicao');
+    
+    if (!form) {
+        alert('❌ Erro: formulário não encontrado.');
+        return;
+    }
+    
+    const regionalId = form.getAttribute('data-id-regional');
+    
+    if (!regionalId) {
+        alert('❌ Erro: ID da regional não encontrado.');
+        return;
+    }
     
     // Primeira confirmação
-    if (!confirm('Tem certeza que deseja excluir este circuito? Esta operação não pode ser desfeita.')) {
+    if (!confirm('⚠️ Tem certeza que deseja excluir esta regional?\n\nEsta operação não pode ser desfeita.')) {
         return;
     }
     
     // Segunda verificação: digitar "EXCLUIR"
-    const confirmacao = prompt('Para confirmar, digite a palavra: EXCLUIR');
+    const confirmacao = prompt('Para confirmar a exclusão, digite a palavra:\n\nEXCLUIR');
+    
     if (confirmacao !== 'EXCLUIR') {
         alert('❌ Confirmação incorreta. Exclusão cancelada.');
         return;
     }
     
+    // Faz a requisição de exclusão
     $.ajax({
-        url: `/subestacoes/${id}/excluir`,
+        url: `/regionais/${regionalId}/excluir`,
         method: 'POST',
         success: function(response) {
             bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
-            alert('✅ Subestação excluída com sucesso!');
+            alert('✅ Regional excluída com sucesso!');
             location.reload();
         },
         error: function(xhr, status, error) {
-            let mensagemErro = '❌ Erro ao excluir subestação!';
+            console.error('❌ Erro ao excluir:', error);
+            console.error('Status HTTP:', xhr.status);
+            console.error('Resposta completa:', xhr.responseText);
+            
+            let mensagemErro = '❌ Erro ao excluir regional!';
             
             // Tenta pegar a mensagem do servidor
             if (xhr.responseJSON && xhr.responseJSON.message) {
                 mensagemErro = xhr.responseJSON.message;
             } else if (xhr.status === 409) {
-                mensagemErro = '❌ Não é possível excluir este circuito!\n\n' +
-                               'Existem registros relacionados na tabela de Alternativas.\n\n' +
-                               '⚠️ Remova todos os registros relacionados antes de excluir o circuito.';
+                mensagemErro = '❌ Não é possível excluir esta regional!\n\n' +
+                              'Existem registros relacionados.\n\n' +
+                              '⚠️ Remova todos os registros associados antes de excluir.';
+            } else if (xhr.status === 400) {
+                mensagemErro = '❌ Requisição inválida. Verifique os dados.';
+            } else if (xhr.status === 500) {
+                mensagemErro = '❌ Erro interno do servidor. Contate o administrador.';
             }
             
             alert(mensagemErro);
-            console.error('Erro detalhado:', xhr.responseText);
         }
     });
 }
@@ -753,6 +701,8 @@ function confirmarExclusao() {
     
 function abrirModalAdicionar() {
     const $modalBody = $('#modalAdicionarBody');
+
+    // Mostra o spinner de carregamento inicial
     $modalBody.html(`
         <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
             <div class="spinner-border text-primary" role="status">
@@ -764,124 +714,107 @@ function abrirModalAdicionar() {
     const modal = new bootstrap.Modal($('#modalAdicionar')[0]);
     modal.show();
 
-    // 🔹 Carregar lista de EDPs
-    $.get('/subestacoes/edps/api')
+    // Busca lista de EDPs (Estados)
+    $.get('/regionais/edps/api')
         .done(function (edps) {
-            let edpOptions = edps.map(edp => `<option value="${edp.id}">${edp.empresa}</option>`).join('');
+            let edpOptions = edps.map(edp =>
+                `<option value="${edp.id}">${edp.empresa}</option>`
+            ).join('');
 
+            // HTML do formulário dinâmico
             const addHtml = `
-                <form id="formAdicionarSubestacao" novalidate>
+                <form id="formAdicionar" novalidate>
                     <div class="card shadow-sm">
                         <div class="card-header bg-secondary text-white">
-                            <i class="fas fa-bolt me-2"></i>Nova Subestação
+                            <i class="fas fa-plus-circle me-2"></i>Nova Regional
                         </div>
                         <div class="card-body">
+                            <!-- Campo: Nome da Regional -->
                             <div class="mb-3">
-                                <label class="form-label"><strong>Nome:</strong> <span class="text-danger">*</span></label>
-                                <input type="text" name="nome" class="form-control" placeholder="Digite o nome da Subestação" required>
+                                <label class="form-label"><strong>Regional:</strong> <span class="text-danger">*</span></label>
+                                <input 
+                                    type="text" 
+                                    name="regional" 
+                                    id="campo-regional"
+                                    class="form-control" 
+                                    placeholder="Digite o nome da regional"
+                                    required
+                                >
+                                <div class="invalid-feedback">
+                                    Por favor, informe o nome da Regional.
+                                </div>
                             </div>
 
+                            <!-- Campo: Estado (EDP) -->
                             <div class="mb-3">
-                                <label class="form-label"><strong>Sigla:</strong> <span class="text-danger">*</span></label>
-                                <input type="text" name="sigla" class="form-control" placeholder="Digite a sigla" required maxlength="10">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>EDP (Estado):</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="id_edp" id="edp-select" required>
+                                <label class="form-label"><strong>Estado (EDP):</strong> <span class="text-danger">*</span></label>
+                                <select 
+                                    class="form-select" 
+                                    name="id_edp" 
+                                    id="edp-select"
+                                    required
+                                >
                                     <option value="">Selecione...</option>
                                     ${edpOptions}
                                 </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Município:</strong> <span class="text-danger">*</span></label>
-                                <select class="form-select" name="id_municipio" id="municipio-select" required disabled>
-                                    <option value="">Selecione o Estado primeiro...</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Latitude:</strong></label>
-                                <input type="text" name="lat" class="form-control" placeholder="Ex: -20.123456">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label"><strong>Longitude:</strong></label>
-                                <input type="text" name="longitude" class="form-control" placeholder="Ex: -40.987654">
+                                <div class="invalid-feedback">
+                                    Por favor, selecione um Estado (EDP).
+                                </div>
                             </div>
                         </div>
                     </div>
                 </form>
             `;
+            
             $modalBody.html(addHtml);
 
-            // Inicializa select2 (corrigido o fechamento do seletor que estava errado)
-            $('#edp-select, #municipio-select').select2({
+            // Inicializa Select2 dentro do modal
+            $('#edp-select').select2({
                 theme: 'bootstrap-5',
                 placeholder: 'Selecione...',
+                allowClear: true,
                 width: '100%',
                 dropdownParent: $('#modalAdicionar')
             });
-
-            // 🔹 Quando muda o EDP → carregar municípios dinamicamente
-            $('#edp-select').on('change', function () {
-                const idEdp = $(this).val();
-                const $municipio = $('#municipio-select');
-
-                if (!idEdp) {
-                    $municipio.html('<option value="">Selecione o Estado primeiro...</option>').prop('disabled', true);
-                    return;
-                }
-
-                $municipio.html('<option>Carregando...</option>').prop('disabled', true);
-
-                $.get(`/subestacoes/municipios/api/${idEdp}`)
-                    .done(function (municipios) {
-                        if (municipios.length === 0) {
-                            $municipio.html('<option value="">Nenhum município encontrado</option>').prop('disabled', true);
-                        } else {
-                            const options = municipios.map(m => `<option value="${m.id}">${m.municipio}</option>`).join('');
-                            $municipio.html('<option value="">Selecione...</option>' + options).prop('disabled', false);
-                        }
-                    })
-                    .fail(function () {
-                        $municipio.html('<option>Erro ao carregar municípios</option>').prop('disabled', true);
-                    });
-            });
         })
         .fail(function () {
-            $modalBody.html('<div class="alert alert-danger">Erro ao carregar EDPs!</div>');
+            $modalBody.html('<div class="alert alert-danger">❌ Erro ao carregar EDPs!</div>');
         });
 }
 
 
-// 🔹 Salvar Subestação (Ajax)
 function salvarNova() {
-    const form = document.getElementById('formAdicionarSubestacao');
+    const form = document.getElementById('formAdicionar');
 
+    // Validação de formulário HTML5
     if (!form.checkValidity()) {
-        form.reportValidity();
+        form.classList.add('was-validated');
         return;
     }
 
     const formData = Object.fromEntries(new FormData(form).entries());
 
     $.ajax({
-        url: '/subestacoes/nova',
+        url: '/regionais/adicionar',
         method: 'POST',
         data: JSON.stringify(formData),
         contentType: 'application/json',
         success: function (response) {
+            alert(response.message || '✅ Regional adicionada com sucesso!');
             bootstrap.Modal.getInstance(document.getElementById('modalAdicionar')).hide();
-            alert('✅ ' + response.msg);
             location.reload();
         },
         error: function (xhr) {
-            alert('❌ Falha ao salvar. ' + (xhr.responseJSON?.erro || 'Verifique os dados e tente novamente.'));
+            console.error('Erro:', xhr.responseText);
+            let mensagem = '❌ Erro ao adicionar regional.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                mensagem = xhr.responseJSON.message;
+            }
+            alert(mensagem);
         }
     });
 }
+
 
 
     // Funcionalidades adicionais
@@ -968,153 +901,6 @@ function salvarNova() {
             $indicator.hide();
         }
     }
-
-
-function verDetalhes(id) {
-    const $modalBody = $('#modalDetalhesBody');
-    
-    // Mostra spinner de carregamento
-    $modalBody.html(`
-        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-            <div class="spinner-border text-info" role="status">
-                <span class="visually-hidden">Carregando...</span>
-            </div>
-        </div>
-    `);
-    
-    // Abre o modal
-    const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
-    modal.show();
-    
-    // Busca dados da subestação
-    $.get(`/subestacoes/${id}/api`)
-        .done(function(data) {
-            if (data.error) {
-                $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
-                return;
-            }
-            
-            console.log('🔹 Dados carregados:', data);
-            
-            const detalhesHtml = `
-                <div class="row g-3">
-                    <!-- Card: Informações Básicas -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-bolt me-2"></i>Informações Básicas
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Nome:</strong> ${data.nome || 'N/A'}</p>
-                                <p><strong>Sigla:</strong> ${data.sigla || 'N/A'}</p>
-                                <p><strong>Município:</strong> ${data.municipio || 'N/A'}</p>
-                                <p><strong>Estado (EDP):</strong> ${data.edp || 'N/A'}</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Card: Coordenadas -->
-                    <div class="col-md-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-header bg-secondary text-white">
-                                <i class="fas fa-map-marker-alt me-2"></i>Localização
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Latitude:</strong> ${data.longitude || 'N/A'}</p>
-                                <p><strong>Longitude:</strong> ${data.lat || 'N/A'}</p>
-                                ${data.longitude && data.lat ? `
-                                    <a href="https://www.google.com/maps?q=${data.longitude},${data.lat}" 
-                                       target="_blank" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt me-1"></i>Ver no Google Maps
-                                    </a>
-                                ` : '<p class="text-muted">Coordenadas não disponíveis</p>'}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Mapa -->
-                ${data.longitude && data.lat ? `
-                    <div class="row g-3 mt-3">
-                        <div class="col-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-map me-2"></i>Mapa
-                                </div>
-                                <div class="card-body p-0">
-                                    <div id="mapaDetalhes" style="height: 400px; width: 100%;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ` : ''}
-            `;
-            
-            $modalBody.html(detalhesHtml);
-            
-            // Inicializa o mapa se houver coordenadas
-            if (data.longitude && data.lat) {
-                inicializarMapaDetalhes(data.longitude, data.lat, data.nome);
-            }
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Erro:', error);
-            $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes da subestação</div>`);
-        });
-}
-
-// Função para inicializar o mapa no modal de detalhes
-function inicializarMapaDetalhes(lat, lng, nome) {
-    // Aguarda um pouco para garantir que o elemento está renderizado
-    setTimeout(() => {
-        const mapaDiv = document.getElementById('mapaDetalhes');
-        
-        if (!mapaDiv) {
-            console.error('Elemento do mapa não encontrado');
-            return;
-        }
-        
-        // Remove mapa existente se houver
-        if (mapaDiv._leaflet_id) {
-            const mapInstance = mapaDiv._map;
-            if (mapInstance) {
-                mapInstance.remove();
-            }
-        }
-        
-        // Cria novo mapa
-        const map = L.map('mapaDetalhes').setView([lat, lng], 13);
-        
-        // Adiciona camada de tiles
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-        
-        // Adiciona marcador
-        L.marker([lat, lng]).addTo(map)
-            .bindPopup(`<strong>${nome}</strong><br>Lat: ${lat}<br>Lng: ${lng}`)
-            .openPopup();
-        
-        // Força redimensionamento
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 100);
-        
-        // Armazena referência
-        mapaDiv._map = map;
-    }, 200);
-}
-
-// Limpa o mapa quando o modal é fechado
-$('#modalDetalhes').on('hidden.bs.modal', function() {
-    const mapaDiv = document.getElementById('mapaDetalhes');
-    if (mapaDiv && mapaDiv._map) {
-        mapaDiv._map.remove();
-        mapaDiv._map = null;
-    }
-});
 
 
 
