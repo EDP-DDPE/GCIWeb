@@ -261,7 +261,10 @@ def get_municipios_by_edp(id_edp):
     """API para buscar municípios por EDP"""
     municipios = Municipio.query.filter_by(id_edp=id_edp).all()
     return {'municipios': [{'id': m.id_municipio, 'nome': m.municipio} for m in municipios]}
-
+@api_bp.route("/api/municipios_by_regional/<int:id_regional>")
+def get_municipios_by_regional(id_regional):
+    municipios = Municipio.query.filter_by(id_regional=id_regional).all()
+    return {'municipios': [{'id': m.id_municipio, 'nome': m.municipio} for m in municipios]}
 
 @api_bp.route("/api/regionais/<int:id_edp>")
 def get_regionais_by_edp(id_edp):

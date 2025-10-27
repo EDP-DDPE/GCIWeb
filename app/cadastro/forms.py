@@ -10,7 +10,7 @@ ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png',
 class EstudoForm(FlaskForm):
     # Campos básicos do estudo
     num_doc = StringField('Número do Documento', validators=[DataRequired()], render_kw={"readonly": True})
-    protocolo = StringField('Protocolo', validators=[Optional()])
+    protocolo = IntegerField('Protocolo', validators=[Optional()])
     nome_projeto = TextAreaField('Nome do Projeto', validators=[InputRequired()])
     descricao = TextAreaField('Descrição', validators=[Optional()])
 

@@ -517,7 +517,7 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.data_abertura_cliente.label(class="form-label") }}
-                                            {{ form.data_abertura_cliente(class="form-control") }}
+                                            {{ form.data_abertura_cliente(class="form-control", max=datetime.utcnow().date()) }}
                                             {% if form.data_abertura_cliente.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.data_abertura_cliente.errors %}
@@ -532,7 +532,7 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.data_desejada_cliente.label(class="form-label") }}
-                                            {{ form.data_desejada_cliente(class="form-control") }}
+                                            {{ form.data_desejada_cliente(class="form-control", min=datetime.utcnow().date()) }}
                                             {% if form.data_desejada_cliente.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.data_desejada_cliente.errors %}
@@ -619,7 +619,7 @@
                         <!-- Botões fixos no final -->
                         <div class="border-top p-3 bg-light">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ url_for('listar.listar') }}" class="btn btn-secondary">
+                                <a href="#" class="btn btn-secondary" id="btn-cancelar">
                                     <i class="fas fa-times me-2"></i>Cancelar
                                 </a>
                                 <button class="btn btn-primary" id="btn-submit">
@@ -1149,6 +1149,15 @@ $(document).ready(function() {
     $('#regional-select').change(function() {
         var regionalId = $(this).val();
         if (regionalId) {
+            $.get('/api/municipios_by_regional/' + regionalId, function(data) {
+                var municipioSelect = $('#municipio-select');
+                municipioSelect.empty().append('<option value="0">Selecione um município...</option>');
+                $.each(data.municipios, function(index, municipio) {
+                    municipioSelect.append('<option value="' + municipio.id + '">' + municipio.nome + '</option>');
+                });
+                municipioSelect.trigger('change');
+            });
+
             $.get('/api/resp_regioes/' + regionalId, function(data) {
                 var respSelect = $('#resp-regiao-select');
                 respSelect.empty().append('<option value="">Selecione um responsável...</option>');
@@ -1164,6 +1173,15 @@ $(document).ready(function() {
     
     // Loading state no submit
     $('#form-estudo').submit(function() {
+
+        $(this).find('input[type="number"], input.form-control').each(function() {
+            const val = $(this).val();
+            console.log('Alterando vírgulas por pontos.')
+            if (val && val.includes(',')) {
+                $(this).val(val.replace(',', '.'));
+            }
+        });
+
         var btn = $('#btn-submit');
         btn.prop('disabled', true);
         btn.find('.btn-text').hide();
@@ -1276,6 +1294,19 @@ $(document).ready(function() {
             }
         });
     });
+
+    $('#btn-cancelar').on('click', function (e) {
+        e.preventDefault();
+
+        // Se o usuário veio de outra página dentro do site
+        if (document.referrer && document.referrer.includes(window.location.origin)) {
+            window.history.back(); // volta para a página anterior
+        } else {
+            // Se não houver referrer (ex: acesso direto), vai pra home
+            window.location.href = "{{ url_for('main.home') }}";
+        }
+    });
+
 
     updateButton();
 });

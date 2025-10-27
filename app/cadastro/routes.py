@@ -188,7 +188,7 @@ def cadastro_estudo():
     elif request.method == 'POST':
         flash('Por favor, corrija os erros no formulário.', 'error')
 
-    return render_template('cadastro/cadastrar_estudo.html', form=form)
+    return render_template('cadastro/cadastrar_estudo.html', form=form, datetime=datetime)
 
 
 def carregar_classificacao(form, id):
@@ -362,7 +362,7 @@ def editar_estudo(id_estudo):
     # Aba Observações
 
     form.observacao.data = estudo.observacao
-    return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos)
+    return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos, datetime=datetime)
 
 
 @cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
