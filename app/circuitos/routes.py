@@ -16,7 +16,6 @@ def listar():
         joinedload(Circuito.subestacao),
         joinedload(Circuito.edp)
     ).all()
-    print(registros[0])
     
     usuario = get_usuario_logado()
 
