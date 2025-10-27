@@ -607,10 +607,6 @@ function editarSubestacao(id) {
                                 <select name="id_edp" class="form-select" id="edp-edit-select" required></select>
                             </div>
 
-                            <div class="text-end mt-4">
-                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-primary" onclick="salvarEdicaoSubestacao()">Salvar</button>
-                            </div>
                         </div>
                     </div>
                 </form>
@@ -713,8 +709,8 @@ function salvarEdicao() {
     
     
 function confirmarExclusao() {
-    const form = document.getElementById('formEdicao');
-    const circuitoId = form.getAttribute('data-circuito-id');
+    const form = document.getElementById('formEditarSubestacao');
+    const id = form.getAttribute('data-subestacao-id');
     
     // Primeira confirmação
     if (!confirm('Tem certeza que deseja excluir este circuito? Esta operação não pode ser desfeita.')) {
@@ -729,15 +725,15 @@ function confirmarExclusao() {
     }
     
     $.ajax({
-        url: `/circuitos/${circuitoId}/excluir`,
+        url: `/subestacoes/${id}/excluir`,
         method: 'POST',
         success: function(response) {
             bootstrap.Modal.getInstance(document.getElementById('modalEditar')).hide();
-            alert('✅ Circuito excluído com sucesso!');
+            alert('✅ Subestação excluída com sucesso!');
             location.reload();
         },
         error: function(xhr, status, error) {
-            let mensagemErro = '❌ Erro ao excluir o circuito!';
+            let mensagemErro = '❌ Erro ao excluir subestação!';
             
             // Tenta pegar a mensagem do servidor
             if (xhr.responseJSON && xhr.responseJSON.message) {

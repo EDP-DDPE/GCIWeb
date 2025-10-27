@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for,
 from app.models import db,Subestacao, Municipio, EDP
 from sqlalchemy.orm import joinedload
 from app.auth import requires_permission, get_usuario_logado
+from sqlalchemy.exc import IntegrityError
 
 subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates", static_folder="static", static_url_path='/subestacoes/static')
 
@@ -39,7 +40,7 @@ def api_subestacao(id):
 @requires_permission('editar')
 def editar_subestacao(id):
     sub = Subestacao.query.get_or_404(id)
-
+    
     # ✅ Verifica tipo de requisição (JSON ou Form)
     if request.is_json:
         data = request.get_json()
@@ -47,17 +48,24 @@ def editar_subestacao(id):
     else:
         data = request.form.to_dict()
         print("📨 Dados recebidos (FormData):", data)
-
-    # ✅ Campos permitidos para edição
-    campos_editaveis = {'nome', 'sigla', 'id_municipio', 'id_edp', 'lat', 'longitude'}
-
-    for campo, valor in data.items():
-        if campo not in campos_editaveis:
-            continue
-        if hasattr(sub, campo):
-            print(f"✏️ Atualizando {campo}: {getattr(sub, campo)} -> {valor}")
-            setattr(sub, campo, valor)
-
+    
+    # ✅ Mapeamento de campos (frontend -> banco)
+    mapeamento_campos = {
+        'nome': 'nome',
+        'sigla': 'sigla',
+        'id_municipio': 'id_municipio',
+        'id_edp': 'id_edp',
+        'lat': 'lat',
+        'longitude': 'long'  # ← MAPEAMENTO AQUI
+    }
+    
+    for campo_frontend, campo_banco in mapeamento_campos.items():
+        if campo_frontend in data:
+            valor = data[campo_frontend]
+            if hasattr(sub, campo_banco):
+                print(f"✏️ Atualizando {campo_banco}: {getattr(sub, campo_banco)} -> {valor}")
+                setattr(sub, campo_banco, valor)
+    
     try:
         db.session.commit()
         print("✅ Commit bem-sucedido")
@@ -121,3 +129,28 @@ def listar_municipios_por_edp(edp_id):
         {"id": m.id_municipio, "municipio": m.municipio}
         for m in municipios
     ])
+
+@subestacao_bp.route('/subestacoes/<int:id>/excluir', methods=['POST'])
+@requires_permission('excluir')
+def excluir_circuito_status_tipos(id):
+    subestacao = Subestacao.query.get_or_404(id)
+    
+    # Verifica se NÃO há estudos associados
+    if not subestacao.circuitos:
+        try:
+            db.session.delete(subestacao)
+            db.session.commit()
+            return jsonify({'status': 'success', 'message': 'Tipo excluído com sucesso!'})
+        except IntegrityError as e:
+            db.session.rollback()
+            error_message = str(e.orig)
+            return jsonify({'status': 'error', 'message': error_message}), 409
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
+    else:
+        # Se houver estudos associados, retorna erro
+        return jsonify({
+            'status': 'error', 
+            'message': 'Não foi possível apagar, pois há um circuito nessa subestação.'
+        }), 400
