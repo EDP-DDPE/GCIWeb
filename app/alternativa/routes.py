@@ -47,7 +47,10 @@ def get_fator_k(subgrupo, data, edp):
             literal_column("DATEADD(day, 365, data_ref)") >= data,
         )
     ).order_by(FatorK.data_ref.desc()).first()
-    return fator_k.id_k
+    if fator_k:
+        return fator_k.id_k
+    else:
+        return None
 
 
 @alternativa_bp.route('/estudo/<id_estudo>/alternativas/', methods=['POST', 'GET'])
@@ -85,60 +88,72 @@ def listar(id_estudo):
     form.latitude_ponto_conexao.data = estudo.latitude_cliente
     form.longitude_ponto_conexao.data = estudo.longitude_cliente
 
-    if request.method == 'POST' and form.validate_on_submit():
-        print('vou tentar salvar')
-        try:
-            arquivo = form.imagem_blob.data
-            print(">> tipo:", type(form.imagem_blob.data))
-            print(">> conteúdo:", form.imagem_blob.data)
-            print(">> filename:", getattr(form.imagem_blob.data, "filename", None))
-            blob = None
-            if arquivo:
-                blob = arquivo.read()
-                print('reconheci um arquivo')
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            print('vou tentar salvar')
+            try:
+                arquivo = form.imagem_blob.data
+                print(">> tipo:", type(form.imagem_blob.data))
+                print(">> conteúdo:", form.imagem_blob.data)
+                print(">> filename:", getattr(form.imagem_blob.data, "filename", None))
+                blob = None
+                if arquivo:
+                    blob = arquivo.read()
+                    print('reconheci um arquivo')
 
 
-            # Criar novo estudo
-            nova_alternativa = Alternativa(
-                id_circuito=form.id_circuito.data,
-                descricao=form.descricao.data,
-                dem_fp_ant=form.dem_fp_ant.data,
-                dem_p_ant=form.dem_p_ant.data,
-                dem_fp_dep=form.dem_fp_dep.data,
-                dem_p_dep=form.dem_p_dep.data,
-                latitude_ponto_conexao=form.latitude_ponto_conexao.data,
-                longitude_ponto_conexao=form.longitude_ponto_conexao.data,
-                flag_menor_custo_global=form.flag_menor_custo_global.data,
-                flag_alternativa_escolhida=form.flag_alternativa_escolhida.data,
-                flag_carga=form.flag_carga.data,
-                flag_geracao=form.flag_geracao.data,
-                flag_fluxo_reverso=form.flag_fluxo_reverso.data,
-                proporcionalidade=calc_prop(form),
-                letra_alternativa=form.letra_alternativa.data,
-                custo_modular=to_float_safe(form.custo_modular.data),
-                id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
-                id_estudo=id_estudo,
-                observacao=form.observacao.data,
-                ERD=to_float_safe(form.ERD.data),
-                demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
-                blob_image=blob
+                # Criar novo estudo
+                nova_alternativa = Alternativa(
+                    id_circuito=form.id_circuito.data,
+                    descricao=form.descricao.data,
+                    dem_fp_ant=form.dem_fp_ant.data,
+                    dem_p_ant=form.dem_p_ant.data,
+                    dem_fp_dep=form.dem_fp_dep.data,
+                    dem_p_dep=form.dem_p_dep.data,
+                    latitude_ponto_conexao=form.latitude_ponto_conexao.data,
+                    longitude_ponto_conexao=form.longitude_ponto_conexao.data,
+                    flag_menor_custo_global=form.flag_menor_custo_global.data,
+                    flag_alternativa_escolhida=form.flag_alternativa_escolhida.data,
+                    flag_carga=form.flag_carga.data,
+                    flag_geracao=form.flag_geracao.data,
+                    flag_fluxo_reverso=form.flag_fluxo_reverso.data,
+                    proporcionalidade=calc_prop(form),
+                    letra_alternativa=form.letra_alternativa.data,
+                    custo_modular=to_float_safe(form.custo_modular.data),
+                    id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
+                    id_estudo=id_estudo,
+                    observacao=form.observacao.data,
+                    ERD=to_float_safe(form.ERD.data),
+                    demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
+                    blob_image=blob
 
+                )
+                print('criei uma nova alternativa')
+                db.session.add(nova_alternativa)
+                # db.session.flush()  # Para obter o ID do estudo
+
+                print('vou fazer o commit')
+                db.session.commit()
+                flash(f'Alternativa cadastrada com sucesso!', 'success')
+                print('tudo certo')
+                return redirect(url_for('alternativa.listar', id_estudo=id_estudo))
+
+            except Exception as e:
+                print('deu erro')
+                print(e)
+                db.session.rollback()
+                flash(f'Erro ao cadastrar alternativa. Tente novamente.', 'error')
+        else:
+            flash('Verifique os campos obrigatórios antes de salvar.', 'warning')
+            # Indica ao template para reabrir o modal automaticamente
+            return render_template(
+                'alternativa/alternativa.html',
+                estudo=estudo,
+                alternativas=alternativas_pagination.items,
+                pagination=alternativas_pagination,
+                form=form,
+                abrir_modal=True
             )
-            print('criei uma nova alternativa')
-            db.session.add(nova_alternativa)
-            # db.session.flush()  # Para obter o ID do estudo
-
-            print('vou fazer o commit')
-            db.session.commit()
-            flash(f'Alternativa cadastrada com sucesso!', 'success')
-            print('tudo certo')
-            return redirect(url_for('alternativa.listar', id_estudo=id_estudo))
-
-        except Exception as e:
-            print('deu erro')
-            print(e)
-            db.session.rollback()
-            flash(f'Erro ao cadastrar alternativa. Tente novamente.', 'error')
 
     return render_template(
         'alternativa/alternativa.html',

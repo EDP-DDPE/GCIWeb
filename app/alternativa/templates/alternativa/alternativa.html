@@ -362,21 +362,22 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form id="formAlternativa" method="POST" enctype="multipart/form-data">
+            <form id="formAlternativa" method="POST" enctype="multipart/form-data" novalidate>
                 <div class="modal-body">
                     {{ form.hidden_tag() }}
 
+                    <!-- Exibe erros gerais -->
                     {% if form.errors %}
-                    <div class="alert alert-danger">
-                        <strong>Erros de validação encontrados:</strong>
-                        <ul class="mb-0">
-                            {% for field, errors in form.errors.items() %}
-                                {% for error in errors %}
-                                    <li><strong>{{ getattr(form, field).label.text }}:</strong> {{ error }}</li>
+                        <div class="alert alert-danger">
+                            <strong>Erros de validação encontrados:</strong>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items() %}
+                                    {% for error in errors %}
+                                        <li><strong>{{ getattr(form, field).label.text }}:</strong> {{ error }}</li>
+                                    {% endfor %}
                                 {% endfor %}
-                            {% endfor %}
-                        </ul>
-                    </div>
+                            </ul>
+                        </div>
                     {% endif %}
 
                     <div class="row">
@@ -386,11 +387,12 @@
 
                             <div class="mb-3">
                                 {{ form.id_circuito.label(class="form-label") }}
-                                {{ form.id_circuito(class="form-select", id="circuito_select") }}
+                                <span class="required">*</span>
+                                {{ form.id_circuito(class="form-select", required=True, id="circuito_select") }}
                                 {% if form.id_circuito.errors %}
-                                    <div class="text-danger small mt-1">
+                                    <div class="invalid-feedback d-block">
                                         {% for error in form.id_circuito.errors %}
-                                            <div>{{ error }}</div>
+                                            {{ error }}
                                         {% endfor %}
                                     </div>
                                 {% endif %}
@@ -410,11 +412,12 @@
 
                             <div class="mb-3">
                                 {{ form.custo_modular.label(class="form-label") }}
-                                {{ form.custo_modular(class="form-control", step="0.01") }}
+                                <span class="required">*</span>
+                                {{ form.custo_modular(class="form-control", step="0.01", required=True, id="custo_modular") }}
                                 {% if form.custo_modular.errors %}
-                                    <div class="text-danger small mt-1">
+                                    <div class="invalid-feedback d-block">
                                         {% for error in form.custo_modular.errors %}
-                                            <div>{{ error }}</div>
+                                            {{ error }}
                                         {% endfor %}
                                     </div>
                                 {% endif %}
@@ -831,6 +834,16 @@ textarea {
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/cleave.js@1.6.0/dist/cleave.min.js"></script>
+
+{% if abrir_modal %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = new bootstrap.Modal(document.getElementById('alternativaModal'));
+    modal.show();
+});
+</script>
+{% endif %}
+
 <script>
 
 (function waitForJQuery() {
@@ -1145,8 +1158,6 @@ textarea {
                 console.error("Erro ao calcular ERD:", err);
             }
         }
-
-
     }); // fecha document.ready
 })(); // fecha função de espera
 </script>

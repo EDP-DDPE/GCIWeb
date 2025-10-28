@@ -3,7 +3,7 @@ from wtforms import (
     StringField, TextAreaField, DecimalField, BooleanField,
     SelectField, FloatField, IntegerField, FileField
 )
-from wtforms.validators import DataRequired, Optional, NumberRange
+from wtforms.validators import DataRequired, Optional, NumberRange, InputRequired
 from wtforms.widgets import TextArea
 from app.models import Estudo, Circuito, FatorK
 
@@ -18,7 +18,7 @@ class AlternativaForm(FlaskForm):
 
     id_circuito = SelectField(
         'Circuito',
-        validators=[DataRequired('Selecione um circuito')],
+        validators=[InputRequired('Selecione um circuito')],
         coerce=int,
         choices=[]
     )
