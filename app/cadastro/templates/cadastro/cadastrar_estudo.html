@@ -209,7 +209,7 @@
                                             {{ form.dem_carga_atual_fp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_carga_atual_fp(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_carga_atual_fp(class="form-control", step="0.01", min=0, max=200000, default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_carga_atual_fp.errors %}

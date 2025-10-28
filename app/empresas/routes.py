@@ -6,7 +6,7 @@ empresas_bp = Blueprint("empresas", __name__, template_folder="templates", stati
 
 @empresas_bp.route("/empresas", methods=["GET", "POST"])
 @requires_permission('visualizar')
-def listar_subestacoes():
+def listar():
 
     registros = Empresa.query.all()
     

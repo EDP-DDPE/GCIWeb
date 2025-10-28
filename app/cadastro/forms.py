@@ -11,7 +11,7 @@ class EstudoForm(FlaskForm):
     # Campos básicos do estudo
     num_doc = StringField('Número do Documento', validators=[DataRequired()], render_kw={"readonly": True})
     protocolo = IntegerField('Protocolo', validators=[Optional()])
-    nome_projeto = TextAreaField('Nome do Projeto', validators=[InputRequired()])
+    nome_projeto = StringField('Nome do Projeto', validators=[InputRequired()])
     descricao = TextAreaField('Descrição', validators=[Optional()])
 
     tensao = SelectField('Classe', choices=[], coerce=int, validators=[InputRequired()])
@@ -31,22 +31,22 @@ class EstudoForm(FlaskForm):
                                   default=0, render_kw={"readonly": True})
 
     # Demandas solicitadas
-    dem_carga_atual_fp = FloatField('Demanda Carga atual FP (kW)',
-                                    validators=[InputRequired(), NumberRange(min=0)])
-    dem_carga_atual_p = FloatField('Demanda Carga atual P (kW)',
-                                   validators=[InputRequired(), NumberRange(min=0)])
-    dem_carga_solicit_fp = FloatField('Demanda Carga Solicitada FP (kW)',
-                                      validators=[InputRequired(), NumberRange(min=0)])
-    dem_carga_solicit_p = FloatField('Demanda Carga Solicitada P (kW)',
-                                     validators=[InputRequired(), NumberRange(min=0)])
-    dem_ger_atual_fp = FloatField('Demanda Geração atual FP (kW)',
-                                  validators=[InputRequired(), NumberRange(min=0)])
-    dem_ger_atual_p = FloatField('Demanda Geração atual P (kW)',
-                                 validators=[InputRequired(), NumberRange(min=0)])
-    dem_ger_solicit_fp = FloatField('Demanda Geração Solicitada FP (kW)',
-                                    validators=[InputRequired(), NumberRange(min=0)])
-    dem_ger_solicit_p = FloatField('Demanda Geração Solicitada P (kW)',
-                                   validators=[InputRequired(), NumberRange(min=0)])
+    dem_carga_atual_fp = FloatField('Demanda Carga atual FP',
+                                    validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_carga_atual_p = FloatField('Demanda Carga atual P',
+                                   validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_carga_solicit_fp = FloatField('Demanda Carga Solicitada FP',
+                                      validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_carga_solicit_p = FloatField('Demanda Carga Solicitada P',
+                                     validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_ger_atual_fp = FloatField('Demanda Geração atual FP',
+                                  validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_ger_atual_p = FloatField('Demanda Geração atual P',
+                                 validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_ger_solicit_fp = FloatField('Demanda Geração Solicitada FP',
+                                    validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
+    dem_ger_solicit_p = FloatField('Demanda Geração Solicitada P',
+                                   validators=[InputRequired(), NumberRange(min=0, max=200000)], default=0)
 
     # Coordenadas do cliente
     latitude_cliente = FloatField('Latitude do Cliente',
@@ -62,7 +62,7 @@ class EstudoForm(FlaskForm):
     data_registro = DateField('Data de Registro',
                               validators=[DataRequired()],
                               default=date.today)
-    data_abertura_cliente = DateField('Data de Abertura do Cliente', validators=[Optional()])
+    data_abertura_cliente = DateField('Data de Abertura do Cliente', validators=[Optional()],)
     data_desejada_cliente = DateField('Data desejada do Cliente', validators=[Optional()])
     data_vencimento_cliente = DateField('Data de Vencimento Cliente', validators=[Optional()])
     data_prevista_conexao = DateField('Data prevista de Conexão', validators=[Optional()])
