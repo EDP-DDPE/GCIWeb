@@ -193,7 +193,7 @@ function renderTable() {
                 <td data-column="id">${item.id}</td>
                 <td data-column="municipio">${item.municipio}</td>
                 <td data-column="edp">${item.edp}</td>
-                <td data-column="reional">${item.regional}</td>
+                <td data-column="regional">${item.regional}</td>
                 <td data-column="acoes">${item.acoes}</td>
             `);
             $tbody.append(row);
@@ -761,7 +761,6 @@ function salvarEdicao() {
             $indicator.hide();
         }
     }
-
 
 
 
