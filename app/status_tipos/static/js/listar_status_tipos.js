@@ -188,8 +188,8 @@ function renderTable() {
             console.log('Ativo: ', item.ativo);
             const row = $('<tr>').html(`
                 <td data-column="id">${item.id}</td>
-                <td data-column="viabilidade">${item.status}</td>
-                <td data-column="analise">${item.descricao}</td>
+                <td data-column="status">${item.status}</td>
+                <td data-column="descricao">${item.descricao}</td>
                 <td data-column="ativo" class="text-center">
                     ${item.ativo == 1 || item.ativo === true || item.ativo === 'True' ? '<i class="fas fa-check-circle text-success" title="Ativo"></i>' : '<i class="fas fa-times-circle text-danger" title="Inativo"></i>'}
                 </td>
