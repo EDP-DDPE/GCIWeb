@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% block titulo %}Estudos para Aprovação{% endblock %}
 {% block content %}
 
 <link rel="stylesheet" href="{{ url_for('gestao.static', filename='css/aprovacao.css') }}">
@@ -6,7 +7,6 @@
 <div class="container-fluid mt-4">
   <!-- Cabeçalho -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="bi bi-clipboard-check me-2"></i>Gestão de Aprovação de Projetos</h2>
 
     <div class="d-flex gap-2 align-items-center">
       <label class="form-label mb-0 fw-bold text-muted">Custo Mínimo (R$)</label>
@@ -17,19 +17,8 @@
     </div>
   </div>
 
-  <!-- Gráfico de resumo -->
+  <!-- Tabela (vem primeiro) -->
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
-      <small>Distribuição de projetos por status</small>
-    </div>
-    <div class="card-body text-center">
-      <canvas id="graficoResumo" height="120"></canvas>
-    </div>
-  </div>
-
-  <!-- Tabela -->
-  <div class="card shadow-sm">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
       <span><i class="bi bi-list-task me-2"></i>Projetos acima de R$ {{ "{:,.2f}".format(valor_minimo or 0) }}</span>
       <small>Gestores podem aprovar, reprovar ou comentar projetos.</small>
@@ -52,30 +41,33 @@
           </thead>
           <tbody>
             {% for doc in documentos %}
-            <tr id="estudo-{{ doc.id }}">
-              <td>{{ doc.id }}</td>
+            {% set alt_escolhida = (doc.alternativas|selectattr('flag_alternativa_escolhida', 'equalto', 1)|list|first) %}
+            <tr id="estudo-{{ doc.id or doc.id_estudo }}">
+              <td>{{ doc.id or doc.id_estudo }}</td>
               <td>{{ doc.nome_projeto or '-' }}</td>
-              <td>{{ doc.empresa or '-' }}</td>
-              <td>{{ doc.municipio or '-' }}</td>
-              <td>R$ {{ "{:,.2f}".format(doc.custo_modular or 0) }}</td>
+              <td>{{ doc.empresa or (doc.edp.empresa if doc.edp) or '-' }}</td>
+              <td>{{ doc.municipio.municipio or '-' }}</td>
+              <td>R$ {{ "{:,.2f}".format((alt_escolhida.custo_modular if alt_escolhida else 0) or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
               <td>
-                <span class="badge {% if doc.status == 'Aprovado' %}bg-success{% elif doc.status == 'Reprovado' %}bg-danger{% else %}bg-secondary{% endif %}">
-                  {{ doc.status or 'Pendente' }}
-                </span>
+                <span class="badge bg-secondary">{{ doc.ultimo_status.status_tipo.status }}</span>
               </td>
               <td>
-                <textarea class="form-control form-control-sm" rows="1" id="comentario-{{ doc.id }}" placeholder="Digite um comentário..."></textarea>
+                <textarea class="form-control form-control-sm" rows="1" id="comentario-{{doc.id_estudo}}" placeholder="Digite um comentário..."></textarea>
               </td>
               <td class="text-center">
-                <button class="btn btn-success btn-sm me-1" onclick="aprovarProjeto({{ doc.id }})" data-bs-toggle="tooltip" title="Aprovar">
+                <button class="btn btn-success btn-sm me-1" onclick="aprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Aprovar">
                   <i class="bi bi-hand-thumbs-up"></i>
                 </button>
-                <button class="btn btn-danger btn-sm me-1" onclick="reprovarProjeto({{ doc.id }})" data-bs-toggle="tooltip" title="Reprovar">
+                <button class="btn btn-danger btn-sm me-1" onclick="reprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Reprovar">
                   <i class="bi bi-hand-thumbs-down"></i>
                 </button>
-                <button class="btn btn-outline-secondary btn-sm" onclick="salvarComentario({{ doc.id }})" data-bs-toggle="tooltip" title="Salvar comentário">
-                  <i class="bi bi-chat-dots"></i>
-                </button>
+                <button class="btn btn-sm btn-info"
+                                        onclick="verDetalhes({{doc.id_estudo}})"
+                                        data-bs-toggle="tooltip"
+                                        title="Ver detalhes">
+                                    <i class="bi bi-eye"></i>
+                                    </button>
+
               </td>
             </tr>
             {% else %}
@@ -95,7 +87,41 @@
       Total de projetos: {{ documentos|length }}
     </div>
   </div>
+
+  <!-- Gráfico (vem depois e menor) -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
+      <small>Distribuição por status</small>
+    </div>
+    <div class="card-body text-center">
+      <div class="grafico-wrapper">
+        <canvas id="graficoResumo"></canvas>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalDetalhesLabel">
+                    <i class="fas fa-file-alt me-2"></i>Detalhes do Documento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo carregado via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -105,9 +131,9 @@
 <script>
   // Dados do gráfico vindos do backend
   const dataResumo = {
-    aprovado: {{ documentos | selectattr('status', 'equalto', 'Aprovado') | list | length }},
-    reprovado: {{ documentos | selectattr('status', 'equalto', 'Reprovado') | list | length }},
-    pendente: {{ documentos | rejectattr('status', 'equalto', 'Aprovado') | rejectattr('status', 'equalto', 'Reprovado') | list | length }}
+    aprovado: {{ resumo["Aprovado"] }},
+    reprovado: {{ resumo["Reprovado"] }},
+    pendente: {{ resumo["Pendente"] }}
   };
 </script>
 

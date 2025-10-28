@@ -19,3 +19,38 @@ textarea.form-control {
 .card-header {
   font-weight: 600;
 }
+
+/* Mantém tabela bonita */
+.table td,
+.table th {
+  vertical-align: middle !important;
+}
+
+textarea.form-control {
+  resize: none;
+}
+
+.badge {
+  font-size: 0.9em;
+  padding: 0.4em 0.6em;
+}
+
+.card {
+  border-radius: 0.75rem;
+}
+
+.card-header {
+  font-weight: 600;
+}
+
+/* Gráfico menor e centralizado */
+.grafico-wrapper {
+  max-width: 420px;  /* controla a largura */
+  margin: 0 auto;    /* centraliza */
+}
+
+#graficoResumo {
+  width: 100% !important;
+  height: 220px !important; /* altura mais baixa */
+}
+

@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, func, UniqueConstraint
+from sqlalchemy import text, func, UniqueConstraint, desc
 from sqlalchemy.orm import joinedload, selectinload
 from datetime import datetime
 from flask import jsonify, request
@@ -72,6 +72,7 @@ class Usuario(db.Model):
     deletar = db.Column(db.Boolean, nullable=False)
     bloqueado = db.Column(db.Boolean, nullable=False, default=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    aprovar = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='usuarios', lazy='joined')
@@ -397,6 +398,14 @@ class StatusEstudo(db.Model):
     criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
     status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
 
+    @property
+    def status_mais_recente(self):
+        return (
+            StatusEstudo.query
+            .filter_by(id_estudo=self.id_estudo)
+            .order_by(desc(StatusEstudo.data))
+            .first()
+        )
 
 class StatusTipo(db.Model):
     __tablename__ = 'status_tipos'
