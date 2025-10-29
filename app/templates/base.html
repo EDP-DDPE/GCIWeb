@@ -80,9 +80,41 @@
             padding-bottom: 0.5rem;
         }
 
-        .alert {
-            border-radius: 0.375rem;
+
+        /* Estilo base do toast */
+        #toast-root .toast {
+            opacity: 0.95;
+            min-width: 300px;
+            border-radius: 0.75rem;
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+            margin-bottom: .5rem;
+            transform: translateY(-10px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
         }
+
+        /* Fade-in */
+        .custom-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+          /* Fade-out */
+          .custom-fade-out {
+            animation: fadeOut 0.5s ease forwards;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 0.95; transform: translateY(0); }
+          }
+
+          @keyframes fadeOut {
+            from { opacity: 0.95; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-10px); }
+          }
+
+          /* Evitar que o container bloqueie cliques */
+          .toast-container { pointer-events: none; }
+          .toast { pointer-events: auto; }
 
         .table th {
             background-color: #f8f9fa;
@@ -308,30 +340,57 @@
             </div>
         </nav>
 
-    <!-- Flash Messages -->
-    <div class="container-fluid mt-3">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {% if category == 'success' %}
-                            <i class="fas fa-check-circle me-2"></i>
-                        {% elif category == 'error' %}
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                        {% elif category == 'warning' %}
-                            <i class="fas fa-exclamation-circle me-2"></i>
-                        {% else %}
-                            <i class="fas fa-info-circle me-2"></i>
-                        {% endif %}
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+<!--    &lt;!&ndash; Flash Messages &ndash;&gt;-->
+<!--    <div class="container-fluid mt-3">-->
+<!--        {% with messages = get_flashed_messages(with_categories=true) %}-->
+<!--            {% if messages %}-->
+<!--                {% for category, message in messages %}-->
+<!--                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">-->
+<!--                        {% if category == 'success' %}-->
+<!--                            <i class="fas fa-check-circle me-2"></i>-->
+<!--                        {% elif category == 'error' %}-->
+<!--                            <i class="fas fa-exclamation-triangle me-2"></i>-->
+<!--                        {% elif category == 'warning' %}-->
+<!--                            <i class="fas fa-exclamation-circle me-2"></i>-->
+<!--                        {% else %}-->
+<!--                            <i class="fas fa-info-circle me-2"></i>-->
+<!--                        {% endif %}-->
+<!--                        {{ message }}-->
+<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+<!--            {% endif %}-->
+<!--        {% endwith %}-->
+<!--    </div>-->
 
+<!--    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">-->
+<!--        {% with messages = get_flashed_messages(with_categories=true) %}-->
+<!--            {% if messages %}-->
+<!--                {% for category, message in messages %}-->
+<!--                    <div class="toast align-items-center text-bg-{{ 'danger' if category == 'error' else category }} border-0 show fade" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">-->
+<!--                        <div class="d-flex">-->
+<!--                            <div class="toast-body">-->
+<!--                                {% if category == 'success' %}-->
+<!--                                    <i class="fas fa-check-circle me-2"></i>-->
+<!--                                {% elif category == 'error' %}-->
+<!--                                    <i class="fas fa-exclamation-triangle me-2"></i>-->
+<!--                                {% elif category == 'warning' %}-->
+<!--                                    <i class="fas fa-exclamation-circle me-2"></i>-->
+<!--                                {% else %}-->
+<!--                                    <i class="fas fa-info-circle me-2"></i>-->
+<!--                                {% endif %}-->
+<!--                                {{ message }}-->
+<!--                            </div>-->
+<!--                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+<!--            {% endif %}-->
+<!--        {% endwith %}-->
+<!--    </div>-->
     <!-- Main Content -->
+    <div id="toast-root" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
+
     <main class="container-fluid">
         {% block content %}{% endblock %}
 
@@ -359,6 +418,57 @@
 
     <!-- Panzoom.js (zoom e pan) -->
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            {% for category, message in messages %}
+              showToast({{ message|tojson }}, {{ ('error' if category=='error' else category)|tojson }});
+            {% endfor %}
+          });
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    <script>
+      // Notificação global unificada
+      // type: 'success' | 'error' | 'warning' | 'info'
+      // delay: ms (padrão 3000)
+      window.showToast = function(message, type = 'info', delay = 3000) {
+        const container = document.getElementById('toast-root');
+
+        const colorMap = { success: 'success', error: 'danger', warning: 'warning', info: 'info' };
+        const iconMap  = { success: 'check-circle', error: 'exclamation-triangle', warning: 'exclamation-circle', info: 'info-circle' };
+
+        const el = document.createElement('div');
+        el.className = `toast align-items-center text-bg-${colorMap[type] || 'info'} border-0 custom-fade-in`;
+        el.setAttribute('role', 'alert');
+        el.setAttribute('aria-live', 'assertive');
+        el.setAttribute('aria-atomic', 'true');
+
+        el.innerHTML = `
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="fas fa-${iconMap[type] || 'info-circle'} me-2"></i>${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+          </div>
+        `;
+
+        container.appendChild(el);
+        const toast = new bootstrap.Toast(el, { delay });
+        toast.show();
+
+        // Remover com fade-out antes de destruir
+        setTimeout(() => {
+          el.classList.remove('custom-fade-in');
+          el.classList.add('custom-fade-out');
+          setTimeout(() => el.remove(), 500);
+        }, delay - 500); // inicia fade-out um pouco antes de sumir
+        // el.addEventListener('hidden.bs.toast', () => el.remove());
+      };
+    </script>
 
     <script>
       $(document).ready(function () {

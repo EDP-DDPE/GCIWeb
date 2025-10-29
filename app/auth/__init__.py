@@ -21,8 +21,15 @@ def requires_permission(permission):
         def decorated_function(*args, **kwargs):
             usuario = get_usuario_logado()
             if not usuario:
-                flash(f"Você não tem autorizações. Não encontrei a matrícula {session['user']['preferred_username'].split('@')[0]} na base de dados.", "danger")
-                return redirect(url_for("auth.login"))
+                try:
+                    flash(f"Você não tem autorizações. Não encontrei a matrícula {session['user']['preferred_username'].split('@')[0]} na base de dados.", "danger")
+                    return redirect(url_for("auth.login"))
+                except KeyError as e:
+                    flash(
+                        f"Você não esta logado.",
+                        "danger")
+                    return redirect(url_for("auth.public"))
+
 
             # Se for admin, libera tudo
             if usuario.admin:
@@ -32,7 +39,10 @@ def requires_permission(permission):
                 return abort(403)
 
             if not getattr(usuario, permission, False):
-                return abort(403)
+                flash(
+                    f"Você não tem a autorização necessária.",
+                    "error")
+                return redirect(url_for("main.home"))
 
             return f(*args, **kwargs)
         return decorated_function

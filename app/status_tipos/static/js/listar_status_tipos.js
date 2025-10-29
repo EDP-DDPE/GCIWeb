@@ -497,31 +497,31 @@ function setupColumnResizing() {
             hideLoading();
 
             // Mostrar notificação de sucesso
-            showNotification('Dados atualizados com sucesso!', 'success');
+            showToast('Dados atualizados com sucesso!', 'success');
         }, 1000);
     }
 
-    function showNotification(message, type = 'info') {
-        // Criar elemento de notificação
-        const $notification = $('<div>').addClass(`alert alert-${type} alert-dismissible fade show position-fixed`)
-            .css({
-                'top': '20px',
-                'right': '20px',
-                'z-index': '9999',
-                'min-width': '300px'
-            })
-            .html(`
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `);
-
-        $('body').append($notification);
-
-        // Auto remover após 3 segundos
-        setTimeout(() => {
-            $notification.remove();
-        }, 3000);
-    }
+//    function showNotification(message, type = 'info') {
+//        // Criar elemento de notificação
+//        const $notification = $('<div>').addClass(`alert alert-${type} alert-dismissible fade show position-fixed`)
+//            .css({
+//                'top': '20px',
+//                'right': '20px',
+//                'z-index': '9999',
+//                'min-width': '300px'
+//            })
+//            .html(`
+//                ${message}
+//                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+//            `);
+//
+//        $('body').append($notification);
+//
+//        // Auto remover após 3 segundos
+//        setTimeout(() => {
+//            $notification.remove();
+//        }, 3000);
+//    }
 
     function closeDropdowns(event) {
         if (!$(event.target).closest('.column-selector').length) {
