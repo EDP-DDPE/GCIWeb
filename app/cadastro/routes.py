@@ -4,11 +4,11 @@ from .forms import EstudoForm, AlternativaForm, AnexoForm
 from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitacao, EDP, RespRegiao, Usuario, Circuito,
                         Subestacao, Anexo, Alternativa, Tensao, Instalacao)
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.auth import requires_permission, get_usuario_logado
 import os
 
-cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates")
+cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates", static_folder="static", static_url_path='/cadastro/static')
 
 
 def gerar_proximo_documento():
@@ -188,7 +188,7 @@ def cadastro_estudo():
     elif request.method == 'POST':
         flash('Por favor, corrija os erros no formulário.', 'error')
 
-    return render_template('cadastro/cadastrar_estudo.html', form=form, datetime=datetime)
+    return render_template('cadastro/cadastrar_estudo.html', form=form, datetime=datetime, timedelta=timedelta)
 
 
 def carregar_classificacao(form, id):
