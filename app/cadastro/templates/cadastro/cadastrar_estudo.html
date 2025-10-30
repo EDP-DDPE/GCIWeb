@@ -75,7 +75,7 @@
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.protocolo.label(class="form-label") }}
-                                            {{ form.protocolo(class="form-control") }}
+                                            {{ form.protocolo(class="form-control limit-length", min="0", maxlength="12") }}
                                             {% if form.protocolo.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.protocolo.errors %}
@@ -209,7 +209,7 @@
                                             {{ form.dem_carga_atual_fp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_carga_atual_fp(class="form-control", step="0.01", min=0, max=200000, default=0) }}
+                                                {{ form.dem_carga_atual_fp(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_carga_atual_fp.errors %}
@@ -224,7 +224,7 @@
                                             {{ form.dem_carga_atual_p.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_carga_atual_p(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_carga_atual_p(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_carga_atual_p.errors %}
@@ -244,7 +244,7 @@
                                             {{ form.dem_carga_solicit_fp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_carga_solicit_fp(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_carga_solicit_fp(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_carga_solicit_fp.errors %}
@@ -259,7 +259,7 @@
                                             {{ form.dem_carga_solicit_p.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_carga_solicit_p(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_carga_solicit_p(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_carga_solicit_p.errors %}
@@ -285,7 +285,7 @@
                                             {{ form.dem_ger_atual_fp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_ger_atual_fp(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_ger_atual_fp(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_ger_atual_fp.errors %}
@@ -300,7 +300,7 @@
                                             {{ form.dem_ger_atual_p.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_ger_atual_p(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_ger_atual_p(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_ger_atual_p.errors %}
@@ -320,7 +320,7 @@
                                             {{ form.dem_ger_solicit_fp.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_ger_solicit_fp(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_ger_solicit_fp(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_ger_solicit_fp.errors %}
@@ -335,7 +335,7 @@
                                             {{ form.dem_ger_solicit_p.label(class="form-label") }}
                                             <span class="required">*</span>
                                             <div class="input-group">
-                                                {{ form.dem_ger_solicit_p(class="form-control", step="0.01", min="0") }}
+                                                {{ form.dem_ger_solicit_p(class="form-control limit-length", type="number", step="0.01", min="0", maxlength="6", default=0) }}
                                                 <span class="input-group-text">kW</span>
                                             </div>
                                             {% if form.dem_ger_solicit_p.errors %}
@@ -1063,6 +1063,15 @@ $(document).ready(function() {
             });
         }
     });
+
+    $('.limit-length').on('input', function() {
+      const maxLen = parseInt($(this).attr('maxlength'));
+      const val = $(this).val();
+      if (val.length > maxLen) {
+        $(this).val(val.slice(0, maxLen));
+      }
+    });
+
     // Pesquisa cliente por numero de Instalacao
     $('#instalacao').change(function() {
         var instalacao_value=$(this).val();
