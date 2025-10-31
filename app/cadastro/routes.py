@@ -475,15 +475,16 @@ def detalhar_estudo(id_estudo):
 
 
 @cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])
-@requires_permission('excluir')
+@requires_permission('deletar')
 def excluir_estudo(id_estudo):
+    print("entrei no excluir")
     user = get_usuario_logado()
     try:
         estudo = Estudo.query.get_or_404(id_estudo)
+        id_resp = RespRegiao.query.get_or_404(estudo.id_resp_regiao).id_usuario
 
-        id_resp = getattr(estudo.id_resp_regiao, "id_usuario", None)
         if user.id_usuario not in [id_resp, estudo.id_criado_por] and not user.admin:
-            return jsonify({'success': False, 'message': 'Você não tem permissão para deletar esse estudo.'}), 403
+            return jsonify({'success': False, 'message': 'Você não tem permissão para deletar esse estudo. Solicite ao criador do estudo, o resposável da região ou à algum admin.'})
 
         db.session.delete(estudo)
         db.session.commit()
