@@ -219,21 +219,20 @@ def carregar_classificacao(form, id):
 @cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
 @requires_permission('editar')
 def editar_estudo(id_estudo):
-    print("iniciei")
+    #print("iniciei")
     estudo = Estudo.query.get_or_404(id_estudo)
-    print("carreguei estudo")
+    #print("carreguei estudo")
     form = EstudoForm()
-    print("carreguei forms")
+    #print("carreguei forms")
     carregar_choices_estudo(form)
-    print("carreguei choices 1")
-    print(estudo.id_tipo_solicitacao)
+    #print("carreguei choices 1")
+    #print(estudo.id_tipo_solicitacao)
     carregar_classificacao(form, estudo.id_tipo_solicitacao)
-    print("Carreguei choices 2")
+    #print("Carreguei choices 2")
     anexos = Anexo.query.filter_by(id_estudo=estudo.id_estudo).all()
-    print("retornei anexos")
     usuario = get_usuario_logado()
 
-    print(request.method)
+    #print(request.method)
 
     if request.method == 'POST' and form.validate_on_submit():
         try:
@@ -367,49 +366,6 @@ def editar_estudo(id_estudo):
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos, datetime=datetime)
 
 
-# @cadastro_bp.route("/estudos/<int:id_estudo>/alternativas/cadastro", methods=["GET", "POST"])
-# def cadastro_alternativa(id_estudo):
-#     """Rota para cadastro de alternativas de um estudo"""
-#     estudo = Estudo.query.get_or_404(id_estudo)
-#     form = AlternativaForm()
-#     carregar_choices_alternativa(form, estudo.id_edp)
-#
-#     if request.method == 'POST' and form.validate_on_submit():
-#         try:
-#             nova_alternativa = Alternativa(
-#                 id_circuito=form.circuito.data,
-#                 descricao=form.descricao.data,
-#                 dem_fp_dep=form.dem_fp_dep.data,
-#                 dem_p_dep=form.dem_p_dep.data,
-#                 latitude_ponto_conexao=form.latitude_ponto_conexao.data,
-#                 longitude_ponto_conexao=form.longitude_ponto_conexao.data,
-#                 custo_modular=form.custo_modular.data,
-#                 id_estudo=id_estudo,
-#                 observacao=form.observacao.data,
-#                 ERD=form.ERD.data,
-#                 demanda_disponivel_ponto=form.demanda_disponivel_ponto.data
-#             )
-#
-#             db.session.add(nova_alternativa)
-#
-#             # Atualizar número de alternativas no estudo
-#             estudo.n_alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).count() + 1
-#
-#             db.session.commit()
-#             flash('Alternativa cadastrada com sucesso!', 'success')
-#             return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
-#
-#         except Exception as e:
-#             db.session.rollback()
-#             current_app.logger.error(f"Erro ao cadastrar alternativa: {str(e)}")
-#             flash('Erro ao cadastrar alternativa. Tente novamente.', 'error')
-#
-#     elif request.method == 'POST':
-#         flash('Por favor, corrija os erros no formulário.', 'error')
-#
-#     return render_template('cadastro/cadastrar_alternativa.html', form=form, estudo=estudo)
-
-
 @cadastro_bp.route("/estudos/<int:id_estudo>/anexos/upload", methods=["GET", "POST"])
 def upload_anexo(id_estudo):
     """Rota para upload de anexos de um estudo"""
@@ -475,6 +431,7 @@ def detalhar_estudo(id_estudo):
 
 
 @cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])
+@requires_permission('deletar')
 @requires_permission('deletar')
 def excluir_estudo(id_estudo):
     print("entrei no excluir")

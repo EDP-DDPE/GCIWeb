@@ -90,17 +90,12 @@ def listar(id_estudo):
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            print('vou tentar salvar')
+
             try:
                 arquivo = form.imagem_blob.data
-                print(">> tipo:", type(form.imagem_blob.data))
-                print(">> conteúdo:", form.imagem_blob.data)
-                print(">> filename:", getattr(form.imagem_blob.data, "filename", None))
                 blob = None
                 if arquivo:
                     blob = arquivo.read()
-                    print('reconheci um arquivo')
-
 
                 # Criar novo estudo
                 nova_alternativa = Alternativa(
@@ -128,19 +123,18 @@ def listar(id_estudo):
                     blob_image=blob
 
                 )
-                print('criei uma nova alternativa')
+
+                estudo.n_alternativas = estudo.n_alternativas + 1
+
                 db.session.add(nova_alternativa)
                 # db.session.flush()  # Para obter o ID do estudo
 
-                print('vou fazer o commit')
                 db.session.commit()
                 flash(f'Alternativa cadastrada com sucesso!', 'success')
-                print('tudo certo')
                 return redirect(url_for('alternativa.listar', id_estudo=id_estudo))
 
             except Exception as e:
-                print('deu erro')
-                print(e)
+                print(f'erro: {e}')
                 db.session.rollback()
                 flash(f'Erro ao cadastrar alternativa. Tente novamente.', 'error')
         else:
@@ -218,7 +212,6 @@ def editar(id_alternativa):
     # POST - Atualizar alternativa
     form = AlternativaForm()
     if form.validate_on_submit():
-        print('vou tentar atualizar a alternativa')
         try:
             estudo = Estudo.query.get_or_404(form.id_estudo.data)
             alternativa_obj.id_estudo = form.id_estudo.data
@@ -265,6 +258,7 @@ def editar(id_alternativa):
 def excluir_alternativa(id):
     try:
         alt = Alternativa.query.get_or_404(id)
+        estudo = Estudo.query.get_or_404(alt.id_circuito)
         if not alt:
             return jsonify({'error': 'Alternativa não encontrada'}), 404
 
@@ -274,6 +268,9 @@ def excluir_alternativa(id):
                 'success': False,
                 'message': f'Não é possível excluir esta alternativa pois ela possui {len(alt.obras)} obra(s) relacionada(s).'
             }), 400
+
+        if estudo.n_alternativas > 0:
+            estudo.n_alternativas = estudo.n_alternativas - 1
 
         db.session.delete(alt)
         db.session.commit()
