@@ -470,10 +470,12 @@
                                         <div class="mb-3">
                                             {{ form.tipo_analise.label(class="form-label") }}
                                             <span class="required">*</span>
-                                            {{ form.tipo_analise(class="form-select", id="tipo_analise") }}
-                                            <button type="button" class="btn btn-outline-secondary" id="btnReloadTipoAnalise" title="Atualizar lista">
-                                                <i class="fas fa-sync-alt"></i>
-                                            </button>
+                                            <div class="d-flex align-items-center">
+                                                {{ form.tipo_analise(class="form-select", id="tipo_analise", data_selected=form.tipo_analise.data) }}
+<!--                                                <button type="button" class="btn btn-outline-secondary" id="btnReloadTipoAnalise" title="Atualizar lista">-->
+<!--                                                    <i class="fas fa-sync-alt"></i>-->
+<!--                                                </button>-->
+                                            </div>
                                             {% if form.tipo_analise.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.tipo_analise.errors %}
@@ -487,7 +489,7 @@
                                         <div class="mb-3">
                                             {{ form.tipo_pedido.label(class="form-label") }}
                                             <span class="required">*</span>
-                                            {{ form.tipo_pedido(class="form-select", required=True, id="tipo_pedido") }}
+                                            {{ form.tipo_pedido(class="form-select", required=True, id="tipo_pedido", data_selected=form.tipo_pedido.data) }}
                                             {% if form.tipo_pedido.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.tipo_pedido.errors %}
@@ -793,7 +795,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
+<!--Scripts da aba Localização-->
 <script src="{{url_for('cadastro.static', filename='js/localizacao_functions.js')  }}"></script>
+<!--Scripts da aba Classificação-->
+<script src="{{url_for('cadastro.static', filename='js/classificacao_functions.js')  }}"></script>
+
 <script>
 
 function removerAcentos(str) {
@@ -808,7 +814,6 @@ $(document).ready(function() {
 
         $(this).find('input[type="number"], input.form-control').each(function() {
             const val = $(this).val();
-            console.log('Alterando vírgulas por pontos.')
             if (val && val.includes(',')) {
                 $(this).val(val.replace(',', '.'));
             }
@@ -879,40 +884,6 @@ $(document).ready(function() {
                 }
 
             })
-        }
-    });
-
-
-    
-
-    //Atualização do tipo_analise
-    $('#tipo_viab').change(function(){
-        var viabilidade = $(this).val();
-        if(viabilidade){
-            $.get('/api/tipo_analises/' + viabilidade, function(data) {
-                var analiseSelect = $('#tipo_analise');
-                analiseSelect.empty().append('<option value="">Selecione um tipo...</option>');
-                $.each(data, function(index, analise) {
-                    analiseSelect.append('<option value="' + analise + '">' + analise + '</option>');
-                });
-                analiseSelect.trigger('change');
-            });
-        }
-    });
-
-    //Atualização do tipo_pedido
-    $('#tipo_analise').change(function(){
-        var analise = $(this).val();
-        var viabilidade = $('#tipo_viab').val();
-        if(analise){
-            $.get('/api/tipo_pedidos/' + viabilidade + '/' + analise, function(data) {
-                var pedidoSelect = $('#tipo_pedido');
-                pedidoSelect.empty().append('<option value="">Selecione um tipo...</option>');
-                $.each(data, function(index, pedido) {
-                    pedidoSelect.append('<option value="' + pedido.id + '">' + pedido.pedido + '</option>');
-                });
-                pedidoSelect.trigger('change');
-            });
         }
     });
 
