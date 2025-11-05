@@ -236,9 +236,14 @@ class AlternativaForm(FlaskForm):
         self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
                                    [(circuito.id_circuito, f"{circuito.circuito}") for circuito in Circuito.query.all()]
 
-    def atualizar_circuitos(self, regiao: int):
+    def atualizar_circuitos(self, regiao: int, classe:str):
 
-        circuitos = Circuito.query.filter_by(id_edp=regiao).order_by(Circuito.circuito).all()
+        if classe == "AT":
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao > 50).order_by(Circuito.circuito).all()
+        else:
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao < 50).order_by(
+                Circuito.circuito).all()
+
         self.id_circuito.choices = [(0, 'Selecione um circuito')] + \
                                    [(circuito.id_circuito, f"{circuito.circuito}") for circuito in circuitos]
 

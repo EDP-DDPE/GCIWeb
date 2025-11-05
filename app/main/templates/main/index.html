@@ -5,15 +5,6 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-<!--<style>-->
-<!--    body {-->
-<!--        background-image: url("{{ url_for('static', filename='/images/background.png') }}");-->
-<!--        background-size: cover;-->
-<!--        background-repeat: no-repeat;-->
-<!--        background-position: center;-->
-<!--    }-->
-<!--</style>-->
-
 <div class="fundo-index">
     <h1 class="text-center mb-4">{{msg}}</h1>
     <h1 class="text-center mb-4">Bem-vindo ao Atlas!</h1>
@@ -43,45 +34,44 @@
 
 {% endif %}
 
-<div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-plus fa-3x text-primary mb-3"></i>
-                <h5 class="card-title">Novo Estudo</h5>
-                <p class="card-text">Adicione um novo documento</p>
-                <a href="{{ url_for('cadastro.cadastro_estudo') }}" class="btn btn-primary">Cadastrar</a>
-            </div>
-        </div>
-    </div>
+    <div class="row justify-content-center g-4 mt-4">
 
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-list fa-3x text-info mb-3"></i>
-                <h5 class="card-title">Listar Documentos</h5>
-                <p class="card-text">Visualize todos os documentos cadastrados no sistema</p>
-                <a href="{{url_for('listar.listar')}}" class="btn btn-info">Listar</a>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Novo Estudo</h5>
+                        <p class="card-text">Adicione um novo documento</p>
+                        <a href="{{ url_for('cadastro.cadastro_estudo') }}" class="btn btn-primary">Cadastrar</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-4 mb-3">
-        <div class="card h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-bar-chart fa-3x text-success mb-3"></i>
-                <h5 class="card-title">Gestão</h5>
-                <p class="card-text">Dashboard e Estudos que necessitam de aprovação do Gestor</p>
-                <a href="{{url_for('gestao.gestao_aprovacao')}}" class="btn btn-success">Gerenciar</a>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-list fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Listar Documentos</h5>
+                        <p class="card-text">Visualize todos os documentos cadastrados no sistema</p>
+                        <a href="{{url_for('listar.listar')}}" class="btn btn-info">Listar</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
+            {% if usuario.aprovar or usuario.admin %}
+
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-bar-chart fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Gestão</h5>
+                            <p class="card-text">Dashboard e Estudos que necessitam de aprovação do Gestor</p>
+                            <a href="{{url_for('gestao.gestao_aprovacao')}}" class="btn btn-success">Gerenciar</a>
+                        </div>
+                    </div>
+                </div>
+
+            {% endif %}
+    </div>
 </div>
-
-
-</div>
-
-
-
 {% endblock %}

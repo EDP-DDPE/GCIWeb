@@ -285,6 +285,23 @@ def get_circuitos_by_edp(id_edp):
     return {'circuitos': [{'id': c.id_circuito, 'nome': f"{c.circuito} - {c.subestacao.nome}"}
                           for c in circuitos]}
 
+@api_bp.route("/api/circuitos/<int:id_edp>/<subgrupo>")
+def get_circuitos_by_edp_and_subgrupo(id_edp, subgrupo):
+    """API para buscar circuitos por EDP"""
+    if subgrupo == "A2":
+        circuitos = Circuito.query.filter_by(id_edp=id_edp).filter(Circuito.tensao > 69).join(Subestacao).all()
+    elif subgrupo == 'A4':
+        circuitos = Circuito.query.filter_by(id_edp=id_edp).filter(Circuito.tensao < 20).join(Subestacao).all()
+    elif subgrupo == 'A3a':
+        circuitos = Circuito.query.filter_by(id_edp=id_edp).filter(Circuito.tensao > 20).filter(Circuito.tensao < 69).join(Subestacao).all()
+    elif subgrupo == 'A3':
+        circuitos = Circuito.query.filter_by(id_edp=id_edp, tensao=69).join(Subestacao).all()
+    else:
+        return jsonify({'error': 'Circuitos não encontrados'}), 404
+
+    return {'circuitos': [{'id': c.id_circuito, 'nome': f"{c.circuito}"}
+                          for c in circuitos]}
+
 
 @api_bp.route("/api/resp_regioes/<int:id_regional>")
 def get_resp_by_regional(id_regional):

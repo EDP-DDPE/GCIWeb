@@ -386,6 +386,18 @@
                             <h6 class="text-primary mb-3">Informações Básicas</h6>
 
                             <div class="mb-3">
+                                {{ form.subgrupo_tarif.label(class="form-label") }}
+                                {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
+                                {% if form.subgrupo_tarif.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.subgrupo_tarif.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
                                 {{ form.id_circuito.label(class="form-label") }}
                                 <span class="required">*</span>
                                 {{ form.id_circuito(class="form-select", required=True, id="circuito_select") }}
@@ -423,17 +435,7 @@
                                 {% endif %}
                             </div>
 
-                            <div class="mb-3">
-                                {{ form.subgrupo_tarif.label(class="form-label") }}
-                                {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
-                                {% if form.subgrupo_tarif.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.subgrupo_tarif.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
+
                         </div>
 
                         <!-- Demandas -->
@@ -851,7 +853,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return setTimeout(waitForJQuery, 50);
     }
     $(document).ready(function() {
-        console.log("✅ jQuery detectado, inicializando eventos do modal de alternativas...");
 
         // Inicializa Select2 apenas uma vez, com configurações corretas
         function initSelect2(selector) {
@@ -918,6 +919,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         $('#subgrupo_select').change(function() {
+            atualiza_circuitos()
             atualiza_ERD()
         });
 
@@ -1126,6 +1128,49 @@ document.addEventListener('DOMContentLoaded', function() {
           numeralDecimalMark: ',',
           delimiter: '.'
         });
+
+        function atualiza_circuitos() {
+            const subgrupo = $('#subgrupo_select').val();
+            const id_edp = "{{ estudo.id_edp }}"; // ou pegue via $('#id_edp').val() se o JS for externo
+            const circuitoSelect = $('#circuito_select');
+
+            if (!subgrupo) {
+                console.warn("Nenhum subgrupo selecionado.");
+                return;
+            }
+
+            // Exibe o loading no select
+            circuitoSelect
+                .empty()
+                .append('<option disabled selected>Carregando circuitos...</option>')
+                .prop('disabled', true);
+
+            // Cria ou mostra o spinner ao lado (opcional)
+            const spinner = $('<div class="spinner-border text-primary ms-2" role="status" style="width: 1.2rem; height: 1.2rem;"><span class="visually-hidden">Carregando...</span></div>');
+            circuitoSelect.parent().append(spinner);
+
+            $.get(`/api/circuitos/${id_edp}/${subgrupo}`)
+                .done(function(response) {
+                    circuitoSelect.empty().append('<option value="">Selecione um circuito...</option>');
+
+                    if (!response.circuitos || response.circuitos.length === 0) {
+                        circuitoSelect.append('<option disabled>Nenhum circuito encontrado</option>');
+                    } else {
+                        response.circuitos.forEach(c => {
+                            circuitoSelect.append(`<option value="${c.id}">${c.nome}</option>`);
+                        });
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error("Erro ao carregar circuitos:", error);
+                    circuitoSelect.empty().append('<option disabled>Erro ao carregar circuitos</option>');
+                })
+                .always(function() {
+                    // Remove o spinner e reabilita o select
+                    spinner.remove();
+                    circuitoSelect.prop('disabled', false);
+                });
+        }
 
         function atualiza_ERD() {
 
