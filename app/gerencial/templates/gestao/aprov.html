@@ -45,7 +45,7 @@
             <tr id="estudo-{{ doc.id or doc.id_estudo }}">
               <td>{{ doc.id or doc.id_estudo }}</td>
               <td>{{ doc.nome_projeto or '-' }}</td>
-              <td>{{ doc.empresa or (doc.edp.empresa if doc.edp) or '-' }}</td>
+              <td>{{ doc.empresa.nome_empresa or '-' }}</td>
               <td>{{ doc.municipio.municipio or '-' }}</td>
               <td>R$ {{ "{:,.2f}".format((alt_escolhida.custo_modular if alt_escolhida else 0) or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
               <td>
