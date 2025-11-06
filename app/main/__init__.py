@@ -29,8 +29,13 @@ def create_app():
         SESSION_FILE_THRESHOLD=100,
         UPLOAD_FOLDER='uploads',  # ou caminho desejado
         DATABASE=os.path.join(app.instance_path, 'SQLSERVER'),
-        JSON_AS_ASCII=False
+        JSON_AS_ASCII=False,
+        PREFERRED_URL_SCHEME='https'
+
     )
+
+    app.config['SESSION_COOKIE_SECURE'] = True
+    app.config['REMEMBER_COOKIE_SECURE'] = True
 
     try:
         os.makedirs(app.instance_path)
