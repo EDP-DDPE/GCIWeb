@@ -57,7 +57,7 @@ $(document).ready(function() {
 
         if (regionalId) {
             // Loading
-            showLoading($('#municipio-select'));
+            showLoading($('#municipio-select'), "Carregando municípios...");
             showLoading($('#resp-regiao-select'), "Carregando responsáveis...");
 
             // Buscar municípios

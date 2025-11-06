@@ -4,6 +4,13 @@ $(document).ready(function () {
     const $tipoAnalise = $('#tipo_analise');
     const $tipoPedido = $('#tipo_pedido');
 
+    // 🔹 Função auxiliar para mostrar o "loading" dentro do select
+    function showLoading($select, text = "Carregando...") {
+        $select.prop('disabled', true)
+               .empty()
+               .append(`<option>${text}</option>`);
+    }
+
     // Valores previamente selecionados (vindos do Flask)
     const selectedViab = $tipoViab.data('selected');
     const selectedAnalise = $tipoAnalise.data('selected');
@@ -12,8 +19,16 @@ $(document).ready(function () {
     // === 1. Atualização do tipo_analise ===
     $tipoViab.on('change', function () {
         const viabilidade = $(this).val();
+
+                // Resetar os selects dependentes
+        $tipoAnalise.prop('disabled', true).empty().append('<option>Selecione um tipo...</option>');
+        $tipoPedido.prop('disabled', true).empty().append('<option>Selecione um tipo...</option>');
+
+
         if (viabilidade) {
+            showLoading($tipoAnalise);
             $.get('/api/tipo_analises/' + viabilidade, function (data) {
+
                 $tipoAnalise.empty().append('<option value="">Selecione um tipo...</option>');
                 $.each(data, function (index, analise) {
                     const isSelected = analise === selectedAnalise ? 'selected' : '';
@@ -22,6 +37,11 @@ $(document).ready(function () {
 
                 // Dispara mudança automática se for recarregamento pós-erro
                 if (selectedAnalise) $tipoAnalise.trigger('change');
+            }).fail(function() {
+                $tipoAnalise.empty().append('<option>Erro ao carregar tipos</option>');
+            }).always(function() {
+                $tipoAnalise.prop('disabled', false);
+                $tipoPedido.prop('disabled', true).empty().append('<option>Selecione um tipo...</option>');
             });
         } else {
             $tipoAnalise.empty().append('<option value="">Selecione um tipo...</option>');
@@ -33,13 +53,21 @@ $(document).ready(function () {
     $tipoAnalise.on('change', function () {
         const analise = $(this).val();
         const viabilidade = $tipoViab.val();
+
+        $tipoPedido.prop('disabled', true).empty().append('<option>Selecione um tipo..</option>');
+
         if (analise) {
+            showLoading($tipoPedido, "Carregando tipos...");
             $.get('/api/tipo_pedidos/' + viabilidade + '/' + analise, function (data) {
                 $tipoPedido.empty().append('<option value="">Selecione um tipo...</option>');
                 $.each(data, function (index, pedido) {
                     const isSelected = pedido.id == selectedPedido ? 'selected' : '';
                     $tipoPedido.append('<option value="' + pedido.id + '" ' + isSelected + '>' + pedido.pedido + '</option>');
                 });
+            }).fail(function() {
+                $tipoPedido.empty().append('<option>Erro ao carregar tipos</option>');
+            }).always(function() {
+                $tipoPedido.prop('disabled', false);
             });
         } else {
             $tipoPedido.empty().append('<option value="">Selecione um tipo...</option>');
