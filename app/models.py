@@ -42,9 +42,9 @@ class Instalacao(db.Model):
     __tablename__ = 'INSTALACOES'
     __table_args__ = {'schema': 'gciweb'}
 
-    ID_INSTALACAO = db.Column(db.BigInteger, primary_key=True)
+    #ID_INSTALACAO = db.Column(db.BigInteger, primary_key=True)
     EMPRESA = db.Column(db.Text, nullable=True)
-    INSTALACAO = db.Column(db.Text, nullable=True)
+    INSTALACAO = db.Column(db.Text, primary_key=True)
     CNPJ = db.Column(db.Text, nullable=True)
     # CPF = db.Column(db.Text, nullable=True)
     STATUS_INSTALACAO = db.Column(db.Text, nullable=True)
