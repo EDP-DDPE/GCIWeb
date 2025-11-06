@@ -1044,12 +1044,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         letraSelect.prop('selectedIndex', 0);
                     }
-                    $('#ERD').val(data.ERD);
-                    $('#dem_p_antes').val(data.dem_p_ant);
-                    $('#dem_p_depois').val(data.dem_p_dep);
-                    $('#dem_fp_antes').val(data.dem_fp_ant);
-                    $('#dem_fp_depois').val(data.dem_fp_dep);
-                    $('#dem_disponivel').val(data.demanda_disponivel_ponto);
+                    $('#ERD').val(data.ERD ? data.ERD : 0);
+                    $('#dem_p_antes').val(data.dem_p_ant ? data.dem_p_ant : 0.00);
+                    $('#dem_p_depois').val(data.dem_p_dep ? data.dem_p_dep : 0.00);
+                    $('#dem_fp_antes').val(data.dem_fp_ant ? data.dem_fp_ant : 0.00);
+                    $('#dem_fp_depois').val(data.dem_fp_dep ? data.dem_fp_dep : 0.00);
+                    $('#dem_disponivel').val(data.demanda_disponivel_ponto ? data.demanda_disponivel_ponto : 0.00);
                     $('#descricao').val(data.descricao);
                     $('#observacao').val(data.observacao);
                     $('#flag_carga').prop('checked', data.flag_carga);
@@ -1057,7 +1057,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     $('#flag_fluxo_reverso').prop('checked', data.flag_fluxo_reverso);
                     $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
                     $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
-                    $('#custo_modular').val(data.custo_modular);
+                    $('#custo_modular').val(data.custo_modular ? data.custo_modular : 0.00);
                     console.log(data.id_estudo);
                     $('#id_estudo').val(data.id_estudo);
 

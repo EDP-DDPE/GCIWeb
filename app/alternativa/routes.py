@@ -5,6 +5,12 @@ from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
 from sqlalchemy import literal_column, and_
 
+# from PIL import Image
+# import io
+# import base64
+
+
+
 alternativa_bp = Blueprint('alternativa', __name__, template_folder='templates')
 
 
@@ -281,3 +287,21 @@ def excluir_alternativa(id):
             'success': False,
             'message': f'Erro ao excluir alternativa: {str(e)}'
         }), 500
+
+
+# def reduzir_imagem_para_base64(caminho_imagem, largura_max=800, qualidade=70):
+#     # Abrir a imagem
+#     img = Image.open(caminho_imagem)
+#
+#     # Reduzir tamanho mantendo proporção
+#     img.thumbnail((largura_max, largura_max))
+#
+#     # Converter para JPEG comprimido em memória
+#     buffer = io.BytesIO()
+#     img.save(buffer, format='JPEG', optimize=True, quality=qualidade)
+#
+#     # Converter para base64
+#     img_bytes = buffer.getvalue()
+#     base64_str = base64.b64encode(img_bytes).decode('utf-8')
+#
+#     return base64_str

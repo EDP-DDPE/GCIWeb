@@ -37,7 +37,7 @@ class AlternativaForm(FlaskForm):
         validators=[
             #DataRequired('O custo modular é obrigatório'),
             NumberRange(min=0, message='O custo deve ser maior ou igual a zero')
-        ],
+        ], default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -52,7 +52,8 @@ class AlternativaForm(FlaskForm):
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
-        ],
+
+        ], default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -66,7 +67,7 @@ class AlternativaForm(FlaskForm):
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
-        ],
+        ],default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -80,7 +81,7 @@ class AlternativaForm(FlaskForm):
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
-        ],
+        ],default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -94,7 +95,7 @@ class AlternativaForm(FlaskForm):
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
-        ],
+        ],default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -135,7 +136,7 @@ class AlternativaForm(FlaskForm):
         validators=[
             Optional(),
             NumberRange(min=0, message='A demanda deve ser maior ou igual a zero')
-        ],
+        ],default=0,
         places=2,
         render_kw={
             'placeholder': '0.00',
@@ -144,7 +145,7 @@ class AlternativaForm(FlaskForm):
         }
     )
 
-    ERD = TextAreaField(
+    ERD = StringField(
         'ERD',
         validators=[
             Optional(),
