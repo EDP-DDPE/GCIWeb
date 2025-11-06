@@ -302,9 +302,14 @@
 <!--                                <li><a class="dropdown-item" href="#">-->
 <!--                                    <i class="fas fa-battery-full me-2 text-secondary"></i>Tensões-->
 <!--                                </a></li>-->
-                                <li><a class="dropdown-item" href="{{ url_for('status_tipos.listar') }}">
+                                <li><a class="dropdown-item" href="{{ url_for('tipo_solicitacao.listar') }}">
                                     <i class="fas fa-layer-group me-2 text-secondary"></i>Tipos de Solicitação
                                 </a></li>
+
+                                <li><a class="dropdown-item" href="{{ url_for('status_tipos.listar') }}">
+                                    <i class="bi bi-clock-history me-2 text-secondary"></i>Tipos de Status
+                                </a></li>
+
                                 <li><a class="dropdown-item" href="{{ url_for('resp_regioes.listar') }}">
                                     <i class="fas fa-solid fa-users-line me-2 text-secondary"></i>Responsáveis por Região
                                 </a></li>
