@@ -35,7 +35,7 @@ class AlternativaForm(FlaskForm):
     custo_modular = DecimalField(
         'Custo Modular (R$)',
         validators=[
-            DataRequired('O custo modular é obrigatório'),
+            #DataRequired('O custo modular é obrigatório'),
             NumberRange(min=0, message='O custo deve ser maior ou igual a zero')
         ],
         places=2,
