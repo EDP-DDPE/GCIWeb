@@ -1,11 +1,18 @@
 from app.models import db
 from app.main import create_app
 from app.database import db_manager
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # from waitress import serve
 
 app = create_app()
-
+app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+        x_port=1
+    )
 
 def run():
 

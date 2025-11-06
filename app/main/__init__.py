@@ -1,6 +1,6 @@
 from flask import Flask, render_template, session, redirect, url_for, request
 import os
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 import msal
 import requests
 from dotenv import load_dotenv
@@ -17,6 +17,14 @@ def create_app():
 
     app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder="static", static_url_path='/static')
     #app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder=os.path.join(app_dir, 'static'), static_url_path='/static')
+
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+        x_port=1
+    )
 
     # Registrar getattr no Jinja2, para utiliza no template genérico
     app.jinja_env.globals['getattr'] = getattr
@@ -51,7 +59,9 @@ def create_app():
 
     # Caminho/URI de redirecionamento (PRECISAM bater com o App Registration)
     redirect_path = os.getenv("REDIRECT_PATH", "auth/callback")
-    redirect_uri = os.getenv("REDIRECT_URI", f"http://localhost:5000/auth{redirect_path}")
+    #redirect_uri = os.getenv("REDIRECT_URI", f"http://localhost:5000/auth{redirect_path}")
+    #redirect_uri = os.getenv("REDIRECT_URI", f"https://172.20.70.54/auth{redirect_path}")
+    redirect_uri = os.getenv("REDIRECT_URI", f"https://{os.getenv('HOST', '172.20.70.54')}/auth{redirect_path}")
 
     # Authority (single-tenant). Para multi-tenant, avalie 'organizations' ou 'common'
     authority = f"https://login.microsoftonline.com/{tenant_id}"
@@ -120,5 +130,10 @@ def create_app():
     #     print("\n[DEBUG] Rotas registradas:")
     #     for rule in app.url_map.iter_rules():
     #         print(f"- {rule.rule} -> {rule.endpoint}")
+    @app.before_request
+    def before_request():
+        from flask import request
+        if request.headers.get('X-Forwarded-Proto') == 'https':
+            request.environ['wsgi.url_scheme'] = 'https'
 
     return app

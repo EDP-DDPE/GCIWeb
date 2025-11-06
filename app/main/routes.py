@@ -8,6 +8,26 @@ from app.auth import requires_permission
 main_bp = Blueprint("main", __name__, template_folder='templates', static_folder='static')
 
 
+@main_bp.route("/debug")
+def debug():
+    from flask import request, current_app
+
+    # Debug completo de todos os headers
+    all_headers = dict(request.headers)
+
+    return {
+        "scheme": request.scheme,
+        "url_root": request.url_root,
+        "X-Forwarded-Proto": request.headers.get("X-Forwarded-Proto"),
+        "X-Forwarded-Host": request.headers.get("X-Forwarded-Host"),
+        "X-Forwarded-Port": request.headers.get("X-Forwarded-Port"),
+        "Host": request.headers.get("Host"),
+        "environ_wsgi_url_scheme": request.environ.get('wsgi.url_scheme'),
+        "all_headers": all_headers,
+        "has_proxy_fix": 'ProxyFix' in str(type(current_app.wsgi_app))
+    }
+
+
 def msg_boas_vidas(nome):
     if 12 > datetime.datetime.now().hour > 4:
         return f"Bom dia, {nome}."
