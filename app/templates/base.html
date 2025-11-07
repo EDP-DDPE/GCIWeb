@@ -267,9 +267,11 @@
                                     <i class="fas fa-list me-2"></i>Listar Estudos
                                 </a></li>
 
+                                {% if usuario.aprovar or usuario.admin %}
                                 <li><a class="dropdown-item" href="{{ url_for('gestao.gestao_aprovacao') }}">
                                     <i class="fas fa-bar-chart me-2"></i>Gestão
                                 </a></li>
+                                {% endif %}
                             </ul>
                         </li>
 

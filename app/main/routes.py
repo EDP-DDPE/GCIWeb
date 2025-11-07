@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 import requests
 from app.database import db_manager
+from app.auth import requires_permission, get_usuario_logado
 import datetime
 import json
 from app.auth import requires_permission
@@ -41,7 +42,7 @@ def msg_boas_vidas(nome):
 def home():
     if "user" not in session:
         return redirect(url_for("auth.public"))
-    usuario = session["user"]
+    usuario = get_usuario_logado()
 
 
     # return f"""
@@ -62,6 +63,7 @@ def home():
         return redirect(url_for("auth.public"))
 
     nome = graph['givenName']
+
 
     return render_template("main/index.html", usuario=usuario, msg=msg_boas_vidas(nome))
 
