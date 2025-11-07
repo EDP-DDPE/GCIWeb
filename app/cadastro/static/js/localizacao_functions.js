@@ -1,8 +1,9 @@
 $(document).ready(function() {
 
-    $('#municipio-select').prop('disabled', true);
-    $('#resp-regiao-select').prop('disabled', true);
-    $('#regional-select').prop('disabled', true);
+    console.log($('#municipio-select').val())
+    if ($('#municipio-select').val() == 0) {$('#municipio-select').prop('disabled', true);}
+    if ($('#resp-regiao-select').val() == 0) {$('#resp-regiao-select').prop('disabled', true);}
+    if ($('#regional-select').val() == 0) {$('#regional-select').prop('disabled', true);}
 
     // 🔹 Função auxiliar para mostrar o "loading" dentro do select
     function showLoading($select, text = "Carregando...") {
@@ -381,9 +382,6 @@ $(document).ready(function() {
      * Zona UTM: 23S (SP) ou 24S (ES), conforme #edp-select.
      */
 
-     function print(texto) {
-        console.log(texto)
-     }
 
    function normalizarCoordenadas() {
       const edpText = ($('#edp-select option:selected').text() || '').toUpperCase();
