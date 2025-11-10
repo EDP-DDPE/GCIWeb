@@ -438,8 +438,47 @@
 
                         </div>
 
-                        <!-- Demandas -->
+                        <!-- Tipo Alternativa -->
                         <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Tipo de Alternativa</h6>
+
+                            <div class="row mt-3">
+                                <div class="mb-3">
+                                    {{ form.letra_alternativa.label(class="form-label") }}
+                                    {{ form.letra_alternativa(class="form-control", id="letra_select") }}
+                                    {% if form.letra_alternativa.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.letra_alternativa.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_carga(class="form-check-input", id='flag_carga') }}
+                                        {{ form.flag_carga.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_geracao(class="form-check-input", id='flag_geracao') }}
+                                        {{ form.flag_geracao.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_fluxo_reverso(class="form-check-input", id='flag_fluxo_reverso') }}
+                                        {{ form.flag_fluxo_reverso.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p></p>
+                            <!-- Demandas -->
                             <h6 class="text-primary mb-3">Demandas</h6>
 
                             <div class="row">
@@ -512,26 +551,6 @@
                                 {% endif %}
                             </div>
 
-                            <div class="row">
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_carga(class="form-check-input", id='flag_carga') }}
-                                        {{ form.flag_carga.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_geracao(class="form-check-input", id='flag_geracao') }}
-                                        {{ form.flag_geracao.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_fluxo_reverso(class="form-check-input", id='flag_fluxo_reverso') }}
-                                        {{ form.flag_fluxo_reverso.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -617,20 +636,6 @@
                                         {{ form.flag_alternativa_escolhida(class="form-check-input") }}
                                         {{ form.flag_alternativa_escolhida.label(class="form-check-label") }}
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="row mt-3">
-                                <div class="mb-3">
-                                    {{ form.letra_alternativa.label(class="form-label") }}
-                                    {{ form.letra_alternativa(class="form-control", id="letra_select") }}
-                                    {% if form.letra_alternativa.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {% for error in form.letra_alternativa.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
                                 </div>
                             </div>
                         </div>
