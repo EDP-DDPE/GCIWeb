@@ -44,6 +44,7 @@ def create_app():
 
     app.config['SESSION_COOKIE_SECURE'] = True
     app.config['REMEMBER_COOKIE_SECURE'] = True
+    app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
     try:
         os.makedirs(app.instance_path)
