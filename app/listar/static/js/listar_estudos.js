@@ -40,8 +40,10 @@
                 municipio: cells.eq(4).text().trim(),
                 eng_responsavel: cells.eq(5).text().trim(),
                 data_registro: cells.eq(6).text().trim(),
-                status: cells.eq(7).text().trim(),
-                acoes: cells.eq(8).html(),
+                qtd_alternativas: cells.eq(7).text().trim(),
+                qtd_anexos: cells.eq(8).text().trim(),
+                status: cells.eq(9).text().trim(),
+                acoes: cells.eq(10).html(),
                 element: this
             };
         }).get();
@@ -204,6 +206,8 @@
                     <td data-column="municipio">${item.municipio}</td>
                     <td data-column="eng_responsavel">${item.eng_responsavel}</td>
                     <td data-column="data_registro">${item.data_registro}</td>
+                    <td data-column="qtd_alternativas">${item.qtd_alternativas}</td>
+                    <td data-column="qtd_anexos">${item.qtd_anexos}</td>
                     <td data-column="status">${item.status}</td>
                     <td data-column="acoes">${item.acoes}</td>
                 `);
@@ -374,7 +378,10 @@
             'Empresa': item.empresa,
             'Município': item.municipio,
             'Responsável': item.eng_responsavel,
-            'Data Criação': item.data_registro
+            'Data Criação': item.data_registro,
+            'Nº Alternativas': item.qtd_alternativas,
+            'Nº Anexos': item.qtd_anexos,
+            'Status': item.status
         }));
 
         switch(format) {
@@ -530,7 +537,7 @@
         // Inicializar tooltips do Bootstrap se disponível
         if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
             $('[data-bs-toggle="tooltip"]').each(function() {
-                new bootstrap.Tooltip(this);
+                new bootstrap.Tooltip(this, { container: 'body' });
             });
         }
     }
@@ -596,7 +603,7 @@
                         <div class="col-md-12">
                             <div class="card shadow-sm">
                                 <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-chart-bar me-2"></i>Demandas
+                                    <i class="fas fa-chart-bar me-2"></i>Demandas (kW)
                                 </div>
                                 <div class="card-body">
                                     <div class='row'>
@@ -629,7 +636,7 @@
                                             <table class="table table-striped table-sm align-middle mb-0">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th>ID</th>
+                                                        <th>Alternativa</th>
                                                         <th>Descrição</th>
                                                         <th>Custo Modular (R$)</th>
                                                         <th>Circuito</th>
@@ -641,7 +648,7 @@
                                                 <tbody>
                                                     ${data.alternativas.map(a => `
                                                         <tr>
-                                                            <td>${a.id || '-'}</td>
+                                                            <td>${a.letra_alternativa || '-'}</td>
                                                             <td>${a.descricao || '-'}</td>
                                                             <td>${a.custo_modular?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '-'}</td>
                                                             <td>${a.circuito?.nome || '-'}</td>

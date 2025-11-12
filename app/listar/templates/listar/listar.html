@@ -81,6 +81,14 @@
                                 <label class="form-check-label" for="col-data_registro">Data Criação</label>
                             </div>
                             <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="qtd_alternativas" id="col-qtd_alternativas" checked>
+                                <label class="form-check-label" for="col-qtd_alternativas">Nº Alternativas</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="qtd_anexos" id="col-qtd_anexos" checked>
+                                <label class="form-check-label" for="col-qtd_anexos">Nº Anexos</label>
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="status" id="col-status" checked>
                                 <label class="form-check-label" for="col-status">Status</label>
                             </div>
@@ -188,6 +196,24 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="qtd_alternativas" style="min-width: 15px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Nº Alternativas</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="qtd_alternativas" style="cursor: pointer; margin-left: 3px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="qtd_anexos" style="min-width: 15px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Nº Anexos</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="qtd_anexos" style="cursor: pointer; margin-left: 3px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="status" style="min-width: 120px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Status</span>
@@ -227,6 +253,12 @@
                             <th data-column="data_registro">
                                 <input type="date" class="filter-input" data-filter="data_registro">
                             </th>
+                            <th data-column="qtd_alternativas">
+                                <input type="text" class="filter-input" data-filter="qtd_alternativas">
+                            </th>
+                            <th data-column="qtd_anexos">
+                                <input type="text" class="filter-input" data-filter="qtd_anexos">
+                            </th>
                             <th data-column="status">
                                 <input type="text" class="filter-input" data-filter="status">
                             </th>
@@ -245,6 +277,8 @@
                             <td data-column="municipio">{{ doc.municipio }}</td>
                             <td data-column="eng_responsavel">{{ doc.eng_responsavel }}</td>
                             <td data-column="data_registro">{{ doc.data_registro }}</td>
+                            <td data-column="qtd_alternativas">{{doc.qtd_alternativas}}</td>
+                            <td data-column="qtd_anexos">{{doc.qtd_anexos}}</td>
                             <td data-column="status">{{ doc.status }}</td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">

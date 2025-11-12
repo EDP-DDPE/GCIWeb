@@ -19,7 +19,6 @@ def listar():
     per_page = request.args.get('per_page', 20, type=int)
     dados = listar_estudos(page, per_page)
     status_tipos = StatusTipo.query.all()
-    print(status_tipos)
     usuario = get_usuario_logado()
 
     return render_template("listar/listar.html", documentos=dados["estudos"],

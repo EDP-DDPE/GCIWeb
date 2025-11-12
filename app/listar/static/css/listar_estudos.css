@@ -201,3 +201,16 @@
 .select2-selection__clear {
   display: none !important;
 }
+
+#estudosTable th[data-column="id"],
+#estudosTable td[data-column="id"],
+#estudosTable th[data-column="qtd_alternativas"], th[data-column="qtd_anexos"],
+#estudosTable td[data-column="qtd_alternativas"], td[data-column="qtd_anexos"] {
+    text-align: center;
+    width: 60px !important;
+}
+
+#estudosTable td[data-column="empresa"],
+#estudosTable td[data-column="municipio"] {
+    text-transform: capitalize;
+}

@@ -560,6 +560,8 @@ def listar_estudos(page, per_page):
                 'eng_responsavel': estudo.resp_regiao.usuario.nome if estudo.resp_regiao else None,
                 'criado_por': estudo.criado_por.nome if estudo.criado_por else None,
                 'status': estudo.ultimo_status.status_tipo.status if estudo.ultimo_status else "Status não cadastrado",
+                'qtd_alternativas': len(estudo.alternativas),
+                'qtd_anexos': len(estudo.anexos),
                 'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None
             })
 
@@ -610,6 +612,8 @@ def obter_estudo(estudo_id):
             'latitude_cliente': float(estudo.latitude_cliente) if estudo.latitude_cliente else None,
             'longitude_cliente': float(estudo.longitude_cliente) if estudo.longitude_cliente else None,
             'observacao': estudo.observacao,
+            'qtd_alternativas': len(estudo.alternativas),
+            'qtd_anexos': len(estudo.anexos),
             'data_registro': estudo.data_registro.isoformat() if estudo.data_registro else None,
 
             # Relacionamentos (já carregados, sem N+1)
@@ -679,6 +683,7 @@ def obter_estudo(estudo_id):
             'alternativas': [
                 {
                     'id': alt.id_alternativa,
+                    'letra_alternativa': alt.letra_alternativa,
                     'descricao': alt.descricao,
                     'custo_modular': float(alt.custo_modular),
                     'flag_alternativa_escolhida': alt.flag_alternativa_escolhida,
