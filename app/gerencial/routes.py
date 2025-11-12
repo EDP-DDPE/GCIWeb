@@ -26,8 +26,8 @@ def gestao_aprovacao():
     valor_minimo = request.args.get("min_valor", 1_000_000.00, type=float)
 
     # Subfiltros de status
-    nomes_bloqueados = ["Aprovado", "Reprovado"]  # já decididos
-    analises_aceitas = ['MMGD','Carga']
+    nomes_bloqueados = ["Aprovado Gestor", "Reprovado Gestor"]  # já decididos
+    analises_aceitas = ['MMGD','Carga', 'DAL', 'Carga e MMGD', 'Carga e Autoprodutor', 'Autoprodutor', 'Produtor Independente']
     nome_reenvio = "Reenviado para aprovação"
 
     rn = func.row_number().over(
@@ -60,9 +60,6 @@ def gestao_aprovacao():
         )
     )
 
-
-
-
     estudos = (
         Estudo.query
         .join(Estudo.alternativas)
@@ -91,9 +88,9 @@ def gestao_aprovacao():
         # regra simples: se tem Aprovado/Rejeitado Gestor no histórico (em tese não terá aqui),
         # senão considerar "Pendente"
         nomes = [se.status_tipo.status for se in e.status_estudos if se.status_tipo and se.status_tipo.status]
-        if "Aprovado" in nomes:
+        if "Aprovado Gestor" in nomes:
             return "Aprovado"
-        if "Reprovado" in nomes:
+        if "Reprovado Gestor" in nomes:
             return "Reprovado"
         return "Pendente"
 

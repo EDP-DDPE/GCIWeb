@@ -49,7 +49,9 @@
               <td>{{ doc.municipio.municipio or '-' }}</td>
               <td>R$ {{ "{:,.2f}".format((alt_escolhida.custo_modular if alt_escolhida else 0) or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
               <td>
-                <span class="badge bg-secondary">{{ doc.ultimo_status.status_tipo.status }}</span>
+                <span class="badge {{ 'bg-secondary' if doc.ultimo_status else 'bg-light text-muted' }}">
+                    {{ doc.ultimo_status.status_tipo.status if doc.ultimo_status and doc.ultimo_status.status_tipo else 'Sem status' }}
+                </span>
               </td>
               <td>
                 <textarea class="form-control form-control-sm" rows="1" id="comentario-{{doc.id_estudo}}" placeholder="Digite um comentário..."></textarea>
