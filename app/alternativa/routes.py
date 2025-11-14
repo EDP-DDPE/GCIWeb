@@ -129,10 +129,10 @@ def listar(id_estudo):
                     flag_fluxo_reverso=form.flag_fluxo_reverso.data,
                     proporcionalidade=calc_prop(form),
                     letra_alternativa=form.letra_alternativa.data,
-                    custo_modular=to_float_safe(form.custo_modular.data),
+                    custo_modular=form.custo_modular.data,
                     id_k=get_fator_k(form.subgrupo_tarif.data, estudo.data_abertura_cliente, estudo.id_edp),
                     observacao=form.observacao.data,
-                    ERD=to_float_safe(form.ERD.data),
+                    ERD=form.ERD.data,
                     demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
                     subgrupo_tarifario=form.subgrupo_tarif.data,
                     etapa=form.etapa.data,
@@ -219,7 +219,6 @@ def editar_alternativa(id_alternativa):
 
     form = AlternativaForm()
     form.atualizar_circuitos(estudo.id_edp, alt.subgrupo_tarifario)
-
     if form.validate_on_submit():
         try:
             arquivo = form.imagem_blob.data
@@ -253,9 +252,9 @@ def editar_alternativa(id_alternativa):
             alt.letra_alternativa = form.letra_alternativa.data
             alt.subgrupo_tarifario = form.subgrupo_tarif.data
             alt.etapa = form.etapa.data
-            alt.custo_modular = to_float_safe(form.custo_modular.data)
+            alt.custo_modular = form.custo_modular.data
             alt.observacao = form.observacao.data
-            alt.ERD = to_float_safe(form.ERD.data)
+            alt.ERD = form.ERD.data
             alt.demanda_disponivel_ponto = form.demanda_disponivel_ponto.data
             alt.proporcionalidade = calc_prop(form)
             alt.id_img_anexo = novo_id_anexo

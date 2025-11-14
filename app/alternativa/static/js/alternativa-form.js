@@ -53,7 +53,9 @@ export function preencherFormulario(data) {
 export function inicializarEventosFormulario() {
 
     $("#subgrupo_select").change(() => {
-        atualizarCircuitos();
+        const sub = $("#subgrupo_select").val();
+        const id_edp = $("#id_edp").val();
+        atualizarCircuitos(id_edp, sub);
         atualizarERD();
     });
 
@@ -64,6 +66,8 @@ export function inicializarEventosFormulario() {
 
 export function atualizarCircuitos(id_edp, subgrupo) {
     const select = $("#circuito_select");
+    select.empty();
+    select.append(new Option("Carregando lista....", 1));
 
     return apiListarCircuitos(id_edp, subgrupo)
         .then(resp => {
