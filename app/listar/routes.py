@@ -15,11 +15,10 @@ listar_bp = Blueprint("listar", __name__, template_folder="templates",
 @listar_bp.route("/listar", methods=["GET", "POST"])
 @requires_permission('visualizar')
 def listar():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    dados = listar_estudos(page, per_page)
+    dados = listar_estudos()
     status_tipos = StatusTipo.query.all()
     usuario = get_usuario_logado()
+
 
     return render_template("listar/listar.html", documentos=dados["estudos"],
                            pagination=dados["pagination"], usuario=usuario, status_tipos=status_tipos)

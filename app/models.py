@@ -4,6 +4,9 @@ from sqlalchemy.orm import joinedload, selectinload
 from datetime import datetime
 from flask import jsonify, request
 from decimal import Decimal
+from sqlalchemy import select
+from sqlalchemy.orm import column_property
+from sqlalchemy.orm import foreign
 
 db = SQLAlchemy()
 
@@ -243,6 +246,34 @@ class TipoSolicitacao(db.Model):
     estudos = db.relationship("Estudo", back_populates="tipo_solicitacao", passive_deletes=True)
 
 
+class StatusEstudo(db.Model):
+    __tablename__ = 'status_estudo'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_status = db.Column(db.BigInteger, primary_key=True)
+    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False,
+                               index=True)
+    observacao = db.Column(db.Text)
+    id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
+    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
+
+    # Relacionamentos
+
+    estudo = db.relationship('Estudo', back_populates='status_estudos', lazy='joined')
+    criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
+    status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
+
+    @property
+    def status_mais_recente(self):
+        return (
+            StatusEstudo.query
+            .filter_by(id_estudo=self.id_estudo)
+            .order_by(desc(StatusEstudo.data))
+            .first()
+        )
+
+
 class Estudo(db.Model):
     __tablename__ = 'estudos'
     __table_args__ = {'schema': 'gciweb'}
@@ -285,6 +316,16 @@ class Estudo(db.Model):
     data_vencimento_ddpe = db.Column(db.Date, nullable=False)
     data_alteracao = db.Column(db.Date, nullable=True)
 
+    id_status_ultimo = column_property(
+        select(StatusEstudo.id_status)
+        .where(StatusEstudo.id_estudo == id_estudo)
+        .order_by(StatusEstudo.data.desc())
+        .limit(1)
+        .correlate_except(StatusEstudo)
+        .scalar_subquery()
+    )
+
+
     # Relacionamentos com lazy estratégico
     edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
     regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
@@ -323,9 +364,8 @@ class Estudo(db.Model):
 
     @property
     def ultimo_status(self):
-        """Retorna o último status do estudo sem executar uma nova query"""
-        if self.status_estudos:
-            return self.status_estudos[0]
+        if self.id_status_ultimo:
+            return StatusEstudo.query.get(self.id_status_ultimo)
         return None
 
     def __repr__(self):
@@ -381,32 +421,7 @@ class Socio(db.Model):
     empresa = db.relationship('Empresa', back_populates='socios', lazy='joined')
 
 
-class StatusEstudo(db.Model):
-    __tablename__ = 'status_estudo'
-    __table_args__ = {'schema': 'gciweb'}
 
-    id_status = db.Column(db.BigInteger, primary_key=True)
-    data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
-    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False,
-                               index=True)
-    observacao = db.Column(db.Text)
-    id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
-    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
-
-    # Relacionamentos
-
-    estudo = db.relationship('Estudo', back_populates='status_estudos', lazy='joined')
-    criado_por = db.relationship('Usuario', back_populates='status_estudos', lazy='joined')
-    status_tipo = db.relationship('StatusTipo', back_populates='status_estudos', lazy='joined')
-
-    @property
-    def status_mais_recente(self):
-        return (
-            StatusEstudo.query
-            .filter_by(id_estudo=self.id_estudo)
-            .order_by(desc(StatusEstudo.data))
-            .first()
-        )
 
 class StatusTipo(db.Model):
     __tablename__ = 'status_tipos'
@@ -529,11 +544,11 @@ class Obra(db.Model):
 #     )
 
 
-def listar_estudos(page, per_page):
+def listar_estudos():
     """Lista estudos com paginação otimizada"""
     try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+        page = request.args.get('page', type=int)
+        per_page = request.args.get('per_page', 100, type=int)
 
         # Query otimizada evitando N+1
         estudos_paginated = Estudo.query.options(
@@ -543,7 +558,11 @@ def listar_estudos(page, per_page):
             db.joinedload(Estudo.tipo_solicitacao),
             db.joinedload(Estudo.criado_por),
             db.joinedload(Estudo.resp_regiao).joinedload(RespRegiao.usuario),
-            db.selectinload(Estudo.status_estudos).selectinload(StatusEstudo.status_tipo)
+            #db.selectinload(Estudo.ultimo_status).selectinload(StatusEstudo.status_tipo),
+
+            db.selectinload(Estudo.alternativas),
+            db.selectinload(Estudo.anexos)
+
         ).order_by(Estudo.id_estudo.desc()) \
             .paginate(
             page=page,
@@ -553,7 +572,7 @@ def listar_estudos(page, per_page):
 
         estudos_data = []
         for estudo in estudos_paginated.items:
-            print(estudo.ultimo_status.status_tipo.status) if estudo.ultimo_status else None
+           #print(estudo.ultimo_status.status_tipo.status) if estudo.ultimo_status else None
 
             estudos_data.append({
                 'id': estudo.id_estudo,

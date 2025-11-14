@@ -1,6 +1,5 @@
 $(document).ready(function() {
 
-    console.log($('#municipio-select').val())
     if ($('#municipio-select').val() == 0) {$('#municipio-select').prop('disabled', true);}
     if ($('#resp-regiao-select').val() == 0) {$('#resp-regiao-select').prop('disabled', true);}
     if ($('#regional-select').val() == 0) {$('#regional-select').prop('disabled', true);}
@@ -93,6 +92,12 @@ $(document).ready(function() {
     // Valores iniciais do banco ou padrão
     var initialLat = parseFloat($('#latitude').val()) || -23.550520;
     var initialLng = parseFloat($('#longitude').val()) || -46.633309;
+
+    L.Icon.Default.mergeOptions({
+        iconUrl: "/marker-icon.png",
+        iconRetinaUrl: "/marker-icon-2x.png",
+        shadowUrl: "/marker-shadow.png"
+    });
 
     var map = L.map('map').setView([initialLat, initialLng], 13);
 
@@ -399,20 +404,18 @@ $(document).ready(function() {
       latStr = latStr.replace(/,/g, '.').replace(/\s+/g, ' ');
       lonStr = lonStr.replace(/,/g, '.').replace(/\s+/g, ' ');
 
-      console.log("latStr: " + latStr)
-      console.log("lonStr: " + lonStr)
-
+//      console.log("latStr: " + latStr)
+//      console.log("lonStr: " + lonStr)
 
       const bothUTM = isLikelyUTMPair(latStr, lonStr);
       const bothGeo = isLikelyGeoPair(latStr, lonStr);
 
-      console.log("bothUTM: " + bothUTM)
-
+//      console.log("bothUTM: " + bothUTM)
 
       if (bothGeo) {
         const lat = parseCoordinate(latStr, true)
         const lon = parseCoordinate(lonStr, false)
-        console.log("bothGeo: "+ bothGeo + " lat: " + lat + " lon: " + lon)
+//        console.log("bothGeo: "+ bothGeo + " lat: " + lat + " lon: " + lon)
         $('#latitude').val(lat.toFixed(8));
         $('#longitude').val(lon.toFixed(8));
         updateMarkerFromInput()
