@@ -52,6 +52,21 @@ def get_cnpj(c: str) -> dict:
         return {"erro": f"Falha na requisição: {response.status_code}"}
 
 
+@api_bp.route('/api/alternativa/estudo/<int:id_estudo>')
+def api_dados_estudo(id_estudo):
+
+    estudo = Estudo.query.get_or_404(id_estudo)
+
+    return jsonify({
+        "dem_fp_ant": max(estudo.dem_carga_atual_fp, estudo.dem_ger_atual_fp),
+        "dem_p_ant": max(estudo.dem_carga_atual_p, estudo.dem_ger_atual_p),
+        "dem_fp_dep": max(estudo.dem_carga_solicit_fp, estudo.dem_ger_solicit_fp),
+        "dem_p_dep": max(estudo.dem_carga_solicit_p, estudo.dem_ger_solicit_p),
+        "latitude": estudo.latitude_cliente,
+        "longitude": estudo.longitude_cliente,
+        "tensao": estudo.tensao.tensao
+
+    })
 
 # @api_bp.route('/api/municipios/<int:municipio_id>')
 # def api_obter_municipio(municipio_id):

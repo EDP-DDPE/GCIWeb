@@ -1,0 +1,332 @@
+<!-- Modal para Nova/Editar Alternativa -->
+<div class="modal fade" id="alternativaModal" tabindex="-1" aria-labelledby="alternativaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alternativaModalLabel">Nova Alternativa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="formAlternativa" method="POST" enctype="multipart/form-data">
+
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                        {{ form.id_estudo(id="id_estudo", type="hidden") }}
+
+
+
+                    <!-- Exibe erros gerais -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Erros de validação encontrados:</strong>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items() %}
+                                    {% for error in errors %}
+                                        <li><strong>{{ getattr(form, field).label.text }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <!-- Informações Básicas -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Informações Básicas</h6>
+
+                            <div class="mb-3">
+                                {{ form.subgrupo_tarif.label(class="form-label") }}
+                                {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
+                                {% if form.subgrupo_tarif.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.subgrupo_tarif.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.id_circuito.label(class="form-label") }}
+                                <span class="required">*</span>
+                                {{ form.id_circuito(class="form-select", required=True, id="circuito_select") }}
+                                {% if form.id_circuito.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.id_circuito.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.descricao.label(class="form-label") }}
+                                {{ form.descricao(class="form-control", rows="3") }}
+                                {% if form.descricao.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.descricao.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.custo_modular.label(class="form-label") }}
+                                <span class="required">*</span>
+                                {{ form.custo_modular(class="form-control", step="0.01", required=True, id="custo_modular") }}
+                                {% if form.custo_modular.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.custo_modular.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+
+                        </div>
+
+                        <!-- Tipo Alternativa -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Tipo de Alternativa</h6>
+
+                            <div class="row mt-3">
+                                <div class="mb-3">
+                                    {{ form.letra_alternativa.label(class="form-label") }}
+                                    {{ form.letra_alternativa(class="form-control", id="letra_select") }}
+                                    {% if form.letra_alternativa.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.letra_alternativa.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="mb-3">
+                                    {{ form.etapa.label(class="form-label") }}
+                                    {{ form.etapa(class="form-control", id="etapa_select") }}
+                                    {% if form.etapa.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.etapa.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_carga(class="form-check-input", id='flag_carga') }}
+                                        {{ form.flag_carga.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_geracao(class="form-check-input", id='flag_geracao') }}
+                                        {{ form.flag_geracao.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_fluxo_reverso(class="form-check-input", id='flag_fluxo_reverso') }}
+                                        {{ form.flag_fluxo_reverso.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p></p>
+                            <!-- Demandas -->
+                            <h6 class="text-primary mb-3">Demandas</h6>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.dem_fp_ant.label(class="form-label") }}
+                                        {{ form.dem_fp_ant(class="form-control", step="0.01", id="dem_fp_antes") }}
+                                        {% if form.dem_fp_ant.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_fp_ant.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.dem_p_ant.label(class="form-label") }}
+                                        {{ form.dem_p_ant(class="form-control", step="0.01", id="dem_p_antes") }}
+                                        {% if form.dem_p_ant.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_p_ant.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.dem_fp_dep.label(class="form-label") }}
+                                        {{ form.dem_fp_dep(class="form-control", step="0.01", id="dem_fp_depois") }}
+                                        {% if form.dem_fp_dep.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_fp_dep.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.dem_p_dep.label(class="form-label") }}
+                                        {{ form.dem_p_dep(class="form-control", step="0.01", id="dem_p_depois") }}
+                                        {% if form.dem_p_dep.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.dem_p_dep.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.demanda_disponivel_ponto.label(class="form-label") }}
+                                {{ form.demanda_disponivel_ponto(class="form-control", step="0.01", id="dem_disponivel") }}
+                                {% if form.demanda_disponivel_ponto.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.demanda_disponivel_ponto.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Localização -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Localização</h6>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.latitude_ponto_conexao.label(class="form-label") }}
+                                        {{ form.latitude_ponto_conexao(class="form-control", step="0.00000001") }}
+                                        {% if form.latitude_ponto_conexao.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.latitude_ponto_conexao.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        {{ form.longitude_ponto_conexao.label(class="form-label") }}
+                                        {{ form.longitude_ponto_conexao(class="form-control", step="0.00000001") }}
+                                        {% if form.longitude_ponto_conexao.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.longitude_ponto_conexao.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="mb-3">
+                                    <label for="imagem_alternativa" class="form-label">Imagem da Alternativa</label>
+                                    <div id="drop_zone" style="border: 2px dashed #007bff; padding: 20px; text-align: center; cursor: pointer;">
+                                        Arraste a imagem aqui ou clique para selecionar
+                                    </div>
+                                    {{ form.imagem_blob(class="form-control", id="imagem_alternativa", style="display:none") }}
+                                    <img id="preview_imagem" src="" alt="Pré-visualização" style="max-width: 100%; margin-top: 10px; display: none;">
+                                    {% if form.imagem_blob.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.imagem_blob.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {{ form.id_estudo(class="form-control", id="id_estudo", style="display:none") }}
+                            </div>
+                        </div>
+
+                        <!-- Outros Campos -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Outros Dados</h6>
+
+                            <div class="mb-3">
+                                {{ form.ERD.label(class="form-label") }}
+                                {{ form.ERD(class="form-control", step="0.001", id="ERD") }}
+                                {% if form.ERD.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.ERD.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_menor_custo_global(class="form-check-input") }}
+                                        {{ form.flag_menor_custo_global.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        {{ form.flag_alternativa_escolhida(class="form-check-input") }}
+                                        {{ form.flag_alternativa_escolhida.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                {{ form.observacao.label(class="form-label") }}
+                                {{ form.observacao(class="form-control", rows="3") }}
+                                {% if form.observacao.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {% for error in form.observacao.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="showLoading()">Cancelar</button>
+                    <button id="btnExcluirAlternativa" class="btn btn-danger" style="display:none;" onclick="showLoading()">Excluir</button>
+                    <button id="salvar_alternativa" type="submit" class="btn btn-primary" onclick="showLoading()">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

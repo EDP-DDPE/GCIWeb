@@ -365,6 +365,7 @@ class Anexo(db.Model):
 
     # Relacionamentos
     estudo = db.relationship('Estudo', back_populates='anexos', lazy='joined')
+    alternativas = db.relationship('Alternativa', back_populates='img_anexo', lazy='select')
 
 
 class Socio(db.Model):
@@ -461,12 +462,17 @@ class Alternativa(db.Model):
     flag_fluxo_reverso = db.Column(db.Boolean, nullable=True, default=False)
     letra_alternativa = db.Column(db.String(1), nullable=True)
     proporcionalidade = db.Column(db.Numeric(3, 2), nullable=True)
+    subgrupo_tarifario = db.Column(db.String(3), nullable=True)
+    etapa = db.Column(db.BigInteger, nullable=False, default=1)
     id_k = db.Column(db.BigInteger, db.ForeignKey('gciweb.FATOR_K.id_k'), nullable=True)
+    id_img_anexo = db.Column(db.BigInteger, db.ForeignKey('gciweb.anexos.id_anexo'), nullable=True)
+
 
     # Relacionamentos simples - sem ambiguidade
     circuito = db.relationship('Circuito', back_populates='alternativas', lazy='joined')
     estudo = db.relationship('Estudo', back_populates='alternativas', lazy='joined')
     fatorK = db.relationship('FatorK', back_populates='alternativas', lazy='joined')
+    img_anexo = db.relationship('Anexo', back_populates='alternativas', lazy='joined')
 
     # Relacionamento 1:N - Uma alternativa pode ter várias obras
     obras = db.relationship(

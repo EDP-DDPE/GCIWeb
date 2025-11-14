@@ -243,8 +243,11 @@ CREATE TABLE "gciweb"."alternativas"(
     "letra_alternativa" varchar(1) null,
     "proporcionalidade" decimal(3,2),
     "id_k" BIGINT null,
+    'id_img_anexo' BIGINT null,
+
 
 );
+
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_alternativa_primary" PRIMARY KEY("id_alternativa");
 
 CREATE TABLE "gciweb"."obras"(
@@ -283,9 +286,6 @@ ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_criado_por_fore
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_eng_responsavel_foreign" FOREIGN KEY("id_resp_regiao") REFERENCES "gciweb"."resp_regioes"("id_resp_regiao");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_empresa_foreign" FOREIGN KEY("id_empresa") REFERENCES "gciweb"."empresas"("id_empresa");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_municipio_foreign" FOREIGN KEY("id_municipio") REFERENCES "gciweb"."municipios"("id_municipio");
---ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_viab_foreign" FOREIGN KEY("id_tipo_viab") REFERENCES "gciweb"."tipo_viabilidade"("id_tipo_viab");
---ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_analise_foreign" FOREIGN KEY("id_tipo_analise") REFERENCES "gciweb"."tipo_analise"("id_tipo_analise");
---ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_pedido_foreign" FOREIGN KEY("id_tipo_pedido") REFERENCES "gciweb"."tipo_pedido"("id_tipo_pedido");
 ALTER TABLE "gciweb"."estudos" ADD CONSTRAINT "gciweb_estudos_id_tipo_solicitacao_foreign" FOREIGN KEY("id_tipo_solicitacao") REFERENCES "gciweb"."tipo_solicitacao"("id_tipo_solicitacao");
 
 ALTER TABLE "gciweb"."anexos" ADD CONSTRAINT "gciweb_anexos_id_estudo_foreign" FOREIGN KEY("id_estudo") REFERENCES "gciweb"."estudos"("id_estudo");
@@ -296,6 +296,8 @@ ALTER TABLE "gciweb"."status_estudo" ADD CONSTRAINT "gciweb_status_estudo_id_sta
 
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_circuito_foreign" FOREIGN KEY("id_circuito") REFERENCES "gciweb"."circuitos"("id_circuito");
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_estudo_foreign" FOREIGN KEY("id_estudo") REFERENCES "gciweb"."estudos"("id_estudo");
+ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_anexo_foreign" FOREIGN KEY("id_img_anexo") REFERENCES "gciweb"."anexos"("id_anexo");
+
 ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_regional_foreign" FOREIGN KEY("id_regional") REFERENCES "gciweb"."regionais"("id_regional");
 ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_kit_foreign" FOREIGN KEY("id_kit") REFERENCES "gciweb"."kits"("id_kit");
 ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_alternativa_foreign" FOREIGN KEY("id_alternativa") REFERENCES "gciweb"."alternativas"("id_alternativa");

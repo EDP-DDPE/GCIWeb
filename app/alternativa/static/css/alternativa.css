@@ -1,0 +1,170 @@
+
+.btn-alternativa-edit.active {
+    transform: scale(0.97);
+    opacity: 0.85;
+    transition: all 0.1s ease-in-out;
+}
+
+/* Gradientes personalizados
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}*/
+
+.bg-gradient-light {
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.08), rgba(108, 117, 125, 0.02));
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.15), rgba(40, 167, 69, 0.05));
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+}
+
+.bg-gradient-subtle {
+    background: linear-gradient(135deg, rgba(248, 249, 250, 0.8), rgba(233, 236, 239, 0.3));
+}
+
+/* Cards de informação */
+.info-card {
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Seções */
+.section-title {
+    position: relative;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--bs-primary), transparent);
+    border-radius: 3px;
+}
+
+/* Especificações */
+.spec-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(var(--bs-primary-rgb), 0.1);
+    border-radius: 50%;
+    font-size: 1.1rem;
+}
+
+/* Demanda */
+.demand-item {
+    transition: all 0.3s ease;
+}
+
+.demand-item:hover {
+    transform: translateX(5px);
+}
+
+/* Conteúdo */
+.content-box {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.content-box:hover {
+    border-color: rgba(var(--bs-primary-rgb), 0.3) !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .card-header {
+        text-align: center;
+    }
+
+    .card-header .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .action-buttons {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-card, .spec-item, .demand-item, .content-box {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.info-card:nth-child(1) { animation-delay: 0.1s; }
+.info-card:nth-child(2) { animation-delay: 0.2s; }
+.info-card:nth-child(3) { animation-delay: 0.3s; }
+
+.toggle-btn .fa-chevron-down {
+    transition: transform 0.3s ease; /* precisa estar no estado base */
+}
+
+.toggle-btn[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+button[aria-expanded="true"] .fa-chevron-down {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+button[aria-expanded="true"] > .fa-chevron-down {
+  transform: rotate(180deg);
+}
+
+/* Ajuste de tamanhos de fonte */
+.card-title {
+    font-size: 1rem; /* título do card */
+}
+
+.card-text,
+.form-label {
+    font-size: 0.9rem; /* textos e labels */
+}
+
+.form-control,
+select,
+input,
+textarea {
+    font-size: 0.9rem; /* campos de formulário */
+}
+
+.card-body {
+    padding: 0.75rem 1rem;
+}
+
+.readonly * {
+    pointer-events: none !important;
+    background-color: #f7f7f7;
+}

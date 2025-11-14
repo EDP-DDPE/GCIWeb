@@ -6,7 +6,9 @@
 
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='bootstrap/bootstrap.min.css') }}">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- Font Awesome -->
@@ -219,6 +221,10 @@
           z-index: 2000;
         }
 
+        .loading-overlay.hidden {
+            display: none !important;
+        }
+
         .spinner {
           width: 64px;
           height: 64px;
@@ -401,7 +407,7 @@
     <main class="container-fluid">
         {% block content %}{% endblock %}
 
-        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div id="loadingOverlay" class="loading-overlay hidden">
           <div class="spinner"></div>
         </div>
     </main>
@@ -415,16 +421,35 @@
 
     <!-- JavaScript -->
     <!-- jQuery -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>-->
+    <script src="{{ url_for('main.static', filename='/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>-->
+    <script src="{{ url_for('main.static', filename='/bootstrap/bootstrap.bundle.min.js') }}"></script>
     <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!--    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>-->
+    <script src="{{ url_for('main.static', filename='/select2/select2.min.js') }}"></script>
+
+
     <!-- Sweet Alert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Panzoom.js (zoom e pan) -->
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
+    <script>
+        const overlay = document.getElementById("loadingOverlay");
+
+        function showLoading() {
+            if (!overlay) return;
+            overlay.classList.remove("hidden");
+        }
+
+        function hideLoading() {
+            if (!overlay) return;
+            overlay.classList.add("hidden");
+        }
+    </script>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

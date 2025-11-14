@@ -213,8 +213,14 @@ class AlternativaForm(FlaskForm):
         choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D'), ('E', 'E'), ('F', 'F')]
     )
 
+    etapa = SelectField(
+        'Escalonamento',
+        validators=[DataRequired('Selecione uma letra')],
+        choices=[(1, '1ª Etapa/única'), (2, '2ª Etapa'), (3, '3ª Etapa'), (4, '4ª Etapa'), (5, '5ª Etapa'), (6, '6ª Etapa')]
+    )
+
     subgrupo_tarif = SelectField(
-        'Subgrupo Tarifário:',
+        'Subgrupo Tarifário',
         validators=[Optional()],
         choices=[('A4', 'A4'), ('A3a', 'A3a'), ('A3', 'A3'), ('A2', 'A2')]
     )
@@ -239,10 +245,16 @@ class AlternativaForm(FlaskForm):
 
     def atualizar_circuitos(self, regiao: int, classe:str):
 
-        if classe == "AT":
-            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao > 50).order_by(Circuito.circuito).all()
+        if classe == "A2":
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao > 69).order_by(Circuito.circuito).all()
+        elif classe == 'A3':
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao == 69).order_by(
+                Circuito.circuito).all()
+        elif classe == 'A3a':
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao == 34.5).order_by(
+                Circuito.circuito).all()
         else:
-            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao < 50).order_by(
+            circuitos = Circuito.query.filter_by(id_edp=regiao).filter(Circuito.tensao < 30).order_by(
                 Circuito.circuito).all()
 
         self.id_circuito.choices = [(0, 'Selecione um circuito')] + \

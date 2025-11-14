@@ -3,6 +3,9 @@
 {% block titulo %}Alternativas{% endblock %}
 
 {% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ url_for('alternativa.static', filename='css/alternativa.css') }}">
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -275,6 +278,11 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" id="id_edp" value="{{ estudo.id_edp }}">
+                <div id="estudo_dados"
+                     data-id-edp="{{ estudo.id_edp }}"
+                     data-data-abertura="{{ estudo.data_abertura_cliente }}">
+                </div>
             </div>
         </div>
     </div>
@@ -296,22 +304,50 @@
                         <table class="table table-striped table-hover" id="tabelaAlternativas">
                             <thead class="table-white">
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Alternativa</th>
                                     <th>Descrição</th>
                                     <th>Circuito</th>
                                     <th>Custo Modular</th>
+                                    <th>ERD</th>
+                                    <th>Proporcionalidade</th>
+                                    <th>Carga</th>
+                                    <th>Geração</th>
+                                    <th>Fluxo Reverso</th>
                                     <th>Menor Custo</th>
-                                    <th>Escolhida</th>
+                                    <th>Alt. Escolhida</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for alternativa in alternativas %}
                                 <tr>
-                                    <td>{{ alternativa.id_alternativa }}</td>
+                                    <td>{{ alternativa.letra_alternativa }}</td>
                                     <td>{{ alternativa.descricao[:50] }}{% if alternativa.descricao|length > 50 %}...{% endif %}</td>
                                     <td>{{ alternativa.circuito.circuito if alternativa.circuito else 'N/A' }}</td>
                                     <td>R$ {{ "{:,.2f}".format(alternativa.custo_modular) }}</td>
+                                    <td>R$ {{ "{:,.2f}".format(alternativa.ERD) }}</td>
+                                    <td>{{ "{:,.2f}".format(alternativa.proporcionalidade * 100) }}%</td>
+                                    <td>
+                                        {% if alternativa.flag_carga %}
+                                            <span class="badge bg-success">Sim</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Não</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if alternativa.flag_geracao %}
+                                            <span class="badge bg-success">Sim</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Não</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if alternativa.flag_fluxo_reverso %}
+                                            <span class="badge bg-success">Sim</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Não</span>
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if alternativa.flag_menor_custo_global %}
                                             <span class="badge bg-success">Sim</span>
@@ -331,12 +367,14 @@
                                             <button type="button" class="btn btn-sm btn-info btn-alternativa-edit"
                                                     data-id="{{ alternativa.id_alternativa }}"
                                                     data-mode="visualizar"
+                                                    onclick="showLoading()"
                                                     title="Visualizar">
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-warning btn-alternativa-edit"
                                                     data-id="{{ alternativa.id_alternativa }}"
                                                     data-mode="editar"
+                                                    onclick="showLoading()"
                                                     title="Editar">
                                                 <i class="fas fa-edit"></i>
                                             </button>
@@ -353,489 +391,7 @@
     </div>
 </div>
 
-<!-- Modal para Nova/Editar Alternativa -->
-<div class="modal fade" id="alternativaModal" tabindex="-1" aria-labelledby="alternativaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="alternativaModalLabel">Nova Alternativa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <form id="formAlternativa" method="POST" enctype="multipart/form-data" novalidate>
-                <div class="modal-body">
-                    {{ form.hidden_tag() }}
-
-                    <!-- Exibe erros gerais -->
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            <strong>Erros de validação encontrados:</strong>
-                            <ul class="mb-0">
-                                {% for field, errors in form.errors.items() %}
-                                    {% for error in errors %}
-                                        <li><strong>{{ getattr(form, field).label.text }}:</strong> {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-
-                    <div class="row">
-                        <!-- Informações Básicas -->
-                        <div class="col-md-6">
-                            <h6 class="text-primary mb-3">Informações Básicas</h6>
-
-                            <div class="mb-3">
-                                {{ form.subgrupo_tarif.label(class="form-label") }}
-                                {{ form.subgrupo_tarif(class="form-control", id="subgrupo_select") }}
-                                {% if form.subgrupo_tarif.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.subgrupo_tarif.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.id_circuito.label(class="form-label") }}
-                                <span class="required">*</span>
-                                {{ form.id_circuito(class="form-select", required=True, id="circuito_select") }}
-                                {% if form.id_circuito.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.id_circuito.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.descricao.label(class="form-label") }}
-                                {{ form.descricao(class="form-control", rows="3") }}
-                                {% if form.descricao.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.descricao.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.custo_modular.label(class="form-label") }}
-                                <span class="required">*</span>
-                                {{ form.custo_modular(class="form-control", step="0.01", required=True, id="custo_modular") }}
-                                {% if form.custo_modular.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {% for error in form.custo_modular.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-
-                        </div>
-
-                        <!-- Tipo Alternativa -->
-                        <div class="col-md-6">
-                            <h6 class="text-primary mb-3">Tipo de Alternativa</h6>
-
-                            <div class="row mt-3">
-                                <div class="mb-3">
-                                    {{ form.letra_alternativa.label(class="form-label") }}
-                                    {{ form.letra_alternativa(class="form-control", id="letra_select") }}
-                                    {% if form.letra_alternativa.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {% for error in form.letra_alternativa.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_carga(class="form-check-input", id='flag_carga') }}
-                                        {{ form.flag_carga.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_geracao(class="form-check-input", id='flag_geracao') }}
-                                        {{ form.flag_geracao.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_fluxo_reverso(class="form-check-input", id='flag_fluxo_reverso') }}
-                                        {{ form.flag_fluxo_reverso.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <p></p>
-                            <!-- Demandas -->
-                            <h6 class="text-primary mb-3">Demandas</h6>
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.dem_fp_ant.label(class="form-label") }}
-                                        {{ form.dem_fp_ant(class="form-control", step="0.01", id="dem_fp_antes") }}
-                                        {% if form.dem_fp_ant.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.dem_fp_ant.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.dem_p_ant.label(class="form-label") }}
-                                        {{ form.dem_p_ant(class="form-control", step="0.01", id="dem_p_antes") }}
-                                        {% if form.dem_p_ant.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.dem_p_ant.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.dem_fp_dep.label(class="form-label") }}
-                                        {{ form.dem_fp_dep(class="form-control", step="0.01", id="dem_fp_depois") }}
-                                        {% if form.dem_fp_dep.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.dem_fp_dep.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.dem_p_dep.label(class="form-label") }}
-                                        {{ form.dem_p_dep(class="form-control", step="0.01", id="dem_p_depois") }}
-                                        {% if form.dem_p_dep.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.dem_p_dep.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.demanda_disponivel_ponto.label(class="form-label") }}
-                                {{ form.demanda_disponivel_ponto(class="form-control", step="0.01", id="dem_disponivel") }}
-                                {% if form.demanda_disponivel_ponto.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.demanda_disponivel_ponto.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <!-- Localização -->
-                        <div class="col-md-6">
-                            <h6 class="text-primary mb-3">Localização</h6>
-
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.latitude_ponto_conexao.label(class="form-label") }}
-                                        {{ form.latitude_ponto_conexao(class="form-control", step="0.00000001") }}
-                                        {% if form.latitude_ponto_conexao.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.latitude_ponto_conexao.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="mb-3">
-                                        {{ form.longitude_ponto_conexao.label(class="form-label") }}
-                                        {{ form.longitude_ponto_conexao(class="form-control", step="0.00000001") }}
-                                        {% if form.longitude_ponto_conexao.errors %}
-                                            <div class="text-danger small mt-1">
-                                                {% for error in form.longitude_ponto_conexao.errors %}
-                                                    <div>{{ error }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="mb-3">
-                                    <label for="imagem_alternativa" class="form-label">Imagem da Alternativa</label>
-                                    <div id="drop_zone" style="border: 2px dashed #007bff; padding: 20px; text-align: center; cursor: pointer;">
-                                        Arraste a imagem aqui ou clique para selecionar
-                                    </div>
-                                    {{ form.imagem_blob(class="form-control", id="imagem_alternativa", style="display:none") }}
-                                    <img id="preview_imagem" src="" alt="Pré-visualização" style="max-width: 100%; margin-top: 10px; display: none;">
-                                    {% if form.imagem_blob.errors %}
-                                        <div class="text-danger small mt-1">
-                                            {% for error in form.imagem_blob.errors %}
-                                                <div>{{ error }}</div>
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                {{ form.id_estudo(class="form-control", id="id_estudo", style="display:none") }}
-                            </div>
-                        </div>
-
-                        <!-- Outros Campos -->
-                        <div class="col-md-6">
-                            <h6 class="text-primary mb-3">Outros Dados</h6>
-
-                            <div class="mb-3">
-                                {{ form.ERD.label(class="form-label") }}
-                                {{ form.ERD(class="form-control", step="0.001", id="ERD") }}
-                                {% if form.ERD.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.ERD.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="row">
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_menor_custo_global(class="form-check-input") }}
-                                        {{ form.flag_menor_custo_global.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="form-check">
-                                        {{ form.flag_alternativa_escolhida(class="form-check-input") }}
-                                        {{ form.flag_alternativa_escolhida.label(class="form-check-label") }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                {{ form.observacao.label(class="form-label") }}
-                                {{ form.observacao(class="form-control", rows="3") }}
-                                {% if form.observacao.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {% for error in form.observacao.errors %}
-                                            <div>{{ error }}</div>
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="btnExcluirAlternativa" style="display: none;">Excluir</button>
-                    <button type="submit" class="btn btn-primary" id="salvar_alternativa">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<style>
-
-.btn-alternativa-edit.active {
-    transform: scale(0.97);
-    opacity: 0.85;
-    transition: all 0.1s ease-in-out;
-}
-
-/* Gradientes personalizados
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}*/
-
-.bg-gradient-light {
-    background: linear-gradient(135deg, rgba(108, 117, 125, 0.08), rgba(108, 117, 125, 0.02));
-}
-
-.bg-gradient-success {
-    background: linear-gradient(135deg, rgba(40, 167, 69, 0.15), rgba(40, 167, 69, 0.05));
-}
-
-.bg-gradient-warning {
-    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
-}
-
-.bg-gradient-subtle {
-    background: linear-gradient(135deg, rgba(248, 249, 250, 0.8), rgba(233, 236, 239, 0.3));
-}
-
-/* Cards de informação */
-.info-card {
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.info-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-/* Seções */
-.section-title {
-    position: relative;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.section-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--bs-primary), transparent);
-    border-radius: 3px;
-}
-
-/* Especificações */
-.spec-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(var(--bs-primary-rgb), 0.1);
-    border-radius: 50%;
-    font-size: 1.1rem;
-}
-
-/* Demanda */
-.demand-item {
-    transition: all 0.3s ease;
-}
-
-.demand-item:hover {
-    transform: translateX(5px);
-}
-
-/* Conteúdo */
-.content-box {
-    transition: all 0.3s ease;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-}
-
-.content-box:hover {
-    border-color: rgba(var(--bs-primary-rgb), 0.3) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    .card-header {
-        text-align: center;
-    }
-
-    .card-header .d-flex {
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .action-buttons {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-    }
-}
-
-/* Animações */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.info-card, .spec-item, .demand-item, .content-box {
-    animation: fadeInUp 0.6s ease forwards;
-}
-
-.info-card:nth-child(1) { animation-delay: 0.1s; }
-.info-card:nth-child(2) { animation-delay: 0.2s; }
-.info-card:nth-child(3) { animation-delay: 0.3s; }
-
-.toggle-btn .fa-chevron-down {
-    transition: transform 0.3s ease; /* precisa estar no estado base */
-}
-
-.toggle-btn[aria-expanded="true"] .fa-chevron-down {
-    transform: rotate(180deg);
-}
-
-button[aria-expanded="true"] .fa-chevron-down {
-    transform: rotate(180deg);
-    transition: transform 0.3s ease;
-}
-
-button[aria-expanded="true"] > .fa-chevron-down {
-  transform: rotate(180deg);
-}
-
-/* Ajuste de tamanhos de fonte */
-.card-title {
-    font-size: 1rem; /* título do card */
-}
-
-.card-text,
-.form-label {
-    font-size: 0.9rem; /* textos e labels */
-}
-
-.form-control,
-select,
-input,
-textarea {
-    font-size: 0.9rem; /* campos de formulário */
-}
-
-.card-body {
-    padding: 0.75rem 1rem;
-}
-
-</style>
+{% include "alternativa/_form.html" %}
 
 {% endblock %}
 
@@ -851,364 +407,32 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 {% endif %}
 
-<script>
+<script type="module">
+    import { abrirModalNovo, abrirModalEditar, abrirModalVisualizar } from "{{ url_for('alternativa.static', filename='js/alternativa-modal.js') }}";
+    import { inicializarEventosFormulario } from "{{ url_for('alternativa.static', filename='js/alternativa-form.js') }}";
+    import { inicializarUploadImagem } from "{{ url_for('alternativa.static', filename='js/alternativa-upload.js') }}";
+    import { inicializarExclusao } from "{{ url_for('alternativa.static', filename='js/alternativa-delete.js') }}";
 
-(function waitForJQuery() {
-    if (typeof window.jQuery === 'undefined') {
-        return setTimeout(waitForJQuery, 50);
-    }
-    $(document).ready(function() {
+    // Inicializações
+    inicializarEventosFormulario();
+    inicializarUploadImagem();
+    inicializarExclusao();
 
-        // Inicializa Select2 apenas uma vez, com configurações corretas
-        function initSelect2(selector) {
-            const $select = $(selector);
+    // Botão Nova Alternativa
+    document.querySelector(".btn-alternativa").addEventListener("click", abrirModalNovo);
 
-            // Marca como inicialização manual
-            $select.addClass('select2-manual-init');
+    // Botões editar/visualizar
+    document.querySelectorAll(".btn-alternativa-edit").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.dataset.id;
+            const modo = btn.dataset.mode;
 
-            // Destroi instância anterior se existir
-            if ($select.data('select2')) {
-                $select.select2('destroy');
-            }
-
-            // Inicializa com configurações adequadas
-            $select.select2({
-                dropdownParent: $('#alternativaModal'),
-                width: '100%',
-                theme: 'bootstrap-5',
-                placeholder: 'Selecione uma opção',
-                allowClear: true,
-                dropdownAutoWidth: false,
-                dropdownCssClass: 'select2-dropdown-below' // força dropdown abaixo
-            });
-        }
-
-        // Inicializa os selects
-        initSelect2('#circuito_select');
-        initSelect2('#letra_select');
-
-        // Comportamento ao abrir o dropdown - ajusta scroll do modal
-        $('#letra_select, #circuito_select').on('select2:opening', function (e) {
-          const $el = $(this);
-          const $modalBody = $('#alternativaModal .modal-body');
-
-          // Pequeno delay para garantir que o DOM está pronto
-          setTimeout(function() {
-              const elTop = $el.offset().top - $modalBody.offset().top + $modalBody.scrollTop();
-              const targetScroll = Math.max(elTop - 120, 0);
-
-              // Scroll suave do modal body
-              $modalBody.stop(true).animate({
-                  scrollTop: targetScroll
-              }, 150);
-          }, 10);
+            if (modo === "editar") abrirModalEditar(id);
+            else abrirModalVisualizar(id);
         });
-
-        // Libera scroll quando fechar o dropdown
-        $('#letra_select, #circuito_select').on('select2:close', function () {
-            $('body').css('overflow', '');
-            $('#alternativaModal').css('overflow-y', 'auto');
-        });
-
-
-
-        $(document).on('mousedown', '.select2-container--open .select2-results__option', function (e) {
-            e.stopPropagation();
-        });
-
-        $(document).on('mousedown', '.btn-alternativa-edit', function() {
-            $(this).addClass('active'); // efeito visual Bootstrap
-        });
-        $(document).on('mouseup mouseleave', '.btn-alternativa-edit', function() {
-            $(this).removeClass('active');
-        });
-
-        $('#subgrupo_select').change(function() {
-            atualiza_circuitos()
-            atualiza_ERD()
-        });
-
-        $('#flag_carga').change(function() {
-            atualiza_ERD()
-        });
-
-        $('#flag_geracao').change(function() {
-            atualiza_ERD()
-        });
-
-        var dropZone = $('#drop_zone');
-        var fileInput = $('#imagem_alternativa');
-        var preview = $('#preview_imagem');
-        var uploadedFile = null;
-
-        // Clique na área abre o file input
-        dropZone.on('click', function() {
-            fileInput.click();
-        });
-
-        // Seleção via file input
-        fileInput.on('change', function(e) {
-            handleFiles(this.files);
-        });
-
-        // Drag & Drop
-        dropZone.on('dragover', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.css('background-color', '#e9ecef');
-        });
-
-        dropZone.on('dragleave', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.css('background-color', '');
-        });
-
-        dropZone.on('drop', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.css('background-color', '');
-            var files = e.originalEvent.dataTransfer.files;
-            handleFiles(files);
-        });
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                var file = files[0];
-                if (!file.type.startsWith('image/')) {
-                    alert('Apenas imagens são permitidas!');
-                    return;
-                }
-
-                // define o arquivo no input file do WTForms
-                var fileInput = document.getElementById('imagem_alternativa');
-                var dataTransfer = new DataTransfer(); // necessário para setar arquivos
-                dataTransfer.items.add(file);
-                fileInput.files = dataTransfer.files;
-
-                // pré-visualização
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#preview_imagem').attr('src', e.target.result).show();
-                }
-                reader.readAsDataURL(file);
-            }
-        }
-
-        $(document).on('click', '.btn-alternativa-edit', function() {
-
-            var modo = $(this).data('mode');
-            var id = $(this).data('id');
-            var id_estudo = $('#id_estudo').val();
-
-            // sempre esconde antes de abrir
-            $('#btnExcluirAlternativa').hide();
-
-            // Mostra loading
-            $('#loadingOverlay').fadeIn(150);
-
-             if (modo === 'editar') {
-                $('#btnExcluirAlternativa').show().data('id', id);
-             }
-
-            // Limpa o formulário antes de usar
-            $('#formAlternativa')[0].reset();
-            $('#preview_imagem').hide().attr('src', '');
-            $('#imagem_alternativa').val('');
-
-            // Define o título e comportamento
-            if (modo === 'nova') {
-
-            }
-            else {
-                // Busca os dados no servidor
-                $.get('/alternativas/' + id, function(data) {
-                    // Preenche os campos (use os IDs ou names conforme o seu form)
-                    const circuitoSelect = $('#circuito_select');
-                    const circuitoValue = data.id_circuito ? data.id_circuito.toString() : '';
-
-                    console.log("Circuito retornado:", circuitoValue);
-                    console.log("Opções disponíveis:", circuitoSelect.html());
-
-                    if (circuitoValue) {
-                        circuitoSelect.val(circuitoValue).trigger('change.select2');
-                        if (circuitoSelect.val() !== circuitoValue) {
-                            // força seleção mesmo se WTForms renderizou como int
-                            circuitoSelect.find('option').each(function() {
-                                if (parseInt($(this).val()) === parseInt(circuitoValue)) {
-                                    $(this).prop('selected', true);
-                                }
-                            });
-                        }
-                    }
-
-                    const letraSelect = $('#letra_select');
-                    const letraValue = (data.letra_alternativa || '').toString().trim();
-                    if (letraValue && letraSelect.find(`option[value="${letraValue}"]`).length) {
-                        letraSelect.val(letraValue);
-                    } else {
-                        letraSelect.prop('selectedIndex', 0);
-                    }
-                    $('#ERD').val(data.ERD ? data.ERD : 0);
-                    $('#dem_p_antes').val(data.dem_p_ant ? data.dem_p_ant : 0.00);
-                    $('#dem_p_depois').val(data.dem_p_dep ? data.dem_p_dep : 0.00);
-                    $('#dem_fp_antes').val(data.dem_fp_ant ? data.dem_fp_ant : 0.00);
-                    $('#dem_fp_depois').val(data.dem_fp_dep ? data.dem_fp_dep : 0.00);
-                    $('#dem_disponivel').val(data.demanda_disponivel_ponto ? data.demanda_disponivel_ponto : 0.00);
-                    $('#descricao').val(data.descricao);
-                    $('#observacao').val(data.observacao);
-                    $('#flag_carga').prop('checked', data.flag_carga);
-                    $('#flag_geracao').prop('checked', data.flag_geracao);
-                    $('#flag_fluxo_reverso').prop('checked', data.flag_fluxo_reverso);
-                    $('#flag_menor_custo_global').prop('checked', data.flag_menor_custo_global);
-                    $('#flag_alternativa_escolhida').prop('checked', data.flag_alternativa_escolhida);
-                    $('#custo_modular').val(data.custo_modular ? data.custo_modular : 0.00);
-                    console.log(data.id_estudo);
-                    $('#id_estudo').val(data.id_estudo);
-
-                    // Imagem
-                    if (data.imagem_base64) {
-                        $('#preview_imagem').attr('src', 'data:image/jpeg;base64,' + data.imagem_base64).show();
-                    } else {
-                        $('#preview_imagem').hide();
-                    }
-
-                    // Modo editar ou visualizar
-                    if (modo === 'editar') {
-                        $('#alternativaModalLabel').text('Editar Alternativa');
-                        $('#formAlternativa').attr('action', '/alternativas/' + id);
-                        $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', false);
-                        $('.btn-primary', '#alternativaModal').show();
-                    } else {
-                        $('#alternativaModalLabel').text('Visualizar Alternativa');
-                        $('#salvar_alternativa', '#alternativaModal').hide();
-                        $('#formAlternativa input, #formAlternativa textarea, #formAlternativa select').prop('disabled', true);
-                    }
-
-                    $('#loadingOverlay').fadeOut(200, function() {
-                            $('#alternativaModal').modal('show');
-                    });
-                })
-                .fail(function(xhr) {
-                        $('#loadingOverlay').fadeOut(200);
-                        alert('Erro ao carregar dados: ' + xhr.responseText);
-                    });
-            }
-        });
-
-        // === Evento de exclusão ===
-        $('#btnExcluirAlternativa').on('click', function() {
-            var id = $(this).data('id');
-
-            if (!id) {
-                alert('Nenhuma alternativa selecionada.');
-                return;
-            }
-
-            // Confirmação
-            if (!confirm('Tem certeza que deseja excluir esta alternativa? Essa ação não poderá ser desfeita.')) {
-                return;
-            }
-
-            // Requisição AJAX
-            $.ajax({
-                url: '/alternativas/excluir/' + id,
-                type: 'DELETE',
-                success: function(resp) {
-                    alert('Alternativa excluída com sucesso!');
-                    $('#alternativaModal').modal('hide');
-                    location.reload();
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    alert('Erro ao excluir alternativa: ' + xhr.responseText);
-                }
-            });
-        });
-
-        const cleaveERD = new Cleave('#ERD', {
-          numeral: true,
-          numeralThousandsGroupStyle: 'thousand',
-          prefix: 'R$ ',
-          numeralDecimalMark: ',',
-          delimiter: '.'
-        });
-
-        function atualiza_circuitos() {
-            const subgrupo = $('#subgrupo_select').val();
-            const id_edp = "{{ estudo.id_edp }}"; // ou pegue via $('#id_edp').val() se o JS for externo
-            const circuitoSelect = $('#circuito_select');
-
-            if (!subgrupo) {
-                console.warn("Nenhum subgrupo selecionado.");
-                return;
-            }
-
-            // Exibe o loading no select
-            circuitoSelect
-                .empty()
-                .append('<option disabled selected>Carregando circuitos...</option>')
-                .prop('disabled', true);
-
-            // Cria ou mostra o spinner ao lado (opcional)
-            const spinner = $('<div class="spinner-border text-primary ms-2" role="status" style="width: 1.2rem; height: 1.2rem;"><span class="visually-hidden">Carregando...</span></div>');
-            circuitoSelect.parent().append(spinner);
-
-            $.get(`/api/circuitos/${id_edp}/${subgrupo}`)
-                .done(function(response) {
-                    circuitoSelect.empty().append('<option value="">Selecione um circuito...</option>');
-
-                    if (!response.circuitos || response.circuitos.length === 0) {
-                        circuitoSelect.append('<option disabled>Nenhum circuito encontrado</option>');
-                    } else {
-                        response.circuitos.forEach(c => {
-                            circuitoSelect.append(`<option value="${c.id}">${c.nome}</option>`);
-                        });
-                    }
-                })
-                .fail(function(xhr, status, error) {
-                    console.error("Erro ao carregar circuitos:", error);
-                    circuitoSelect.empty().append('<option disabled>Erro ao carregar circuitos</option>');
-                })
-                .always(function() {
-                    // Remove o spinner e reabilita o select
-                    spinner.remove();
-                    circuitoSelect.prop('disabled', false);
-                });
-        }
-
-        function atualiza_ERD() {
-
-            var subgrupo = $('#subgrupo_select').val();
-            var dem_p_antes = parseFloat($('#dem_p_antes').val().replace(',', '.'));
-            var dem_fp_antes = parseFloat($('#dem_fp_antes').val().replace(',', '.'));
-            var dem_p_depois = parseFloat($('#dem_p_depois').val().replace(',', '.'));
-            var dem_fp_depois = parseFloat($('#dem_fp_depois').val().replace(',', '.'));
-            var carga_flegada = $('#flag_carga').is(':checked');
-            var geracao_flegada = $('#flag_geracao').is(':checked');
-            var tipo;
-
-            if (!carga_flegada && !geracao_flegada){
-                cleaveERD.setRawValue(0);
-                return;
-            }
-
-            tipo = carga_flegada ? 1 : 0;
-
-            var dif_p = dem_p_depois - dem_p_antes;
-            var dif_fp = dem_fp_depois - dem_fp_antes;
-            var maior_demanda = Math.max(dif_p, dif_fp);
-
-            try {
-                $.get('/api/fator_k/{{estudo.id_edp}}/' + subgrupo + '/{{estudo.data_abertura_cliente}}/' + tipo, function(data) {
-                    var valor = data.k * maior_demanda;
-                    cleaveERD.setRawValue(valor);  // número puro, Cleave vai formatar
-                });
-            } catch (err) {
-                console.error("Erro ao calcular ERD:", err);
-            }
-        }
-    }); // fecha document.ready
-})(); // fecha função de espera
+    });
 </script>
+
+
+
 {% endblock %}
