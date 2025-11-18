@@ -215,7 +215,9 @@ def cadastra_cnpj(cnpj):
         except Exception as e:
             print(str(e))
             db.session.rollback()
-            return jsonify({'id_empresa': -1})
+            flash("Houve um erro ao cadastrar a empresa, vamos cadastrar uma empresa fictícia. Após a correção do "
+                  "erro por favor edite o estudo e coloque a empresa desejada.")
+            return jsonify({'id_empresa': 1})
     else:
         return jsonify({
             'id_empresa': empresa.id_empresa,
@@ -299,6 +301,7 @@ def get_circuitos_by_edp(id_edp):
     circuitos = Circuito.query.filter_by(id_edp=id_edp).join(Subestacao).all()
     return {'circuitos': [{'id': c.id_circuito, 'nome': f"{c.circuito} - {c.subestacao.nome}"}
                           for c in circuitos]}
+
 
 @api_bp.route("/api/circuitos/<int:id_edp>/<subgrupo>")
 def get_circuitos_by_edp_and_subgrupo(id_edp, subgrupo):
