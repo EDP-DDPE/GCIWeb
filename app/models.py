@@ -281,7 +281,7 @@ class Estudo(db.Model):
     id_estudo = db.Column(db.BigInteger, primary_key=True)
     num_doc = db.Column(db.String(255), nullable=False, index=True)
     protocolo = db.Column(db.BigInteger)
-    nome_projeto = db.Column(db.Text, nullable=False)
+    nome_projeto = db.Column(db.String(255), nullable=False)
     descricao = db.Column(db.Text)
     instalacao = db.Column(db.BigInteger)
     n_alternativas = db.Column(db.Integer, nullable=False, default=0)
