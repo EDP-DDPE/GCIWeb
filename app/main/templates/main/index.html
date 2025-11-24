@@ -3,7 +3,11 @@
 {% block titulo %}Página Inicial{% endblock %}
 {% block content %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+
+<img src="{{ url_for('main.static', filename='images/atlas_icon_v3_white.png') }}"
+     class="watermark"
+     alt="Atlas Logo">
 
 <div class="fundo-index">
     <h1 class="text-center mb-4">{{msg}}</h1>

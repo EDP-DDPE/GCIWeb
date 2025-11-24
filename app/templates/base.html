@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="{{ url_for('cadastro.static', filename='leaflet/leaflet.css') }}">
     <script src="{{ url_for('cadastro.static', filename='leaflet/leaflet.js') }}"></script>
 
+    <script src="{{ url_for('main.static', filename='chart/chart.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='chart/chartjs-plugin-zoom@2.js') }}"></script>
+
 
     <style>
 
@@ -37,9 +40,21 @@
                 border-radius: 8px;
                 margin-bottom: 15px;
             }
+
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 440px;        /* ajuste o tamanho */
+            height: auto;
+            opacity: 0.07;       /* transparência suave */
+            transform: translate(-50%, -50%);
+            pointer-events: none; /* não interfere com cliques */
+            z-index: 1;
+        }
         .navbar-brand {
             font-weight: bold;
-            color: #0d6efd !important;
+            color: #072d66 !important;
         }
 
         .navbar .dropdown-menu {
@@ -244,6 +259,8 @@
         }
     </style>
 
+    <link rel="icon" type="image/x-icon" href="{{ url_for('main.static', filename='images/favicon_v3.ico') }}">
+
     {% block extra_css %}{% endblock %}
     <title>{% block titulo %}{% endblock %} - Atlas</title>
 </head>
@@ -251,8 +268,11 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
             <div class="container-fluid">
                 <!-- Logo / Home -->
-                <a class="navbar-brand fw-bold text-primary" href="{{ url_for('main.home') }}">
-                    <i class="fas fa-bolt me-2 text-warning"></i>Atlas
+                <a class="navbar-brand fw-bold" href="{{ url_for('main.home') }}">
+                        <img src="{{ url_for('static', filename='images/atlas_icon_v3_planet.png') }}"
+                             alt="Atlas"
+                             class="me-2"
+                             style="height: 32px; width: auto;">Atlas
                 </a>
 
                 <!-- Toggle para mobile -->
@@ -331,7 +351,22 @@
                             </ul>
                         </li>
 
+                        <div class="navbar-nav">
+                            <a class="nav-link" href="{{ url_for('bot.atlas') }}">
+                                <i class="fa-solid fa-atom"></i> Atlas GPT
+                            </a>
+                        </div>
+
+                        <div class="navbar-nav">
+                            <a class="nav-link" href="http://172.20.70.54:7777/">
+                                <i class="fa-solid fa-chart-line"></i> James
+                            </a>
+                        </div>
+
                     </ul>
+
+
+
 
                     <!-- Usuário -->
                     <ul class="navbar-nav">
@@ -354,6 +389,8 @@
                         </li>
                     </ul>
                 </div>
+
+
             </div>
         </nav>
 
@@ -417,7 +454,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-3 mt-5">
+    <footer class="bg-light text-center text-muted py-3 mt-3">
         <div class="container">
             <small>&copy; 2025 Atlas - Sistema de Gerenciamento de Documentos da Expansão</small>
         </div>

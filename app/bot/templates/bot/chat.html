@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block titulo %}Atlas GPT{% endblock %}
+
+{% block content %}
+    <link rel="stylesheet" href="{{ url_for('bot.static', filename='css/chat.css') }}">
+
+    <div class="main-container">
+        <!-- Sidebar com histórico -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Chats</h2>
+                <button class="new-chat-btn" onclick="startNewChat()">Novo Chat</button>
+            </div>
+            <div class="chat-history" id="chat-history">
+                <!-- Histórico será carregado aqui -->
+            </div>
+        </div>
+
+        <!-- Área principal do chat -->
+        <div class="chat-container">
+            <div id="chat-box" class="chat-box">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💭</div>
+                    <div class="empty-state-text">Comece uma nova conversa</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typing-indicator">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="auto-save-indicator" id="auto-save">
+                    <div class="save-dot"></div>
+                    <span>Salvo automaticamente</span>
+                </div>
+            </div>
+
+
+
+            <div class="chat-input-area">
+                <div class="input-wrapper">
+                    <textarea id="chat-input" class="chat-input" placeholder="Digite sua mensagem..."></textarea>
+
+                    <button id="send-btn" class="send-btn" title="Enviar">
+                        <svg viewBox="0 0 24 24" width="22" height="22">
+                            <path fill="currentColor"
+                                  d="M12 2l4 4h-3v7h-2V6H8l4-4zm-7 9v11h14V11h2v13H3V11h2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('bot.static', filename='js/chat.js') }}"></script>
+
+{% endblock %}

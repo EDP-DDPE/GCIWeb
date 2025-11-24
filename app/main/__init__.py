@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, render_template, session, redirect, url_for, request, g
 import os
 from werkzeug.middleware.proxy_fix import ProxyFix
 import msal
@@ -7,7 +7,9 @@ from dotenv import load_dotenv
 from urllib.parse import quote_plus
 from flask_session import Session
 from app.auth.routes import create_auth_blueprint
+from app.auth import get_usuario_logado
 from app.database import init_database, db_manager
+from app.models import Usuario
 
 
 def create_app():
@@ -104,6 +106,7 @@ def create_app():
     from app.regionais.routes import regionais_bp
     from app.resp_regioes.routes import resp_regioes_bp
     from app.empresas.routes import empresas_bp
+    from app.bot.routes import bot_bp
 
     app.register_blueprint(create_auth_blueprint(redirect_path="/callback"), url_prefix="/auth")
     # REDIRECT_URI deve ser http://localhost:5000/auth/callback
@@ -125,6 +128,7 @@ def create_app():
     app.register_blueprint(regionais_bp)
     app.register_blueprint(resp_regioes_bp)
     app.register_blueprint(empresas_bp)
+    app.register_blueprint(bot_bp)
 
 
     # with app.app_context():
@@ -136,5 +140,16 @@ def create_app():
         from flask import request
         if request.headers.get('X-Forwarded-Proto') == 'https':
             request.environ['wsgi.url_scheme'] = 'https'
+
+    @app.before_request
+    def carregar_usuario():
+        g.user = get_usuario_logado()
+        if g.user:
+            g.user.first_name = str(g.user.nome).split(sep=' ')[0]
+            g.user.chat_dir = f'app/bot/chats/{g.user.matricula}'
+
+    @app.context_processor
+    def inject_user():
+        return dict(user=g.user)
 
     return app
