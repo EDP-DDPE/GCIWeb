@@ -10,6 +10,15 @@ from app.auth.routes import create_auth_blueprint
 from app.auth import get_usuario_logado
 from app.database import init_database, db_manager
 from app.models import Usuario
+from json import JSONEncoder
+from decimal import Decimal
+
+
+class CustomJSONEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
 
 
 def create_app():
@@ -18,6 +27,7 @@ def create_app():
     #app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder="static", static_url_path='/static')
+    app.json_encoder = CustomJSONEncoder
     #app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder=os.path.join(app_dir, 'static'), static_url_path='/static')
 
     app.wsgi_app = ProxyFix(

@@ -4,9 +4,10 @@ from datetime import datetime
 import json
 import os
 import uuid
-
+import pandas as pd
 from app.bot.atlas_agent import AtlasAgent
 from app.bot.sql_schema import get_schema_from_sqlserver
+from decimal import Decimal
 
 bot_bp = Blueprint('bot', __name__,
                    template_folder='templates',
@@ -14,6 +15,19 @@ bot_bp = Blueprint('bot', __name__,
 
 # Armazenamento temporário de conversas ativas (em produção, use Redis ou DB)
 active_chats = {}
+
+
+def decimal_to_float(data):
+    if isinstance(data, list):
+        return [decimal_to_float(x) for x in data]
+
+    if isinstance(data, dict):
+        return {k: decimal_to_float(v) for k, v in data.items()}
+
+    if isinstance(data, Decimal):
+        return float(data)
+
+    return data
 
 def ensure_chat_structure(chat_data):
     """
@@ -531,14 +545,17 @@ def llm_query():
             # ====================================================
             if intent == "sql_plot":
 
-                x, y = df.columns[:2]
+                print(df)
+
+                x, y = detectar_colunas(df)
+
                 # fig_id = AGENT.create_plot(df, x, y, chat_id)
                 #
                 # rel_path = f"{g.user.matricula}/{chat_id}/charts/{fig_id}"
                 # public_url = f"/api/chat_file/{rel_path}"
 
                 labels = df[x].astype(str).tolist()
-                values = df[y].tolist()
+                values = decimal_to_float(df[y].tolist())
 
                 chart_id = f"chart_{uuid.uuid4().hex[:8]}"
 
@@ -594,7 +611,7 @@ def llm_query():
     except Exception as e:
         print("ERRO NO LLM_QUERY:", str(e))  # Log no servidor
         return jsonify({
-            "text": "⚠️ Ocorreu um erro interno ao processar sua solicitação.",
+            "text": f"⚠️ Ocorreu um erro interno ao processar sua solicitação. {str(e)}",
             "role": "bot",
             "error": str(e)
         }), 500
@@ -670,3 +687,49 @@ def generate_prompt_especialist(type, hist, schema):
         --------------------------------------
     '''
     return prompt
+
+def detectar_colunas(df):
+    """
+    Retorna: (coluna_categorica, coluna_numerica)
+    Detecta automaticamente pelo tipo e pelo número de valores únicos.
+    """
+
+    numericas = []
+    categoricas = []
+
+    for col in df.columns:
+        if pd.api.types.is_numeric_dtype(df[col]):
+            numericas.append(col)
+        else:
+            categoricas.append(col)
+
+    # Se identificou uma numérica e uma categórica → retorna direto
+    if len(numericas) == 1 and len(categoricas) == 1:
+        return categoricas[0], numericas[0]
+
+    # Backup: se o SQL retornar tudo como texto (às vezes acontece!)
+    # tenta converter na marra
+    if len(numericas) == 0:
+        for col in df.columns:
+            try:
+                df[col].astype(float)
+                numericas.append(col)
+            except:
+                categoricas.append(col)
+
+    # Escolhe a numerica pelo maior range
+    if len(numericas) > 1:
+        ranges = {col: df[col].astype(float).max() - df[col].astype(float).min()
+                  for col in numericas}
+        coluna_numerica = max(ranges, key=ranges.get)
+    else:
+        coluna_numerica = numericas[0]
+
+    # A categórica vira a coluna mais distinta por valor único
+    if len(categoricas) > 1:
+        uniques = {col: df[col].nunique() for col in categoricas}
+        coluna_categoria = max(uniques, key=uniques.get)
+    else:
+        coluna_categoria = categoricas[0]
+
+    return coluna_categoria, coluna_numerica
