@@ -3,6 +3,7 @@ $(document).ready(function () {
     const $tipoViab = $('#tipo_viab');
     const $tipoAnalise = $('#tipo_analise');
     const $tipoPedido = $('#tipo_pedido');
+    const $tipoGeracao = $('#tipo_geracao');
 
     // 🔹 Função auxiliar para mostrar o "loading" dentro do select
     function showLoading($select, text = "Carregando...") {
@@ -15,6 +16,14 @@ $(document).ready(function () {
     const selectedViab = $tipoViab.data('selected');
     const selectedAnalise = $tipoAnalise.data('selected');
     const selectedPedido = $tipoPedido.data('selected');
+    const selectedGeracao = $tipoGeracao.data('selected');
+
+    if (selectedGeracao) {
+        mostrarTipoGeracao();
+    } else {
+        $tipoGeracao.val("");
+        esconderTipoGeracao();
+    }
 
     // === 1. Atualização do tipo_analise ===
     $tipoViab.on('change', function () {
@@ -23,6 +32,8 @@ $(document).ready(function () {
                 // Resetar os selects dependentes
         $tipoAnalise.prop('disabled', true).empty().append('<option>Selecione um tipo...</option>');
         $tipoPedido.prop('disabled', true).empty().append('<option>Selecione um tipo...</option>');
+        $tipoGeracao.val("");
+        esconderTipoGeracao();
 
 
         if (viabilidade) {
@@ -54,7 +65,12 @@ $(document).ready(function () {
         const analise = $(this).val();
         const viabilidade = $tipoViab.val();
 
+
         $tipoPedido.prop('disabled', true).empty().append('<option>Selecione um tipo..</option>');
+        $tipoGeracao.val("");
+        esconderTipoGeracao();
+
+
 
         if (analise) {
             showLoading($tipoPedido, "Carregando tipos...");
@@ -69,6 +85,12 @@ $(document).ready(function () {
             }).always(function() {
                 $tipoPedido.prop('disabled', false);
             });
+
+            if (analise != 'Carga') {
+                mostrarTipoGeracao();
+            } else
+                {esconderTipoGeracao();}
+
         } else {
             $tipoPedido.empty().append('<option value="">Selecione um tipo...</option>');
         }
@@ -98,4 +120,20 @@ $(document).ready(function () {
         }, 1000);
     };
     // Fim do Bloco para repopular a aba Classificação automaticamente
+
+    function esconderTipoGeracao() {
+        $("#divTipoGeracao").hide();
+
+        $(".campo-classificacao")
+            .removeClass("col-md-3")
+            .addClass("col-md-4");
+    }
+
+    function mostrarTipoGeracao() {
+        $("#divTipoGeracao").show();
+
+        $(".campo-classificacao")
+            .removeClass("col-md-4")
+            .addClass("col-md-3");
+    }
 });

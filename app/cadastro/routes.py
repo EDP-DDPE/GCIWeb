@@ -142,6 +142,7 @@ def cadastro_estudo():
                 data_vencimento_cliente=form.data_vencimento_cliente.data,
                 data_prevista_conexao=form.data_prevista_conexao.data,
                 data_vencimento_ddpe=form.data_vencimento_ddpe.data,
+                tipo_geracao=form.tipo_geracao.data
             )
 
             db.session.add(novo_estudo)
@@ -266,6 +267,7 @@ def editar_estudo(id_estudo):
             estudo.data_vencimento_ddpe = form.data_vencimento_ddpe.data
             estudo.id_resp_alteracao = usuario.id_usuario
             estudo.data_alteracao = datetime.today()
+            estudo.tipo_geracao = form.tipo_geracao.data
 
             anexos_excluir = request.form.getlist('excluir_anexo')
 
@@ -352,6 +354,7 @@ def editar_estudo(id_estudo):
     form.tipo_viab.data = estudo.tipo_solicitacao.viabilidade
     form.tipo_pedido.data = estudo.tipo_solicitacao.pedido
     form.tipo_analise.data = estudo.tipo_solicitacao.analise
+    form.tipo_geracao.data = estudo.tipo_geracao
 
     # Aba Datas
     form.data_abertura_cliente.data = estudo.data_abertura_cliente
