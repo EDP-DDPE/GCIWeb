@@ -1,0 +1,202 @@
+<div class="row g-3">
+
+    <!-- INFORMAÇÕES BÁSICAS -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-info-circle me-2"></i>Informações Básicas
+            </div>
+            <div class="card-body">
+                <p><strong>Protocolo:</strong> {{ e.protocolo or 'N/A' }}</p>
+                <p><strong>Nº Documento:</strong> {{ e.num_doc or 'N/A' }}</p>
+                <p><strong>Projeto:</strong> {{ e.nome_projeto or 'N/A' }}</p>
+                <p><strong>Descrição:</strong> {{ e.descricao or 'N/A' }}</p>
+
+                <p><strong>Cliente:</strong> {{ e.nome_empresa or 'N/A' }}</p>
+                <p><strong>Município:</strong> {{ e.municipio or 'N/A' }}</p>
+                <p><strong>Regional:</strong> {{ e.regional or 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETALHES TÉCNICOS -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
+            </div>
+            <div class="card-body">
+                <p><strong>Viabilidade:</strong> {{ e.viabilidade or 'N/A' }}</p>
+                <p><strong>Análise:</strong> {{ e.analise or 'N/A' }}</p>
+                <p><strong>Pedido:</strong> {{ e.pedido or 'N/A' }}</p>
+                <p><strong>Responsável:</strong> {{ e.nome_responsavel or 'N/A' }}</p>
+                <p><strong>Data Registro:</strong> {{ e.data_registro.strftime('%d/%m/%Y') if e.data_registro else 'N/A' }}</p>
+                <p><strong>Latitude:</strong> {{ e.latitude_cliente or 'N/A' }}</p>
+                <p><strong>Longitude:</strong> {{ e.longitude_cliente or 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DEMANDAS -->
+<div class="row g-3 mt-3">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-chart-bar me-2"></i>Demandas (kW)
+            </div>
+            <div class="card-body">
+                <div class="row">
+
+                    <div class="col-md-6">
+                        <p><strong>Carga Atual FP:</strong> {{ e.dem_carga_atual_fp or 'N/A' }}</p>
+                        <p><strong>Carga Atual P:</strong> {{ e.dem_carga_atual_p or 'N/A' }}</p>
+                        <p><strong>Geração Atual FP:</strong> {{ e.dem_ger_atual_fp or 'N/A' }}</p>
+                        <p><strong>Geração Atual P:</strong> {{ e.dem_ger_atual_p or 'N/A' }}</p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <p><strong>Carga Solicitada FP:</strong> {{ e.dem_carga_solicit_fp or 'N/A' }}</p>
+                        <p><strong>Carga Solicitada P:</strong> {{ e.dem_carga_solicit_p or 'N/A' }}</p>
+                        <p><strong>Geração Solicitada FP:</strong> {{ e.dem_ger_solicit_fp or 'N/A' }}</p>
+                        <p><strong>Geração Solicitada P:</strong> {{ e.dem_ger_solicit_p or 'N/A' }}</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ALTERNATIVAS -->
+<div class="row g-3 mt-3">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="bi bi-list-check"></i> Alternativas
+            </div>
+
+            <div class="card-body">
+
+                {% if alternativas and alternativas|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Letra</th>
+                                <th>Descrição</th>
+                                <th>Custo Modular</th>
+                                <th>Circuito</th>
+                                <th>Tensão</th>
+                                <th>Escolhida?</th>
+                                <th>Imagem</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for a in alternativas %}
+                            <tr>
+                                <td>{{ a.letra_alternativa }}</td>
+                                <td>{{ a.descricao or '-' }}</td>
+                                <td>{{ "%.2f"|format(a.custo_modular) if a.custo_modular else "-" }}</td>
+                                <td>{{ a.circuito_nome or "-" }}</td>
+                                <td>{{ a.circuito_tensao or "-" }}</td>
+
+                                <td>
+                                    {% if a.flag_alternativa_escolhida %}
+                                        <span class="badge bg-success">Sim</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Não</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if a.has_image %}
+                                        <button class="btn btn-sm btn-outline-primary ver-imagem-db"
+                                                data-id="{{ a.id }}">
+                                            <i class="bi bi-image"></i> Ver
+                                        </button>
+                                    {% else %}
+                                        <span class="text-muted">Sem imagem</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+                {% else %}
+                    <p>Nenhuma alternativa cadastrada.</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ANEXOS -->
+<div class="row g-3 mt-3">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-file-upload me-2"></i>Anexos
+            </div>
+            <div class="card-body">
+
+                {% if anexos and anexos|length > 0 %}
+                <ul class="list-group list-group-flush">
+
+                    {% for a in anexos %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ a.nome_arquivo }}
+                        <a href="/listar/download/{{ a.endereco|replace('\\','/') }}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-download"></i> Baixar
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                </ul>
+                {% else %}
+                    <p>Nenhum anexo cadastrado.</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HISTÓRICO -->
+<div class="row g-3 mt-3">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-history me-2"></i>Status Histórico
+            </div>
+            <div class="card-body">
+
+                {% if status and status|length > 0 %}
+
+                <ul class="list-group list-group-flush">
+                    {% for s in status %}
+                    <li class="list-group-item">
+                        <strong>{{ s.status_tipo.status or "N/A" }}</strong>
+                        — {{ s.data or "N/A" }}
+                        — {{ s.criado_por.nome or "N/A" }}
+                        {% if s.observacao %}
+                            <br><small>{{ s.observacao }}</small>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                {% else %}
+                    <p>Sem histórico de status.</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>

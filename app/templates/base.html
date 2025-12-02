@@ -237,7 +237,7 @@
           display: flex;
           justify-content: center;
           align-items: center;
-          z-index: 2000;
+          z-index: 2147483647;
         }
 
         .loading-overlay.hidden {
@@ -394,59 +394,15 @@
             </div>
         </nav>
 
-<!--    &lt;!&ndash; Flash Messages &ndash;&gt;-->
-<!--    <div class="container-fluid mt-3">-->
-<!--        {% with messages = get_flashed_messages(with_categories=true) %}-->
-<!--            {% if messages %}-->
-<!--                {% for category, message in messages %}-->
-<!--                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">-->
-<!--                        {% if category == 'success' %}-->
-<!--                            <i class="fas fa-check-circle me-2"></i>-->
-<!--                        {% elif category == 'error' %}-->
-<!--                            <i class="fas fa-exclamation-triangle me-2"></i>-->
-<!--                        {% elif category == 'warning' %}-->
-<!--                            <i class="fas fa-exclamation-circle me-2"></i>-->
-<!--                        {% else %}-->
-<!--                            <i class="fas fa-info-circle me-2"></i>-->
-<!--                        {% endif %}-->
-<!--                        {{ message }}-->
-<!--                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
-<!--            {% endif %}-->
-<!--        {% endwith %}-->
-<!--    </div>-->
-
-<!--    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">-->
-<!--        {% with messages = get_flashed_messages(with_categories=true) %}-->
-<!--            {% if messages %}-->
-<!--                {% for category, message in messages %}-->
-<!--                    <div class="toast align-items-center text-bg-{{ 'danger' if category == 'error' else category }} border-0 show fade" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">-->
-<!--                        <div class="d-flex">-->
-<!--                            <div class="toast-body">-->
-<!--                                {% if category == 'success' %}-->
-<!--                                    <i class="fas fa-check-circle me-2"></i>-->
-<!--                                {% elif category == 'error' %}-->
-<!--                                    <i class="fas fa-exclamation-triangle me-2"></i>-->
-<!--                                {% elif category == 'warning' %}-->
-<!--                                    <i class="fas fa-exclamation-circle me-2"></i>-->
-<!--                                {% else %}-->
-<!--                                    <i class="fas fa-info-circle me-2"></i>-->
-<!--                                {% endif %}-->
-<!--                                {{ message }}-->
-<!--                            </div>-->
-<!--                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                {% endfor %}-->
-<!--            {% endif %}-->
-<!--        {% endwith %}-->
-<!--    </div>-->
     <!-- Main Content -->
     <div id="toast-root" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1080;"></div>
 
     <main class="container-fluid">
         {% block content %}{% endblock %}
+
+        <div id="pageLoadingOverlay" class="loading-overlay hidden">
+          <div class="spinner"></div>
+        </div>
 
         <div id="loadingOverlay" class="loading-overlay hidden">
           <div class="spinner"></div>
@@ -478,18 +434,53 @@
     <!-- Panzoom.js (zoom e pan) -->
     <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
+<!--    <script>-->
+<!--        const overlay = document.getElementById("loadingOverlay");-->
+
+<!--        function showLoading() {-->
+<!--            if (!overlay) return;-->
+<!--            overlay.classList.remove("hidden");-->
+<!--        }-->
+
+<!--        function hideLoading() {-->
+<!--            if (!overlay) return;-->
+<!--            overlay.classList.add("hidden");-->
+<!--        }-->
+<!--    </script>-->
+
     <script>
-        const overlay = document.getElementById("loadingOverlay");
-
-        function showLoading() {
+        window.showLoading = function () {
+            const overlay = document.getElementById("loadingOverlay");
             if (!overlay) return;
+
             overlay.classList.remove("hidden");
-        }
+            overlay.style.display = "flex";
+        };
 
-        function hideLoading() {
+        window.hideLoading = function () {
+            const overlay = document.getElementById("loadingOverlay");
             if (!overlay) return;
+
             overlay.classList.add("hidden");
-        }
+            overlay.style.display = "none";
+        };
+
+        window.showPageLoading = function() {
+            const ov = document.getElementById("pageLoadingOverlay");
+            if (ov) {
+                ov.style.display = "flex";
+                ov.classList.remove("hidden");
+            }
+        };
+
+        window.hidePageLoading = function() {
+            const ov = document.getElementById("pageLoadingOverlay");
+            if (ov) {
+                ov.style.display = "none";
+                ov.classList.add("hidden");
+            }
+        };
+
     </script>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -592,6 +583,53 @@
 
     </script>
 
+    <script>
+        document.addEventListener("click", function (e) {
+            const target = e.target.closest("a, button");
+            if (!target) return;
+
+            // Ignorar se for explicitamente marcado para não mostrar loading
+            if (target.dataset.noLoading === "true") return;
+
+            // Ignorar se estiver desabilitado
+            if (target.classList.contains("disabled") ||
+                target.getAttribute("aria-disabled") === "true") {
+                return;
+            }
+
+            // Verificar se tem data-bs-toggle
+            const bsToggle = target.getAttribute("data-bs-toggle");
+            if (bsToggle && ["modal", "collapse", "dropdown", "offcanvas"].includes(bsToggle)) {
+                // tooltip pode passar, modal/collapse/dropdown não
+                return;
+            }
+
+            // 1) Link <a href="..."> que navega
+            const href = target.getAttribute("href");
+            const isLinkNav =
+                target.tagName === "A" &&
+                href &&
+                !href.startsWith("#") &&
+                !href.startsWith("javascript:");
+
+            // 2) Botão de submit em formulário GET
+            const form = target.closest("form");
+            const isGetSubmit =
+                target.tagName === "BUTTON" &&
+                target.type === "submit" &&
+                form &&
+                (form.method || "GET").toUpperCase() === "GET";
+
+            if (isLinkNav || isGetSubmit) {
+                window.showPageLoading();
+            }
+        });
+
+        // Ao carregar a nova página, some com o overlay
+        window.addEventListener("pageshow", function () {
+            window.hidePageLoading();
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -1,5 +1,7 @@
 from functools import wraps
 from flask import session, redirect, url_for, flash, abort
+from flask_session.sqlalchemy import sqlalchemy
+
 from app.models import Usuario, db
 
 
@@ -7,10 +9,17 @@ def get_usuario_logado():
     if 'user' not in session:
         return None
 
-    # Pega a parte antes do @ no email do Azure
-    matricula = session['user']['preferred_username'].split('@')[0]
+    try:
 
-    usuario = Usuario.query.filter_by(matricula=matricula).first()
+        # Pega a parte antes do @ no email do Azure
+        matricula = session['user']['preferred_username'].split('@')[0]
+
+        usuario = Usuario.query.filter_by(matricula=matricula).first()
+    except Exception as e:
+        print(f'Erro ao pegar usuario logado: {e}')
+        flash(f'Erro ao pegar usuario logado: {e}')
+        return None
+
     return usuario
 
 

@@ -82,6 +82,7 @@ class EstudoForm(FlaskForm):
     tipo_viab = SelectField('Tipo de Viabilidade', choices=[], coerce=str, validators=[InputRequired()])
     tipo_analise = SelectField('Tipo de Análise', choices=[], coerce=str, validators=[InputRequired()], validate_choice=False)
     tipo_pedido = SelectField('Tipo de Pedido', choices=[], coerce=str, validators=[InputRequired()], validate_choice=False)
+    tipo_geracao = SelectField('Tipo de Geração', choices=[('', ''), ('Fotovoltaica', 'Fotovoltaica'), ('Hidrelétrica', 'Hidrelétrica'), ('Termoelétrica', 'Termoelétrica'), ('Eólica', 'Eólica')], coerce=str)
 
     # Arquivo anexo (opcional no cadastro inicial)
     arquivos = MultipleFileField('Anexar Documentos',

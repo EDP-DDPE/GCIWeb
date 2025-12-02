@@ -1,0 +1,27 @@
+<div class="btn-group" role="group">
+    <button class="btn btn-sm btn-info"
+            onclick="verDetalhes({{ id_estudo }})"
+            data-bs-toggle="tooltip"
+            title="Ver detalhes">
+        <i class="bi bi-eye"></i>
+    </button>
+
+    <a href="{{ url_for('cadastro.editar_estudo', id_estudo=id_estudo) }}"
+       class="btn btn-sm btn-warning {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+       data-bs-toggle="tooltip"
+       title="Editar estudo">
+        <i class="bi bi-pencil"></i>
+    </a>
+
+    <a href="{{ url_for('alternativa.listar', id_estudo=id_estudo) }}"
+       class="btn btn-sm btn-success {% if not usuario.editar and not usuario.admin %}disabled{% endif %}"
+       data-bs-toggle="tooltip"
+       title="Gerenciar alternativas">
+        <i class="bi bi-list-check"></i>
+    </a>
+
+    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Gerenciar Status" onclick="abrirStatus({{ id_estudo }})">
+        <i class="bi bi-clock-history"></i>
+    </button>
+
+</div>

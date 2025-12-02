@@ -214,3 +214,14 @@
 #estudosTable td[data-column="municipio"] {
     text-transform: capitalize;
 }
+
+.modal-loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.75);
+    z-index: 1055;
+    display: none;       /* agora funciona */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

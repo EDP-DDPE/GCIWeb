@@ -1,12 +1,17 @@
     // Estado global da aplicação
-    let currentData = [];
-    let filteredData = [];
+//    let currentData = [];
+//    let filteredData = [];
+//
+//
+//    let columnFilters = {};
+//    let idEstudo = null;
+
     let currentPage = 1;
     let pageSize = 25;
-    let sortColumn = '';
-    let sortDirection = 'asc';
+    let sortColumn = 'data_registro';
+    let sortDirection = 'desc';
+    let searchTerm = '';
     let columnFilters = {};
-    let idEstudo = null;
 
     // Inicialização
     $(document).ready(function() {
@@ -18,7 +23,8 @@
             allowClear: false
         });
 
-        initializeData();
+        loadData();
+//        initializeData();
         setupEventListeners();
         setupColumnResizing();
         initializeTooltips();
@@ -26,6 +32,32 @@
 
 
     });
+
+    function loadData() {
+
+        showLoading();
+
+        $.get("/listar/api/estudos", {
+            page: currentPage,
+            per_page: pageSize,
+            search: searchTerm,
+            sort: sortColumn,
+            direction: sortDirection
+        })
+        .done(function(response) {
+
+            renderTable(response.items);
+            renderPagination(response.page, response.pages);
+            updateRecordInfo(response);
+
+        })
+        .fail(function() {
+            alert("Erro ao carregar dados do servidor.");
+        })
+        .always(function() {
+            hideLoading();
+        });
+    }
 
     // Inicializar dados
     function initializeData() {
@@ -56,16 +88,38 @@
     // Configurar event listeners
     function setupEventListeners() {
         // Busca global
-        $('#globalSearch').on('input', debounce(applyGlobalSearch, 300));
+//        $('#globalSearch').on('input', debounce(applyGlobalSearch, 300));
+        $("#globalSearch").on("input", function() {
+            searchTerm = $(this).val();
+            currentPage = 1;
+            loadData();
+        });
+
+        $("#pageSize").on("change", function() {
+            pageSize = parseInt($(this).val());
+            currentPage = 1;
+            loadData();
+        });
 
         // Filtros por coluna
         $('.filter-input').on('input', debounce(applyColumnFilter, 300));
 
         // Tamanho da página
-        $('#pageSize').on('change', changePageSize);
+//        $('#pageSize').on('change', changePageSize);
 
         // Ordenação
-        $('.sort-icon').on('click', handleSort);
+//        $('.sort-icon').on('click', handleSort);
+
+        $(".sort-icon").on("click", function() {
+            const column = $(this).data("sort");
+            if (sortColumn === column) {
+                sortDirection = (sortDirection === "asc") ? "desc" : "asc";
+            } else {
+                sortColumn = column;
+                sortDirection = "asc";
+            }
+            loadData();
+        });
 
         // Seleção de colunas
         $('.column-toggle').on('change', toggleColumn);
@@ -186,99 +240,160 @@
     }
 
     // Renderizar tabela
-    function renderTable() {
-        showLoading();
+//    function renderTable() {
+//        showLoading();
+//
+//        setTimeout(() => {
+//            const $tbody = $('#tableBody');
+//            const start = (currentPage - 1) * pageSize;
+//            const end = start + pageSize;
+//            const pageData = filteredData.slice(start, end);
+//
+//            $tbody.empty();
+//
+//            pageData.forEach(item => {
+//                const row = $('<tr>').html(`
+//                    <td data-column="id">${item.id}</td>
+//                    <td data-column="num_doc">${item.num_doc}</td>
+//                    <td data-column="nome_projeto">${item.nome_projeto}</td>
+//                    <td data-column="empresa">${item.empresa}</td>
+//                    <td data-column="municipio">${item.municipio}</td>
+//                    <td data-column="eng_responsavel">${item.eng_responsavel}</td>
+//                    <td data-column="data_registro">${item.data_registro}</td>
+//                    <td data-column="qtd_alternativas">${item.qtd_alternativas}</td>
+//                    <td data-column="qtd_anexos">${item.qtd_anexos}</td>
+//                    <td data-column="status">${item.status}</td>
+//                    <td data-column="acoes">${item.acoes}</td>
+//                `);
+//                $tbody.append(row);
+//            });
+//
+//            // Aplicar visibilidade das colunas
+//            applyColumnVisibility();
+//
+//            // Reativar tooltips
+//            initializeTooltips();
+//
+//            hideLoading();
+//        }, 200);
+//    }
 
-        setTimeout(() => {
-            const $tbody = $('#tableBody');
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-            const pageData = filteredData.slice(start, end);
-
+        function renderTable(data) {
+            const $tbody = $("#tableBody");
             $tbody.empty();
 
-            pageData.forEach(item => {
-                const row = $('<tr>').html(`
-                    <td data-column="id">${item.id}</td>
-                    <td data-column="num_doc">${item.num_doc}</td>
-                    <td data-column="nome_projeto">${item.nome_projeto}</td>
-                    <td data-column="empresa">${item.empresa}</td>
-                    <td data-column="municipio">${item.municipio}</td>
-                    <td data-column="eng_responsavel">${item.eng_responsavel}</td>
-                    <td data-column="data_registro">${item.data_registro}</td>
-                    <td data-column="qtd_alternativas">${item.qtd_alternativas}</td>
-                    <td data-column="qtd_anexos">${item.qtd_anexos}</td>
-                    <td data-column="status">${item.status}</td>
-                    <td data-column="acoes">${item.acoes}</td>
-                `);
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.id}</td>
+                        <td>${item.num_doc}</td>
+                        <td>${item.nome_projeto}</td>
+                        <td>${item.empresa}</td>
+                        <td>${item.municipio}</td>
+                        <td>${item.eng_responsavel}</td>
+                        <td>${item.data_registro}</td>
+                        <td>${item.qtd_alternativas}</td>
+                        <td>${item.qtd_anexos}</td>
+                        <td>${item.status}</td>
+                        <td>${item.acoes}</td>
+                    </tr>
+                `;
                 $tbody.append(row);
             });
 
-            // Aplicar visibilidade das colunas
-            applyColumnVisibility();
-
-            // Reativar tooltips
             initializeTooltips();
-
-            hideLoading();
-        }, 200);
-    }
+        }
 
     // Atualizar paginação
-    function updatePagination() {
-        const totalRecords = filteredData.length;
-        const totalPages = Math.ceil(totalRecords / pageSize);
-        const start = Math.min((currentPage - 1) * pageSize + 1, totalRecords);
-        const end = Math.min(currentPage * pageSize, totalRecords);
+//    function updatePagination() {
+//        const totalRecords = filteredData.length;
+//        const totalPages = Math.ceil(totalRecords / pageSize);
+//        const start = Math.min((currentPage - 1) * pageSize + 1, totalRecords);
+//        const end = Math.min(currentPage * pageSize, totalRecords);
+//
+//        // Atualizar informações
+//        $('#startRecord').text(totalRecords > 0 ? start : 0);
+//        $('#endRecord').text(end);
+//        $('#totalRecords').text(totalRecords);
+//
+//        // Mostrar informação de filtro se necessário
+//        const $filteredInfo = $('#filteredInfo');
+//        const $originalTotal = $('#originalTotal');
+//        if (totalRecords < currentData.length) {
+//            $originalTotal.text(currentData.length);
+//            $filteredInfo.show();
+//        } else {
+//            $filteredInfo.hide();
+//        }
+//
+//        // Gerar paginação
+//        const $pagination = $('#pagination');
+//        $pagination.empty();
+//
+//        if (totalPages <= 1) return;
+//
+//        // Botão anterior
+//        const $prevLi = $('<li>').addClass(`page-item ${currentPage === 1 ? 'disabled' : ''}`)
+//            .html(`<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Anterior</a>`);
+//        $pagination.append($prevLi);
+//
+//        // Páginas
+//        const startPage = Math.max(1, currentPage - 2);
+//        const endPage = Math.min(totalPages, currentPage + 2);
+//
+//        for (let i = startPage; i <= endPage; i++) {
+//            const $li = $('<li>').addClass(`page-item ${i === currentPage ? 'active' : ''}`)
+//                .html(`<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`);
+//            $pagination.append($li);
+//        }
+//
+//        // Botão próximo
+//        const $nextLi = $('<li>').addClass(`page-item ${currentPage === totalPages ? 'disabled' : ''}`)
+//            .html(`<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Próximo</a>`);
+//        $pagination.append($nextLi);
+//    }
 
-        // Atualizar informações
-        $('#startRecord').text(totalRecords > 0 ? start : 0);
-        $('#endRecord').text(end);
-        $('#totalRecords').text(totalRecords);
+        function renderPagination(page, totalPages) {
 
-        // Mostrar informação de filtro se necessário
-        const $filteredInfo = $('#filteredInfo');
-        const $originalTotal = $('#originalTotal');
-        if (totalRecords < currentData.length) {
-            $originalTotal.text(currentData.length);
-            $filteredInfo.show();
-        } else {
-            $filteredInfo.hide();
+            const $pagination = $("#pagination");
+            $pagination.empty();
+
+            if (totalPages <= 1) return;
+
+            // anterior
+            $pagination.append(`
+                <li class="page-item ${page == 1 ? 'disabled' : ''}">
+                    <a class="page-link" onclick="changePage(${page - 1})">Anterior</a>
+                </li>
+            `);
+
+            // páginas
+            for (let p = Math.max(1, page - 2); p <= Math.min(totalPages, page + 2); p++) {
+                $pagination.append(`
+                    <li class="page-item ${p == page ? 'active' : ''}">
+                        <a class="page-link" onclick="changePage(${p})">${p}</a>
+                    </li>
+                `);
+            }
+
+            // próximo
+            $pagination.append(`
+                <li class="page-item ${page == totalPages ? 'disabled' : ''}">
+                    <a class="page-link" onclick="changePage(${page + 1})">Próximo</a>
+                </li>
+            `);
         }
-
-        // Gerar paginação
-        const $pagination = $('#pagination');
-        $pagination.empty();
-
-        if (totalPages <= 1) return;
-
-        // Botão anterior
-        const $prevLi = $('<li>').addClass(`page-item ${currentPage === 1 ? 'disabled' : ''}`)
-            .html(`<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Anterior</a>`);
-        $pagination.append($prevLi);
-
-        // Páginas
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        for (let i = startPage; i <= endPage; i++) {
-            const $li = $('<li>').addClass(`page-item ${i === currentPage ? 'active' : ''}`)
-                .html(`<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`);
-            $pagination.append($li);
-        }
-
-        // Botão próximo
-        const $nextLi = $('<li>').addClass(`page-item ${currentPage === totalPages ? 'disabled' : ''}`)
-            .html(`<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Próximo</a>`);
-        $pagination.append($nextLi);
-    }
-
     // Mudar página
-    function changePage(page) {
-        if (page < 1 || page > Math.ceil(filteredData.length / pageSize)) return;
-        currentPage = page;
-        renderTable();
-        updatePagination();
+//    function changePage(page) {
+//        if (page < 1 || page > Math.ceil(filteredData.length / pageSize)) return;
+//        currentPage = page;
+//        renderTable();
+//        updatePagination();
+//    }
+
+    function changePage(p) {
+        currentPage = p;
+        loadData();
     }
 
     // Seleção de colunas
@@ -489,7 +604,8 @@
                     const $tbody = $('#tableBody');
                     $tbody.empty().append(newRows);
 
-                    initializeData();
+//                    initializeData();
+                    loadData();
                     initializeTooltips();
                 }
 
@@ -542,234 +658,234 @@
         }
     }
     // Função original para detalhes (mantida)
-    function verDetalhes(estudoId) {
-        const $modalBody = $('#modalDetalhesBody');
-        $modalBody.html(`
-            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                </div>
-            </div>
-        `);
-
-        const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
-        modal.show();
-
-        $.get(`/api/estudos/${estudoId}`)
-            .done(function(data) {
-                if (data.error) {
-                    $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
-                    return;
-                }
-
-                const detalhesHtml = `
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-info-circle me-2"></i>Informações Básicas
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Protocolo:</strong> ${data.protocolo || 'N/A'}</p>
-                                    <p><strong>Nº Documento:</strong> ${data.num_doc || 'N/A'}</p>
-                                    <p><strong>Projeto:</strong> ${data.nome_projeto || 'N/A'}</p>
-                                    <p><strong>Descrição:</strong> ${data.descricao || 'N/A'}</p>
-                                    <p><strong>Cliente:</strong> ${data.empresa?.nome || 'N/A'}</p>
-                                    <p><strong>CNPJ:</strong> ${data.empresa?.cnpj || 'N/A'}</p>
-                                    <p><strong>Município:</strong> ${data.municipio?.nome || 'N/A'}</p>
-                                    <p><strong>Regional:</strong> ${data.regional?.nome || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Viabilidade:</strong> ${data.tipo_solicitacao?.viabilidade || 'N/A'}</p>
-                                    <p><strong>Análise:</strong> ${data.tipo_solicitacao?.analise || 'N/A'}</p>
-                                    <p><strong>Pedido:</strong> ${data.tipo_solicitacao?.pedido || 'N/A'}</p>
-                                    <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
-                                    <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
-                                    <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
-                                    <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
-                                    <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-chart-bar me-2"></i>Demandas (kW)
-                                </div>
-                                <div class="card-body">
-                                    <div class='row'>
-                                        <div class="col-md-6">
-                                            <p><strong>Demanda Atual Carga FP:</strong> ${data.dem_carga_atual_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Carga P:</strong> ${data.dem_carga_atual_p || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Geração FP:</strong> ${data.dem_ger_atual_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Geração P:</strong> ${data.dem_ger_atual_p || 'N/A'}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p><strong>Demanda Solicitada Carga FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Carga P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Geração FP:</strong> ${data.dem_ger_solicit_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Geração P:</strong> ${data.dem_ger_solicit_p || 'N/A'}</p>
-                                        </div>
-                                    </row>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="bi bi-list-check"></i>Alternativas
-                                </div>
-                                <div class="card-body">
-                                     ${data.alternativas && data.alternativas.length > 0 ? `
-                                        <div class="table-responsive">
-                                            <table class="table table-striped table-sm align-middle mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Alternativa</th>
-                                                        <th>Descrição</th>
-                                                        <th>Custo Modular (R$)</th>
-                                                        <th>Circuito</th>
-                                                        <th>Tensão</th>
-                                                        <th>Escolhida?</th>
-                                                        <th>Imagem</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    ${data.alternativas.map(a => `
-                                                        <tr>
-                                                            <td>${a.letra_alternativa || '-'}</td>
-                                                            <td>${a.descricao || '-'}</td>
-                                                            <td>${a.custo_modular?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '-'}</td>
-                                                            <td>${a.circuito?.nome || '-'}</td>
-                                                            <td>${a.circuito?.tensao || '-'}</td>
-                                                            <td>
-                                                                ${a.flag_alternativa_escolhida
-                                                                    ? '<span class="badge bg-success">Sim</span>'
-                                                                    : '<span class="badge bg-secondary">Não</span>'
-                                                                }
-                                                            </td>
-                                                            <td>
-                                                              ${a.has_image
-                                                                    ? `<button class="btn btn-sm btn-outline-primary ver-imagem-db"
-                                                                                data-id="${a.id}">
-                                                                            <i class="bi bi-image"></i> Ver Imagem
-                                                                       </button>`
-                                                                    : '<span class="text-muted">Sem imagem</span>'
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ` : '<p>Nenhuma alternativa cadastrada.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-file-upload me-2"></i>Anexos
-                                </div>
-                                <div class="card-body">
-
-                                    ${data.anexos && data.anexos.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.anexos.map(a => {
-                                                const caminho = a.endereco.replace(/\\/g, '/'); // troca '\' por '/'
-                                                return `
-                                                    <li class="list-group-item  d-flex justify-content-between align-items-center">${a.nome_arquivo || 'N/A'}
-                                                        <a href="/listar/download/${caminho}" class="btn btn-sm btn-outline-primary">
-                                                          <i class="bi bi-download"></i> Baixar
-                                                        </a>
-                                                    </li>
-                                                `;
-                                            }).join('')}
-                                        </ul>
-                                    ` : '<p>Nenhum anexo.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-history me-2"></i>Status Histórico
-                                </div>
-                                <div class="card-body">
-                                    ${data.status_historico && data.status_historico.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.status_historico.map(s => `
-                                                <li class="list-group-item">
-                                                    <strong>${s.status || 'N/A'}</strong> - ${s.data || 'N/A'} - ${s.criado_por || 'N/A'}
-                                                    ${s.observacao ? `<br><small>${s.observacao}</small>` : ''}
-                                                </li>
-                                            `).join('')}
-                                        </ul>
-                                    ` : '<p>Sem histórico de status.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                if (!$('#modalImagemDB').length) {
-                    $('body').append(`
-                        <div class="modal fade" id="modalImagemDB" tabindex="-1" aria-labelledby="modalImagemDBLabel"
-                             aria-hidden="true" data-bs-backdrop="static">
-                          <div class="modal-dialog modal-xl modal-dialog-centered">
-                            <div class="modal-content" style="z-index: 99999 !important;">
-                              <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="modalImagemDBLabel">
-                                  <i class="bi bi-image"></i> Imagem da Alternativa
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                              </div>
-                              <div class="modal-body text-center">
-                                  <div id="loadingImg" class="my-3" style="display:none;">
-                                    <div class="spinner-border text-primary" role="status">
-                                      <span class="visually-hidden">Carregando...</span>
-                                    </div>
-                                  </div>
-
-                                  <div id="panzoom-container" class="d-inline-block border rounded p-2 bg-light">
-                                    <img id="imagemDB" src="" alt="Imagem da alternativa" class="img-fluid rounded shadow d-none" style="cursor: grab;">
-                                  </div>
-
-                                  <div class="mt-3">
-                                    <button id="zoomIn" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-in"></i></button>
-                                    <button id="zoomOut" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-out"></i></button>
-                                    <button id="resetZoom" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i></button>
-                                  </div>
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
-                    `);
-                }
-
-                $modalBody.html(detalhesHtml);
-            })
-            .fail(function(xhr, status, error) {
-                console.error('Erro:', error);
-                $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes do documento</div>`);
-            });
-    }
+//    function verDetalhes(estudoId) {
+//        const $modalBody = $('#modalDetalhesBody');
+//        $modalBody.html(`
+//            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+//                <div class="spinner-border text-primary" role="status">
+//                    <span class="visually-hidden">Carregando...</span>
+//                </div>
+//            </div>
+//        `);
+//
+//        const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
+//        modal.show();
+//
+//        $.get(`/api/estudos/${estudoId}`)
+//            .done(function(data) {
+//                if (data.error) {
+//                    $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
+//                    return;
+//                }
+//
+//                const detalhesHtml = `
+//                    <div class="row g-3">
+//                        <div class="col-md-6">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="fas fa-info-circle me-2"></i>Informações Básicas
+//                                </div>
+//                                <div class="card-body">
+//                                    <p><strong>Protocolo:</strong> ${data.protocolo || 'N/A'}</p>
+//                                    <p><strong>Nº Documento:</strong> ${data.num_doc || 'N/A'}</p>
+//                                    <p><strong>Projeto:</strong> ${data.nome_projeto || 'N/A'}</p>
+//                                    <p><strong>Descrição:</strong> ${data.descricao || 'N/A'}</p>
+//                                    <p><strong>Cliente:</strong> ${data.empresa?.nome || 'N/A'}</p>
+//                                    <p><strong>CNPJ:</strong> ${data.empresa?.cnpj || 'N/A'}</p>
+//                                    <p><strong>Município:</strong> ${data.municipio?.nome || 'N/A'}</p>
+//                                    <p><strong>Regional:</strong> ${data.regional?.nome || 'N/A'}</p>
+//                                </div>
+//                            </div>
+//                        </div>
+//                        <div class="col-md-6">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
+//                                </div>
+//                                <div class="card-body">
+//                                    <p><strong>Viabilidade:</strong> ${data.tipo_solicitacao?.viabilidade || 'N/A'}</p>
+//                                    <p><strong>Análise:</strong> ${data.tipo_solicitacao?.analise || 'N/A'}</p>
+//                                    <p><strong>Pedido:</strong> ${data.tipo_solicitacao?.pedido || 'N/A'}</p>
+//                                    <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
+//                                    <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
+//                                    <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
+//                                    <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
+//                                    <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>
+//                    <div class="row g-3 mt-3">
+//                        <div class="col-md-12">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="fas fa-chart-bar me-2"></i>Demandas (kW)
+//                                </div>
+//                                <div class="card-body">
+//                                    <div class='row'>
+//                                        <div class="col-md-6">
+//                                            <p><strong>Demanda Atual Carga FP:</strong> ${data.dem_carga_atual_fp || 'N/A'}</p>
+//                                            <p><strong>Demanda Atual Carga P:</strong> ${data.dem_carga_atual_p || 'N/A'}</p>
+//                                            <p><strong>Demanda Atual Geração FP:</strong> ${data.dem_ger_atual_fp || 'N/A'}</p>
+//                                            <p><strong>Demanda Atual Geração P:</strong> ${data.dem_ger_atual_p || 'N/A'}</p>
+//                                        </div>
+//                                        <div class="col-md-6">
+//                                            <p><strong>Demanda Solicitada Carga FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
+//                                            <p><strong>Demanda Solicitada Carga P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
+//                                            <p><strong>Demanda Solicitada Geração FP:</strong> ${data.dem_ger_solicit_fp || 'N/A'}</p>
+//                                            <p><strong>Demanda Solicitada Geração P:</strong> ${data.dem_ger_solicit_p || 'N/A'}</p>
+//                                        </div>
+//                                    </row>
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>
+//                    <div class="row g-3 mt-3">
+//                        <div class="col-md-12">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="bi bi-list-check"></i>Alternativas
+//                                </div>
+//                                <div class="card-body">
+//                                     ${data.alternativas && data.alternativas.length > 0 ? `
+//                                        <div class="table-responsive">
+//                                            <table class="table table-striped table-sm align-middle mb-0">
+//                                                <thead class="table-light">
+//                                                    <tr>
+//                                                        <th>Alternativa</th>
+//                                                        <th>Descrição</th>
+//                                                        <th>Custo Modular (R$)</th>
+//                                                        <th>Circuito</th>
+//                                                        <th>Tensão</th>
+//                                                        <th>Escolhida?</th>
+//                                                        <th>Imagem</th>
+//                                                    </tr>
+//                                                </thead>
+//                                                <tbody>
+//                                                    ${data.alternativas.map(a => `
+//                                                        <tr>
+//                                                            <td>${a.letra_alternativa || '-'}</td>
+//                                                            <td>${a.descricao || '-'}</td>
+//                                                            <td>${a.custo_modular?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '-'}</td>
+//                                                            <td>${a.circuito?.nome || '-'}</td>
+//                                                            <td>${a.circuito?.tensao || '-'}</td>
+//                                                            <td>
+//                                                                ${a.flag_alternativa_escolhida
+//                                                                    ? '<span class="badge bg-success">Sim</span>'
+//                                                                    : '<span class="badge bg-secondary">Não</span>'
+//                                                                }
+//                                                            </td>
+//                                                            <td>
+//                                                              ${a.has_image
+//                                                                    ? `<button class="btn btn-sm btn-outline-primary ver-imagem-db"
+//                                                                                data-id="${a.id}">
+//                                                                            <i class="bi bi-image"></i> Ver Imagem
+//                                                                       </button>`
+//                                                                    : '<span class="text-muted">Sem imagem</span>'
+//                                                                }
+//                                                            </td>
+//                                                        </tr>
+//                                                    `).join('')}
+//                                                </tbody>
+//                                            </table>
+//                                        </div>
+//                                    ` : '<p>Nenhuma alternativa cadastrada.</p>'}
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>
+//                    <div class="row g-3 mt-3">
+//                        <div class="col-md-12">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="fas fa-file-upload me-2"></i>Anexos
+//                                </div>
+//                                <div class="card-body">
+//
+//                                    ${data.anexos && data.anexos.length > 0 ? `
+//                                        <ul class="list-group list-group-flush">
+//                                            ${data.anexos.map(a => {
+//                                                const caminho = a.endereco.replace(/\\/g, '/'); // troca '\' por '/'
+//                                                return `
+//                                                    <li class="list-group-item  d-flex justify-content-between align-items-center">${a.nome_arquivo || 'N/A'}
+//                                                        <a href="/listar/download/${caminho}" class="btn btn-sm btn-outline-primary">
+//                                                          <i class="bi bi-download"></i> Baixar
+//                                                        </a>
+//                                                    </li>
+//                                                `;
+//                                            }).join('')}
+//                                        </ul>
+//                                    ` : '<p>Nenhum anexo.</p>'}
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>
+//                    <div class="row g-3 mt-3">
+//                        <div class="col-md-12">
+//                            <div class="card shadow-sm">
+//                                <div class="card-header bg-secondary text-white">
+//                                    <i class="fas fa-history me-2"></i>Status Histórico
+//                                </div>
+//                                <div class="card-body">
+//                                    ${data.status_historico && data.status_historico.length > 0 ? `
+//                                        <ul class="list-group list-group-flush">
+//                                            ${data.status_historico.map(s => `
+//                                                <li class="list-group-item">
+//                                                    <strong>${s.status || 'N/A'}</strong> - ${s.data || 'N/A'} - ${s.criado_por || 'N/A'}
+//                                                    ${s.observacao ? `<br><small>${s.observacao}</small>` : ''}
+//                                                </li>
+//                                            `).join('')}
+//                                        </ul>
+//                                    ` : '<p>Sem histórico de status.</p>'}
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>
+//                `;
+//
+//                if (!$('#modalImagemDB').length) {
+//                    $('body').append(`
+//                        <div class="modal fade" id="modalImagemDB" tabindex="-1" aria-labelledby="modalImagemDBLabel"
+//                             aria-hidden="true" data-bs-backdrop="static">
+//                          <div class="modal-dialog modal-xl modal-dialog-centered">
+//                            <div class="modal-content" style="z-index: 99999 !important;">
+//                              <div class="modal-header bg-dark text-white">
+//                                <h5 class="modal-title" id="modalImagemDBLabel">
+//                                  <i class="bi bi-image"></i> Imagem da Alternativa
+//                                </h5>
+//                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+//                              </div>
+//                              <div class="modal-body text-center">
+//                                  <div id="loadingImg" class="my-3" style="display:none;">
+//                                    <div class="spinner-border text-primary" role="status">
+//                                      <span class="visually-hidden">Carregando...</span>
+//                                    </div>
+//                                  </div>
+//
+//                                  <div id="panzoom-container" class="d-inline-block border rounded p-2 bg-light">
+//                                    <img id="imagemDB" src="" alt="Imagem da alternativa" class="img-fluid rounded shadow d-none" style="cursor: grab;">
+//                                  </div>
+//
+//                                  <div class="mt-3">
+//                                    <button id="zoomIn" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-in"></i></button>
+//                                    <button id="zoomOut" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-out"></i></button>
+//                                    <button id="resetZoom" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i></button>
+//                                  </div>
+//                              </div>
+//
+//                            </div>
+//                          </div>
+//                        </div>
+//                    `);
+//                }
+//
+//                $modalBody.html(detalhesHtml);
+//            })
+//            .fail(function(xhr, status, error) {
+//                console.error('Erro:', error);
+//                $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes do documento</div>`);
+//            });
+//    }
 
     // Funcionalidades adicionais
 
