@@ -9,7 +9,7 @@
      class="watermark"
      alt="Atlas Logo">
 
-<div class="fundo-index">
+<div class="fundo-index" style="background-image: url('{{ url_for('main.bginfo_latest') }}');">
     <h1 class="text-center mb-4">{{msg}}</h1>
     <h1 class="text-center mb-4">Bem-vindo ao Atlas!</h1>
 
@@ -78,4 +78,19 @@
             {% endif %}
     </div>
 </div>
+
+<script>
+setInterval(() => {
+    fetch("/bginfo_timestamp")
+        .then(r => r.text())
+        .then(ts => {
+            if (!window.lastTS) {
+                window.lastTS = ts;
+            } else if (window.lastTS !== ts) {
+                location.reload();
+            }
+        });
+}, 60000); // verifica a cada 30s
+</script>
+
 {% endblock %}
