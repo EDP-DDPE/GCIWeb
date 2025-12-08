@@ -5,6 +5,19 @@ Go
 -- Todos os tipos de dados são nativos do SQL Server 2016+
 -- Sistema centralizado, BIGINT é mais adequado que UNIQUEIDENTIFIER
 
+CREATE TABLE "gciweb"."doc_padronizados" (
+	"id_doc_padronizado" BIGINT IDENTITY(1,1) NOT NULL,
+	"nome_doc" VARCHAR(255) NOT NULL,
+	"caminho_doc" VARCHAR(500) NOT NULL,
+	"tipo_doc" VARCHAR(100) NOT NULL,
+	"data_criacao" DATETIME NOT NULL,
+	"data_atualizacao" DATETIME NULL,
+	"automatico" BIT NOT NULL,
+	"id_tipo_solicitacao" BIGINT NOT NULL
+);
+
+ALTER TABLE "gciweb"."doc_padronizados" ADD CONSTRAINT "gciweb_doc_padronizados_id_primary" PRIMARY KEY("id_doc_padronizado")
+
 CREATE TABLE "gciweb"."FATOR_K"(
     "id_k" BIGINT IDENTITY(1,1) NOT NULL,
     "k" decimal(6,2) NULL,
@@ -304,6 +317,7 @@ ALTER TABLE "gciweb"."obras" ADD CONSTRAINT "gciweb_obras_id_alternativa_foreign
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_obra_foreign" FOREIGN KEY("id_obra") REFERENCES "gciweb"."obras"("id_obra");
 ALTER TABLE "gciweb"."alternativas" ADD CONSTRAINT "gciweb_alternativas_id_k_foreign" FOREIGN KEY("id_k") REFERENCES "gciweb"."FATOR_K"("id_k");
 ALTER TABLE "gciweb"."FATOR_K" ADD CONSTRAINT "gciweb_fator_k_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp")
+ALTER TABLE "gciweb"."doc_padronizados" ADD CONSTRAINT "gciweb_doc_padronizados_id_tipo_solicitacao_foreign" FOREIGN KEY("id_tipo_solicitacao") REFERENCES "gciweb"."tipo_solicitacao"("id_tipo_solicitacao")
 
 ALTER TABLE "gciweb.usuarios" ADD CONSTRAINT "gciweb_usuarios_id_edp_foreign" FOREIGN KEY("id_edp") REFERENCES "gciweb"."edp"("id_edp");
 
