@@ -373,7 +373,6 @@ def download_file(filename):
         UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
 
         safe_path = safe_join(UPLOAD_FOLDER, filename)
-        print(safe_path)
         if not safe_path or not os.path.isfile(safe_path):
             flash("⚠️ Arquivo não encontrado ou removido.", "warning")
             abort(404)
@@ -405,8 +404,16 @@ def excluir(id_estudo):
 def visualizar_imagem(id):
     img = Anexo.query.get_or_404(id)
 
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
+
+    safe_path = os.path.join(UPLOAD_FOLDER,  img.endereco).replace('\\', '/')
+
+    if not safe_path or not os.path.isfile(safe_path):
+        flash("⚠️ Arquivo não encontrado ou removido.", "warning")
+        abort(404)
+
     return send_file(
-        img.endereco,
+        safe_path,
         mimetype=img.tipo_mime,
         as_attachment=False
     )
