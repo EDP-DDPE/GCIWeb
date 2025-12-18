@@ -43,7 +43,7 @@ export let state = {
     page: 1,
     perPage: 25,
     search: "",
-    sort: "data_registro",
+    sort: "id_estudo",
     direction: "desc",
     columnFilters: {}
 };

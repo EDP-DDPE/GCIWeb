@@ -87,7 +87,7 @@ def api_estudos():
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=25, type=int)
     search = request.args.get("search", default="", type=str)
-    sort_column = request.args.get("sort", default="data_registro", type=str)
+    sort_column = request.args.get("sort", default="id_estudo", type=str)
     sort_dir = request.args.get("direction", default="desc", type=str)
     export_format = request.args.get("export")
     raw_cols = request.args.get("columns")
@@ -143,7 +143,10 @@ def api_estudos():
     if sort_dir == "desc":
         sort_obj = sort_obj.desc()
 
+    print(sort_obj)
     query = query.order_by(sort_obj)
+
+    print(query)
 
     # Paginação real
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
