@@ -1,0 +1,36 @@
+<!-- Modal Imagem com Zoom -->
+<div class="modal fade" id="modalImagem" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white">
+                    <i class="bi bi-image"></i> Visualização da Imagem
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body d-flex justify-content-center align-items-center">
+                <div id="imageContainer">
+                    <img id="imagemModal"
+                         src=""
+                         class="img-fluid"
+                         alt="Imagem da alternativa">
+                </div>
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center gap-2">
+                <button class="btn btn-outline-light" id="zoomOut">
+                    <i class="bi bi-zoom-out"></i>
+                </button>
+                <button class="btn btn-outline-light" id="zoomReset">
+                    <i class="bi bi-aspect-ratio"></i>
+                </button>
+                <button class="btn btn-outline-light" id="zoomIn">
+                    <i class="bi bi-zoom-in"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

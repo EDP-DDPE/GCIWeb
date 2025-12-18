@@ -1,7 +1,7 @@
 import json
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, send_from_directory, \
-    abort, flash, jsonify, g, Response
+    abort, flash, jsonify, g, Response, send_file
 from sqlalchemy import or_, String
 from werkzeug.utils import safe_join
 from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, ViewEstudos, db, Alternativa, Anexo, StatusEstudo
@@ -264,71 +264,7 @@ def api_estudos():
 @listar_bp.route("/listar", methods=["GET", "POST"])
 @requires_permission('visualizar')
 def listar():
-    # page = request.args.get("page", 1, type=int)
-    # per_page = request.args.get("per_page", 20, type=int)
-    # search = request.args.get("search", default="", type=str)
-    # sort_column = request.args.get("sort", default="data_registro", type=str)
-    # sort_dir = request.args.get("direction", default="desc", type=str)
-    #
-    # query = db.session.query(ViewEstudos)
-    # usuario = get_usuario_logado()
-    #
-    # # Busca global
-    # if search:
-    #     search_pattern = f"%{search}%"
-    #     query = query.filter(
-    #         or_(
-    #             ViewEstudos.num_doc.ilike(search_pattern),
-    #             ViewEstudos.nome_projeto.ilike(search_pattern),
-    #             ViewEstudos.empresa.ilike(search_pattern),
-    #             ViewEstudos.municipio.ilike(search_pattern),
-    #             ViewEstudos.nome_responsavel.ilike(search_pattern),
-    #             ViewEstudos.id_estudo.cast(String).ilike(search_pattern)
-    #         )
-    #     )
-    #
-    # # Ordenação
-    # sort_obj = getattr(ViewEstudos, sort_column)
-    # if sort_dir == "desc":
-    #     sort_obj = sort_obj.desc()
-    #
-    # query = query.order_by(sort_obj)
-    #
-    # # Paginação real
-    # pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    #
-    # # SERIALIZAÇÃO DOS CAMPOS
-    # items = []
-    # for e in pagination.items:
-    #     items.append({
-    #         "id_estudo": e.id_estudo,
-    #         "num_doc": e.num_doc,
-    #         "nome_projeto": e.nome_projeto,
-    #         "empresa": e.empresa,
-    #         "municipio": e.municipio,
-    #         "eng_responsavel": e.nome_responsavel,
-    #         "data_registro": e.data_registro.strftime("%d/%m/%Y") if e.data_registro else "",
-    #         "qtd_alternativas": e.n_alternativas,
-    #         "qtd_anexos": e.qtd_anexos,
-    #         "status": e.ultimo_status,
-    #         "acoes": render_template(
-    #             "listar/partials/acoes.html",
-    #             id_estudo=e.id_estudo,
-    #             usuario=g.user
-    #         )
-    #     })
-
-    # return jsonify({
-    #     "page": pagination.page,
-    #     "per_page": pagination.per_page,
-    #     "total": pagination.total,
-    #     "pages": pagination.pages,
-    #     "items": items
-    # })
-
-    #dados = listar_estudos()
     status_tipos = StatusTipo.query.all()
-
 
     return render_template("listar/listar.html", usuario=g.user, status_tipos=status_tipos)
 
@@ -463,3 +399,14 @@ def excluir(id_estudo):
     else:
         return jsonify({'teste': 'pode excluir'})
         # permite a exclusão
+
+
+@listar_bp.route("/listar/imagem/<int:id>")
+def visualizar_imagem(id):
+    img = Anexo.query.get_or_404(id)
+
+    return send_file(
+        img.endereco,
+        mimetype=img.tipo_mime,
+        as_attachment=False
+    )
