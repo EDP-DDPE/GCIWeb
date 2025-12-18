@@ -360,6 +360,7 @@ def editar_estudo(id_estudo):
     form.tipo_geracao.data = estudo.tipo_geracao
 
     # Aba Datas
+    form.data_registro.data = estudo.data_registro
     form.data_abertura_cliente.data = estudo.data_abertura_cliente
     form.data_desejada_cliente.data = estudo.data_desejada_cliente
     form.data_vencimento_cliente.data = estudo.data_vencimento_cliente
