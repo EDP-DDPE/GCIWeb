@@ -143,10 +143,7 @@ def api_estudos():
     if sort_dir == "desc":
         sort_obj = sort_obj.desc()
 
-    print(sort_obj)
     query = query.order_by(sort_obj)
-
-    print(query)
 
     # Paginação real
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
