@@ -12,7 +12,7 @@ cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates", stati
 
 
 def gerar_proximo_documento():
-    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.id_estudo.desc()).first()
+    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.num_doc.desc()).first()
 
     if doc_atual[0]:
         num, ano = str(doc_atual[0]).split('/')
@@ -220,16 +220,10 @@ def carregar_classificacao(form, id):
 @cadastro_bp.route("/estudos/editar/<int:id_estudo>", methods=['GET', 'POST'])
 @requires_permission('editar')
 def editar_estudo(id_estudo):
-    #print("iniciei")
     estudo = Estudo.query.get_or_404(id_estudo)
-    #print("carreguei estudo")
     form = EstudoForm()
-    #print("carreguei forms")
     carregar_choices_estudo(form)
-    #print("carreguei choices 1")
-    #print(estudo.id_tipo_solicitacao)
     carregar_classificacao(form, estudo.id_tipo_solicitacao)
-    #print("Carreguei choices 2")
     anexos = Anexo.query.filter_by(id_estudo=estudo.id_estudo).all()
     usuario = get_usuario_logado()
 
@@ -282,9 +276,18 @@ def editar_estudo(id_estudo):
                         new_name = file.filename
                     nome_arquivo = secure_filename(new_name)
 
+
+
                     upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], prefix)
                     os.makedirs(upload_folder, exist_ok=True)
                     caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
+
+                    overwrite_file = Anexo.query.filter_by(endereco=caminho_arquivo)
+                    if overwrite_file:
+                        if os.path.exists(overwrite_file.endereco):
+                            os.remove(overwrite_file.endereco)
+                        db.session.delete(overwrite_file)
+
                     file.save(caminho_arquivo)
 
                     novo_anexo = Anexo(
@@ -369,68 +372,69 @@ def editar_estudo(id_estudo):
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos, datetime=datetime)
 
 
-@cadastro_bp.route("/estudos/<int:id_estudo>/anexos/upload", methods=["GET", "POST"])
-def upload_anexo(id_estudo):
-    """Rota para upload de anexos de um estudo"""
-    estudo = Estudo.query.get_or_404(id_estudo)
-    form = AnexoForm()
+# @cadastro_bp.route("/estudos/<int:id_estudo>/anexos/upload", methods=["GET", "POST"])
+# def upload_anexo(id_estudo):
+#     """Rota para upload de anexos de um estudo"""
+#     estudo = Estudo.query.get_or_404(id_estudo)
+#     form = AnexoForm()
+#
+#     if request.method == 'POST' and form.validate_on_submit():
+#         try:
+#             arquivo = form.arquivo.data
+#             nome_arquivo = secure_filename(arquivo.filename)
+#
+#             # Criar diretório se não existir
+#             upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'estudos', str(id_estudo))
+#             os.makedirs(upload_folder, exist_ok=True)
+#
+#             # Gerar nome único se arquivo já existir
+#             base_name, ext = os.path.splitext(nome_arquivo)
+#             counter = 1
+#             while os.path.exists(os.path.join(upload_folder, nome_arquivo)):
+#                 nome_arquivo = f"{base_name}_{counter}{ext}"
+#                 counter += 1
+#
+#             # Salvar arquivo
+#             caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
+#             arquivo.save(caminho_arquivo)
+#
+#             # Criar registro do anexo
+#             novo_anexo = Anexo(
+#                 nome_arquivo=form.descricao.data or nome_arquivo,
+#                 endereco=caminho_arquivo,
+#                 tamanho_arquivo=os.path.getsize(caminho_arquivo),
+#                 tipo_mime=arquivo.content_type,
+#                 id_estudo=id_estudo
+#             )
+#
+#             db.session.add(novo_anexo)
+#             db.session.commit()
+#
+#             flash('Arquivo enviado com sucesso!', 'success')
+#             return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
+#
+#         except Exception as e:
+#             db.session.rollback()
+#             current_app.logger.error(f"Erro ao fazer upload do anexo: {str(e)}")
+#             flash('Erro ao enviar arquivo. Tente novamente.', 'error')
+#
+#     elif request.method == 'POST':
+#         flash('Por favor, corrija os erros no formulário.', 'error')
+#
+#     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
 
-    if request.method == 'POST' and form.validate_on_submit():
-        try:
-            arquivo = form.arquivo.data
-            nome_arquivo = secure_filename(arquivo.filename)
 
-            # Criar diretório se não existir
-            upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'estudos', str(id_estudo))
-            os.makedirs(upload_folder, exist_ok=True)
-
-            # Gerar nome único se arquivo já existir
-            base_name, ext = os.path.splitext(nome_arquivo)
-            counter = 1
-            while os.path.exists(os.path.join(upload_folder, nome_arquivo)):
-                nome_arquivo = f"{base_name}_{counter}{ext}"
-                counter += 1
-
-            # Salvar arquivo
-            caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
-            arquivo.save(caminho_arquivo)
-
-            # Criar registro do anexo
-            novo_anexo = Anexo(
-                nome_arquivo=form.descricao.data or nome_arquivo,
-                endereco=caminho_arquivo,
-                tamanho_arquivo=os.path.getsize(caminho_arquivo),
-                tipo_mime=arquivo.content_type,
-                id_estudo=id_estudo
-            )
-
-            db.session.add(novo_anexo)
-            db.session.commit()
-
-            flash('Arquivo enviado com sucesso!', 'success')
-            return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
-
-        except Exception as e:
-            db.session.rollback()
-            current_app.logger.error(f"Erro ao fazer upload do anexo: {str(e)}")
-            flash('Erro ao enviar arquivo. Tente novamente.', 'error')
-
-    elif request.method == 'POST':
-        flash('Por favor, corrija os erros no formulário.', 'error')
-
-    return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
-
-@cadastro_bp.route("/estudos/<int:id_estudo>")
-def detalhar_estudo(id_estudo):
-    """Rota para detalhar um estudo específico"""
-    estudo = Estudo.query.get_or_404(id_estudo)
-    alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).all()
-    anexos = Anexo.query.filter_by(id_estudo=id_estudo).all()
-
-    return render_template('cadastro/detalhar_estudo.html',
-                           estudo=estudo,
-                           alternativas=alternativas,
-                           anexos=anexos)
+# @cadastro_bp.route("/estudos/<int:id_estudo>")
+# def detalhar_estudo(id_estudo):
+#     """Rota para detalhar um estudo específico"""
+#     estudo = Estudo.query.get_or_404(id_estudo)
+#     alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).all()
+#     anexos = Anexo.query.filter_by(id_estudo=id_estudo).all()
+#
+#     return render_template('cadastro/detalhar_estudo.html',
+#                            estudo=estudo,
+#                            alternativas=alternativas,
+#                            anexos=anexos)
 
 
 @cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])
@@ -446,6 +450,7 @@ def excluir_estudo(id_estudo):
         if user.id_usuario not in [id_resp, estudo.id_criado_por] and not user.admin:
             return jsonify({'success': False, 'message': 'Você não tem permissão para deletar esse estudo. Solicite ao criador do estudo, o resposável da região ou à algum admin.'})
 
+        print(f"{datetime.now()}: Estudo {id_estudo} excluído pelo usuário {user.nome} ")
         db.session.delete(estudo)
         db.session.commit()
 
