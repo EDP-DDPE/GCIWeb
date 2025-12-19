@@ -282,7 +282,7 @@ def editar_estudo(id_estudo):
                     os.makedirs(upload_folder, exist_ok=True)
                     caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
 
-                    overwrite_file = Anexo.query.filter_by(endereco=caminho_arquivo)
+                    overwrite_file = Anexo.query.filter_by(endereco=caminho_arquivo).first()
                     if overwrite_file:
                         if os.path.exists(overwrite_file.endereco):
                             os.remove(overwrite_file.endereco)
