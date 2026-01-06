@@ -6,24 +6,46 @@ from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitaca
 
 from datetime import datetime, timedelta
 from app.auth import requires_permission, get_usuario_logado
+from sqlalchemy import desc 
 import os
 
 cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates", static_folder="static", static_url_path='/cadastro/static')
 
 
-def gerar_proximo_documento():
-    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.num_doc.desc()).first()
+#def gerar_proximo_documento():
+#    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.num_doc.desc()).first()
 
-    if doc_atual[0]:
-        num, ano = str(doc_atual[0]).split('/')
-        ano = int(ano) + 2000
-        if ano == datetime.now().year:
-            num = int(num) + 1
-        else:
-            ano = datetime.now().year
-            num = 1
-        proximo_doc = f"{num:04d}/{str(ano)[-2:]}"
-        return proximo_doc
+#    if doc_atual[0]:
+#        num, ano = str(doc_atual[0]).split('/')
+#        ano = int(ano) + 2000
+#        if ano == datetime.now().year:
+#            num = int(num) + 1
+#        else:
+#            ano = datetime.now().year
+#            num = 1
+#        proximo_doc = f"{num:04d}/{str(ano)[-2:]}"
+#        return proximo_doc
+
+
+def gerar_proximo_documento():
+    ano_atual = datetime.now().year
+    sufixo_ano = str(ano_atual)[-2:]
+
+    # Busca o último documento APENAS do ano atual
+    doc_atual = (
+        db.session.query(Estudo.num_doc)
+        .filter(Estudo.num_doc.like(f"%/{sufixo_ano}"))
+        .order_by(desc(Estudo.num_doc))
+        .first()
+    )
+
+    if doc_atual:
+        num, _ = doc_atual[0].split('/')
+        num = int(num) + 1
+    else:
+        num = 1
+
+    return f"{num:04d}/{sufixo_ano}"
 
 
 def carregar_choices_estudo(form):
