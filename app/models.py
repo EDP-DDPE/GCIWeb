@@ -244,6 +244,7 @@ class TipoSolicitacao(db.Model):
     pedido = db.Column(db.String(255), nullable=False)
 
     estudos = db.relationship("Estudo", back_populates="tipo_solicitacao", passive_deletes=True)
+    doc_padronizados = db.relationship('DocPadronizado',back_populates='tipo_solicitacao',lazy='select')
 
 
 class StatusEstudo(db.Model):
@@ -517,6 +518,30 @@ class Obra(db.Model):
 
     # Relacionamento N:1 - Várias obras podem pertencer a uma alternativa
     alternativa = db.relationship('Alternativa', back_populates='obras', lazy='joined')
+
+class DocPadronizado(db.Model):
+    __tablename__ = 'doc_padronizados'
+    __table_args__ = {'schema': 'gciweb'}
+
+    id_doc_padronizado = db.Column(db.BigInteger, primary_key=True)
+    nome_doc = db.Column(db.String(255), nullable=False)
+    caminho_doc = db.Column(db.String(500), nullable=False)
+    tipo_doc = db.Column(db.String(100), nullable=False)
+    data_criacao = db.Column(db.DateTime, nullable=False)
+    data_atualizacao = db.Column(db.DateTime)
+    versao = db.Column(db.Integer)
+    id_tipo_solicitacao = db.Column(
+        db.BigInteger,
+        db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'),
+        nullable=False
+    )
+
+    # Relacionamentos
+    tipo_solicitacao = db.relationship(
+        'TipoSolicitacao',
+        back_populates='doc_padronizados',
+        lazy='joined'
+    )
 
 
 # Funções utilitárias para queries otimizadas

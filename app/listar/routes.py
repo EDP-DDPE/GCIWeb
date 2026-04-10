@@ -4,14 +4,15 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
     abort, flash, jsonify, g, Response, send_file
 from sqlalchemy import or_, String
 from werkzeug.utils import safe_join
-from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, ViewEstudos, db, Alternativa, Anexo, StatusEstudo
+from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, ViewEstudos, db, Alternativa, Anexo, StatusEstudo, DocPadronizado
 from app.auth import requires_permission, get_usuario_logado
 import os
 from io import BytesIO
 import pandas as pd
 from fpdf import FPDF
-from datetime import datetime
+from datetime import datetime, date
 import pytz
+from app.utils.docx_helper import preencher_template
 
 listar_bp = Blueprint("listar", __name__, template_folder="templates",
                       static_folder="static", static_url_path='/listar/static')
@@ -413,4 +414,133 @@ def visualizar_imagem(id):
         safe_path,
         mimetype=img.tipo_mime,
         as_attachment=False
+    )
+
+# Faz parte da implementação do Download do Template do Documento
+@listar_bp.get("/listar/estudos/<int:id_estudo>/download_template")
+@requires_permission('visualizar')
+def download_template(id_estudo):
+    log = current_app.logger
+    log.info("=== INÍCIO download_template id_estudo=%s ===", id_estudo)
+
+    # ── Parâmetros vindos do popup ──────────────────────────────────────
+    multiplas_etapas  = request.args.get("multiplas_etapas", "nao")   # "sim" | "nao"
+    alternativa_unica = request.args.get("alternativa_unica", "nao")  # "sim" | "nao"
+
+    # Converte para bool para facilitar uso no context / lógica de negócio
+    flag_multiplas_etapas  = multiplas_etapas  == "sim"
+    flag_alternativa_unica = alternativa_unica == "sim"
+    # ────────────────────────────────────────────────────────────────────
+
+    # Busca o estudo
+    estudo    = db.session.query(ViewEstudos).filter_by(id_estudo=id_estudo).first()
+    estudo_2  = db.session.query(Estudo).filter_by(id_estudo=id_estudo).first()
+
+    doc_padronizado = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=estudo_2.id_tipo_solicitacao).order_by(DocPadronizado.versao.desc()).first()
+
+    if not doc_padronizado:
+        return jsonify({'status': 'error', 'message': 'Não há template cadastrado'}), 404
+    if not estudo:
+        abort(404, description="Estudo não encontrado")
+
+        # ── Monta o nome do arquivo ─────────────────────────────────────────
+    if estudo.viabilidade == "Orçamento Estimado":
+        viabilidade_cod = "OE"
+    elif estudo.viabilidade == "Orçamento de Conexão":
+        viabilidade_cod = "EV"
+    else:
+        viabilidade_cod = "XX"
+
+    if estudo.analise == "Carga":
+        analise_cod = "C"
+        demanda = max(float(estudo.dem_carga_solicit_p), float(estudo.dem_carga_solicit_fp))
+        c_g = "C"
+    elif estudo.analise == "MMGD":
+        analise_cod = "MMGD"
+        demanda = max(float(estudo.dem_ger_solicit_p), float(estudo.dem_ger_solicit_fp))
+        c_g = "G"
+    elif estudo.analise == "Autoprodutor":
+        analise_cod = "AUTO"
+        demanda = max(float(estudo.dem_ger_solicit_p), float(estudo.dem_ger_solicit_fp))
+        c_g = "G"
+    elif estudo.analise == "Produtor Independente":
+        analise_cod = "PI"
+        demanda = max(float(estudo.dem_ger_solicit_p), float(estudo.dem_ger_solicit_fp))
+        c_g = "G"
+    elif estudo.analise == "Carga e MMGD":
+        analise_cod = "CMMGD"
+        demanda = max(float(estudo.dem_carga_solicit_p), float(estudo.dem_carga_solicit_fp),
+                      float(estudo.dem_ger_solicit_p),   float(estudo.dem_ger_solicit_fp))
+        c_g = "G"
+    elif estudo.analise == "Carga e Autoprodutor":
+        analise_cod = "CAUTO"
+        demanda = max(float(estudo.dem_carga_solicit_p), float(estudo.dem_carga_solicit_fp),
+                      float(estudo.dem_ger_solicit_p),   float(estudo.dem_ger_solicit_fp))
+        c_g = "G"
+    else:
+        analise_cod = "XX"
+        demanda = 0
+
+    if estudo.pedido == "Ligação Nova":
+        pedido_cod = "LN"
+    elif estudo.pedido == "Aumento de Demanda":
+        pedido_cod = "AD"
+    elif estudo.pedido == "Reserva de Capacidade":
+        pedido_cod = "RC"
+    else:
+        pedido_cod = "XX"
+
+    numdoc    = str(estudo.num_doc)
+    primeiros_4 = numdoc[:4]
+    ultimos_2   = numdoc[-2:]
+
+    # Monta o dicionário de valores que o template espera
+    context = {
+        "UF":                    estudo.empresa,
+        "protocolo":             estudo.num_doc,
+        "nota":                  estudo.protocolo,
+        "cliente":               estudo.nome_empresa,
+        "instalacao":            estudo.instalacao,
+        "tipo_geracao":          estudo_2.tipo_geracao,
+        "municipio":             estudo.municipio,
+        "latitude":              estudo.latitude_cliente,
+        "longitude":             estudo.longitude_cliente,
+        "carga_ponta_L5":        int(estudo.dem_carga_atual_p),
+        "carga_fora_ponta_L5":   int(estudo.dem_carga_atual_fp),
+        "geracao_ponta_L5":      int(estudo.dem_ger_atual_p),
+        "geracao_fora_ponta_L5": int(estudo.dem_ger_atual_fp),
+        "data_L6":               estudo.data_desejada_cliente.strftime("%m/%y") if estudo.data_desejada_cliente else "",
+        "carga_ponta_L6":        int(estudo.dem_carga_solicit_p),
+        "carga_fora_ponta_L6":   int(estudo.dem_carga_solicit_fp),
+        "geracao_ponta_L6":      int(estudo.dem_ger_solicit_p),
+        "geracao_fora_ponta_L6": int(estudo.dem_ger_solicit_fp),
+
+        # Variáveis aleatórias
+        "data_hoje": date.today().strftime("%d/%m/%Y"),
+
+        # ── Variáveis do popup ──────────────────────────────────────────
+        "multiplas_etapas":      flag_multiplas_etapas,
+        "alternativa_unica":     flag_alternativa_unica,
+        # ────────────────────────────────────────────────────────────────
+
+        "c_g": c_g
+    }
+
+    # Preenche o template e obtém BytesIO
+    try:
+        doc_io = preencher_template(f"doc_{doc_padronizado.id_tipo_solicitacao}_{doc_padronizado.versao}.docx", context)
+    except Exception as e:
+        current_app.logger.error(f"Erro ao gerar docx: {e}")
+        abort(500, description="Falha ao gerar documento")
+
+    filename = (
+        f"{viabilidade_cod}_DDPE-{estudo.empresa}_{primeiros_4}_{ultimos_2}"
+        f"_{analise_cod}_{pedido_cod}_{int(demanda)}_kW_{estudo.nome_projeto}_ALIM.docx"
+    )
+
+    return send_file(
+        doc_io,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )

@@ -204,3 +204,142 @@
         </div>
     </div>
 </div>
+
+<!-- BOTÃO DE DOWNLOAD DO TEMPLATE -->
+
+<!-- BOTÃO QUE ABRE O MODAL -->
+<div class="mt-3 text-end">
+    <button class="btn btn-outline-success"
+            onclick="abrirModalDownload({{ e.id_estudo }})">
+        <i class="fas fa-download"></i> Baixar modelo preenchido
+    </button>
+</div>
+
+<!-- MODAL DE OPÇÕES DE DOWNLOAD -->
+<div class="modal fade" id="modalDownloadOpcoes" tabindex="-1"
+     aria-labelledby="modalDownloadOpcoesLabel" aria-hidden="true"
+     data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalDownloadOpcoesLabel">
+                    <i class="fas fa-file-word me-2"></i>Opções do Documento
+                </h5>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="text-muted mb-3">
+                    Responda as perguntas abaixo antes de gerar o documento.
+                </p>
+
+                <!-- Pergunta 1 -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Existe mais de uma etapa?</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="multiplas_etapas" id="etapa_sim" value="sim">
+                            <label class="form-check-label" for="etapa_sim">Sim</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="multiplas_etapas" id="etapa_nao" value="nao">
+                            <label class="form-check-label" for="etapa_nao">Não</label>
+                        </div>
+                    </div>
+                    <div id="erro_etapas" class="text-danger small mt-1" style="display:none;">
+                        Por favor, selecione uma opção.
+                    </div>
+                </div>
+
+                <!-- Pergunta 2 -->
+                <div class="mb-2">
+                    <label class="form-label fw-bold">É um documento de alternativa única?</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="alternativa_unica" id="alt_unica_sim" value="sim">
+                            <label class="form-check-label" for="alt_unica_sim">Sim</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="alternativa_unica" id="alt_unica_nao" value="nao">
+                            <label class="form-check-label" for="alt_unica_nao">Não</label>
+                        </div>
+                    </div>
+                    <div id="erro_alternativa" class="text-danger small mt-1" style="display:none;">
+                        Por favor, selecione uma opção.
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success"
+                        id="btnConfirmarDownload"
+                        onclick="confirmarDownload()">
+                    <i class="fas fa-download me-1"></i>Gerar Documento
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let _idEstudoDownload = null;
+
+    function abrirModalDownload(idEstudo) {
+        _idEstudoDownload = idEstudo;
+
+        // Limpa seleções anteriores
+        document.querySelectorAll('input[name="multiplas_etapas"]').forEach(r => r.checked = false);
+        document.querySelectorAll('input[name="alternativa_unica"]').forEach(r => r.checked = false);
+        document.getElementById('erro_etapas').style.display = 'none';
+        document.getElementById('erro_alternativa').style.display = 'none';
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+            document.getElementById('modalDownloadOpcoes')
+        );
+        modal.show();
+    }
+
+    function confirmarDownload() {
+        const multiplas_etapas = document.querySelector('input[name="multiplas_etapas"]:checked');
+        const alternativa_unica = document.querySelector('input[name="alternativa_unica"]:checked');
+
+        // Validação
+        let valido = true;
+        if (!multiplas_etapas) {
+            document.getElementById('erro_etapas').style.display = 'block';
+            valido = false;
+        } else {
+            document.getElementById('erro_etapas').style.display = 'none';
+        }
+
+        if (!alternativa_unica) {
+            document.getElementById('erro_alternativa').style.display = 'block';
+            valido = false;
+        } else {
+            document.getElementById('erro_alternativa').style.display = 'none';
+        }
+
+        if (!valido) return;
+
+        // Monta a URL com os parâmetros
+        const url = `/listar/estudos/${_idEstudoDownload}/download_template`
+            + `?multiplas_etapas=${multiplas_etapas.value}`
+            + `&alternativa_unica=${alternativa_unica.value}`;
+
+        // Dispara o download e fecha o modal
+        window.open(url, '_blank');
+
+        bootstrap.Modal.getOrCreateInstance(
+            document.getElementById('modalDownloadOpcoes')
+        ).hide();
+    }
+</script>

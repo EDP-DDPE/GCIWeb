@@ -27,7 +27,8 @@ function initializeData() {
             viabilidade: cells.eq(1).text().trim(),
             analise: cells.eq(2).text().trim(),
             pedido: cells.eq(3).text().trim(),
-            acoes: cells.eq(4).html(),
+            status_doc: cells.eq(4).text().trim(),
+            acoes: cells.eq(5).clone(), // era: acoes: cells.eq(4).html(),
             element: this
         };
     }).get();
@@ -188,22 +189,32 @@ function renderTable() {
         $tbody.empty();
 
         pageData.forEach(item => {
-            const row = $('<tr>').html(`
-                <td data-column="id">${item.id}</td>
-                <td data-column="viabilidade">${item.viabilidade}</td>
-                <td data-column="analise">${item.analise}</td>
-                <td data-column="pedido">${item.pedido}</td>
-                <td data-column="acoes">${item.acoes}</td>
-            `);
-            $tbody.append(row);
+            const $row = $('<tr>');
+
+            $('<td>').attr('data-column', 'id').text(item.id).appendTo($row);
+            $('<td>').attr('data-column', 'viabilidade').text(item.viabilidade).appendTo($row);
+            $('<td>').attr('data-column', 'analise').text(item.analise).appendTo($row);
+            $('<td>').attr('data-column', 'pedido').text(item.pedido).appendTo($row);
+
+            // status_doc: clona o TD original para preservar o badge colorido
+            const $tdStatus = currentData.find(d => d.id === item.id);
+            if ($tdStatus) {
+                const $originalRow = $($tdStatus.element);
+                const $statusCell = $originalRow.find('[data-column="status_doc"]').clone(true);
+                $row.append($statusCell);
+            } else {
+                $('<td>').attr('data-column', 'status_doc').text(item.status_doc).appendTo($row);
+            }
+
+            const $tdAcoes = $('<td>').attr('data-column', 'acoes');
+            $tdAcoes.append(item.acoes.clone(true));
+            $row.append($tdAcoes);
+
+            $tbody.append($row);
         });
 
-        // Aplicar visibilidade das colunas
         applyColumnVisibility();
-
-        // Reativar tooltips
         initializeTooltips();
-
         hideLoading();
     }, 200);
 }
@@ -949,8 +960,214 @@ function salvarNovoTipoSolicitacao() {
         }
     }
 
+// Documentos Padronizados
+
+let tipoSolicitacaoIdDocumento = null;
+
+function getAlertaRevisao(dataAtualizacaoStr) {
+    if (!dataAtualizacaoStr) return null;
+
+    // Converte "DD/MM/YYYY HH:MM" para Date
+    const partes = dataAtualizacaoStr.split(' ')[0].split('/');
+    const dataAtualizacao = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+    const hoje = new Date();
+
+    // Data limite = atualização + 6 meses
+    const dataLimite = new Date(dataAtualizacao);
+    dataLimite.setMonth(dataLimite.getMonth() + 6);
+
+    const diffMs = dataLimite - hoje;
+    const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDias < 0) {
+        return {
+            tipo: 'danger',
+            icone: 'bi-exclamation-triangle-fill',
+            mensagem: `Documento vencido há ${Math.abs(diffDias)} dia(s). Revisão obrigatória!`
+        };
+    } else if (diffDias <= 30) {
+        return {
+            tipo: 'warning',
+            icone: 'bi-clock-fill',
+            mensagem: `Documento vence em ${diffDias} dia(s). Revisão recomendada!`
+        };
+    }
+    return {
+        tipo: 'success',
+        icone: 'bi-check-circle-fill',
+        mensagem: `Documento em dia. Próxima revisão em ${diffDias} dia(s) (${dataLimite.toLocaleDateString('pt-BR')}).`
+    };
+}
 
 
+function abrirModalDocumento(tipoId) {
+    tipoSolicitacaoIdDocumento = tipoId;
+
+    const $modalBody = $('#modalDocumentoBody');
+    $modalBody.html(`
+        <div class="d-flex justify-content-center align-items-center" style="height: 150px;">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+    `);
+
+    const modal = new bootstrap.Modal($('#modalDocumento')[0]);
+    modal.show();
+
+    $.get(`/tipo_solicitacao/${tipoId}/api`)
+        .done(function(data) {
+            const doc = data.doc_padronizado;
+
+            let docHtml = '';
+            if (doc) {
+                const alerta = getAlertaRevisao(doc.data_atualizacao);
+                const alertaHtml = alerta ? `
+                    <div class="alert alert-${alerta.tipo} d-flex align-items-center py-2 mb-3">
+                        <i class="bi ${alerta.icone} me-2 fs-5"></i>
+                        <span>${alerta.mensagem}</span>
+                    </div>
+                ` : '';
+
+                docHtml = `
+                    ${alertaHtml}
+                    <p><strong>Documento atual:</strong> ${doc.nome_doc || '(sem nome)'}</p>
+                    <p><strong>Tipo:</strong> ${doc.tipo_doc || '-'}</p>
+                    <p><strong>Criado em:</strong> ${doc.data_criacao || '-'}</p>
+                    <p><strong>Última atualização:</strong> ${doc.data_atualizacao || '-'}</p>
+                    <p><strong>Total de versões:</strong> ${doc.total_versoes}</p>
+                    <button class="btn btn-sm btn-outline-primary mb-2" onclick="baixarDocumentoAtual()">
+                        <i class="bi bi-download"></i> Baixar atual
+                    </button>
+                `;
+            } else {
+                docHtml = `
+                    <div class="alert alert-warning">
+                        Nenhum documento padrão cadastrado para este tipo de solicitação.
+                    </div>
+                `;
+            }
+
+            $modalBody.html(`
+                <div class="mb-3">
+                    <h6>Tipo de Solicitação ${data.id}</h6>
+                    <p><strong>Viabilidade:</strong> ${data.viabilidade || '-'}</p>
+                    <p><strong>Análise:</strong> ${data.analise || '-'}</p>
+                    <p><strong>Pedido:</strong> ${data.pedido || '-'}</p>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    ${docHtml}
+                </div>
+                <hr>
+                <div class="mb-2">
+                    <h6>Versões anteriores</h6>
+                    <div id="listaVersoesDoc">
+                        Carregando versões...
+                    </div>
+                </div>
+            `);
+
+            carregarVersoesDocumento();
+        })
+        .fail(function() {
+            $modalBody.html('<div class="alert alert-danger">Erro ao carregar informações do documento.</div>');
+        });
+}
+
+function carregarVersoesDocumento() {
+    if (!tipoSolicitacaoIdDocumento) return;
+
+    $.get(`/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/versoes`)
+        .done(function(resp) {
+            if (resp.status !== 'success') {
+                $('#listaVersoesDoc').html('<div class="alert alert-danger">Erro ao carregar versões.</div>');
+                return;
+            }
+
+            const versoes = resp.versoes || [];
+            if (versoes.length === 0) {
+                $('#listaVersoesDoc').html('<p class="text-muted mb-0">Nenhuma versão anterior encontrada.</p>');
+                return;
+            }
+
+            let html = `
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">Versão</th>
+                            <th>Nome</th>
+                            <th style="width: 180px;">Data atualização</th>
+                            <th style="width: 80px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            versoes.forEach(v => {
+                html += `
+                    <tr>
+                        <td class="text-center">${v.versao}</td>
+                        <td>${v.nome_doc}</td>
+                        <td>${v.data_atualizaocao || '-'}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id})">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            $('#listaVersoesDoc').html(html);
+        })
+        .fail(function() {
+            $('#listaVersoesDoc').html('<div class="alert alert-danger">Erro ao carregar versões.</div>');
+        });
+}
+
+function enviarDocumentoPadrao() {
+    if (!tipoSolicitacaoIdDocumento) return;
+
+    const arquivo = $('#arquivoDocumento')[0].files[0];
+    if (!arquivo) {
+        alert('Selecione um arquivo para enviar.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+
+    $.ajax({
+        url: `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/upload`,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(resp) {
+            if (resp.status === 'success') {
+                alert('Documento enviado/atualizado com sucesso.');
+                // Recarrega as informações do modal
+                abrirModalDocumento(tipoSolicitacaoIdDocumento);
+            } else {
+                alert(resp.message || 'Erro ao enviar documento.');
+            }
+        },
+        error: function() {
+            alert('Erro ao enviar documento. Tente novamente.');
+        }
+    });
+}
+
+function baixarDocumentoAtual() {
+    if (!tipoSolicitacaoIdDocumento) return;
+    window.location.href = `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/download`;
+}
+
+function baixarVersaoDocumento(idVersao) {
+    window.location.href = `/tipo_solicitacao/documento/versao/${idVersao}/download`;
+}
 
 
 

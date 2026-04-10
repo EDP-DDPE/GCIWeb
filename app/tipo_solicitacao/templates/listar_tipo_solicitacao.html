@@ -10,7 +10,7 @@
             <button class="btn btn-success" onclick="refreshData()">
                 <i class="fas fa-sync-alt"></i> Atualizar
             </button> 
-            <button class="btn btn-sm btn-primary" 
+            <button class="btn btn-sm btn-primary"
                     onclick="abrirModalAdicionar()"
                     {% if usuario.criar == 0 %}disabled{% endif %}>
                 <i class="bi bi-plus-circle"></i> Novo Tipo
@@ -67,6 +67,10 @@
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="pedido" id="col-pedido" checked>
                                 <label class="form-check-label" for="col-edp">Pedido</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="status_doc" id="col-status_doc" checked>
+                                <label class="form-check-label" for="col-status_doc">Doc. Padrão</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
@@ -145,6 +149,15 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="status_doc" style="min-width: 160px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Doc. Padrão</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="status_doc" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Ações</span>
@@ -166,6 +179,9 @@
                             <th data-column="pedido">
                                 <input type="text" class="filter-input" placeholder="Filtrar Pedido..." data-filter="pedido">
                             </th>
+                            <th data-column="status_doc">
+                                <input type="text" class="filter-input" placeholder="Filtrar status..." data-filter="status_doc">
+                            </th>
                             <th data-column="acoes">
                                 <!-- Sem filtro para ações -->
                             </th>
@@ -178,6 +194,16 @@
                             <td data-column="viabilidade">{{ doc.viabilidade }}</td>
                             <td data-column="analise">{{ doc.analise }}</td>
                             <td data-column="pedido">{{ doc.pedido }}</td>
+                            {% set status = status_map.get(doc.id_tipo_solicitacao, {'classe': 'secondary', 'icone': 'bi-file-earmark-x', 'texto': 'Sem documento', 'dias': none}) %}
+                            <td data-column="status_doc">
+                                <span class="badge bg-{{ status.classe }} d-flex align-items-center gap-1"
+                                    style="width: fit-content;"
+                                    data-bs-toggle="tooltip"
+                                    title="{% if status.dias is not none %}Próxima revisão: {{ status.data_limite }}{% else %}Nenhum documento cadastrado{% endif %}">
+                                    <i class="bi {{ status.icone }}"></i>
+                                    {{ status.texto }}
+                                </span>
+                            </td>
                             <td data-column="acoes">
                                 <div class="btn-group" role="group">
                                     <button class="btn btn-sm btn-warning"
@@ -186,6 +212,13 @@
                                         title="Editar Tipo de Solicitação"
                                         {% if usuario.editar == 0 %}disabled{% endif %}>
                                     <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <button class="btn btn-sm btn-info"
+                                        onclick="abrirModalDocumento({{ doc.id_tipo_solicitacao }})"
+                                        data-bs-toggle="tooltip"
+                                        tittle="Documento Padrão">
+                                        <i class="bi bi-file-earmark-text"></i>
                                     </button>
                                 </div>
                             </td>
@@ -257,6 +290,29 @@
   </div>
 </div>
 
+<!-- Modal Documento Padrão -->
+<div class="modal fade" id="modalDocumento" tabindex="-1" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="modalDocumentoLabel">
+          <i class="bi bi-file-earmark-text me-2"></i>Documento Padrão
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" id="modalDocumentoBody">
+        <!-- Conteúdo via JS -->
+      </div>
+      <div class="modal-footer">
+        <form id="formUploadDocumento" enctype="multipart/form-data" class="me-auto">
+          <input type="file" name="arquivo" id="arquivoDocumento" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt">
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <button type="button" class="btn btn-primary" onclick="enviarDocumentoPadrao()">Enviar Documento</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src=" {{ url_for('tipo_solicitacao.static', filename='js/listar_tipo_solicitacao.js') }}"></script>
