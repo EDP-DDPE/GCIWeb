@@ -15,8 +15,8 @@ pandas~=2.3.3
 openpyxl
 fpdf~=1.7.2
 pytz~=2025.2
-
-
+pyodbc
+waitress
 docx
 python-docx>=0.8.11
 docxtpl>=0.16.0
