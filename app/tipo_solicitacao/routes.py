@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import Blueprint, render_template, request, jsonify, send_file, current_app, flash, abort
 from app.models import db, TipoSolicitacao, DocPadronizado
+from werkzeug.utils import safe_join
 from app.auth import requires_permission, get_usuario_logado
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -8,23 +9,17 @@ import shutil
 
 tipo_solicitacao_bp = Blueprint("tipo_solicitacao", __name__, template_folder="templates", static_folder="static", static_url_path='/tipo_solicitacao/static')
 
-# Diretórios base
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-BASE_DIR_DOCS = os.path.join(BASE_DIR, 'arquivos', 'doc_padronizados')
-
 @tipo_solicitacao_bp.route("/tipo_solicitacao", methods=["GET", "POST"])
 @requires_permission('visualizar')
 def listar():
     registros = TipoSolicitacao.query.all()
     usuario = get_usuario_logado()
 
-    # Buscar todos os docs de uma vez (evita N+1)
     ids = [r.id_tipo_solicitacao for r in registros]
     docs = DocPadronizado.query.filter(
         DocPadronizado.id_tipo_solicitacao.in_(ids)
     ).all()
 
-    # Mapear id_tipo_solicitacao -> doc
     doc_map = {d.id_tipo_solicitacao: d for d in docs}
 
     hoje = datetime.now()
@@ -90,32 +85,26 @@ def listar():
         status_map=status_map
     )
 
+
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/editar', methods=['POST'])
 @requires_permission('editar')
 def editar_circuito(id):
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
-    # CORREÇÃO: Verificar se é JSON ou FormData
     if request.is_json:
         data = request.get_json()
-        print("Dados recebidos (JSON):", data)  # Para debug
     else:
         data = request.form.to_dict()
-        print("Dados recebidos (Form):", data)  # Para debug
     
-    # Atualiza os campos recebidos
     for campo in data:
         if hasattr(tipo_solicitacao, campo):
-            print(f"Atualizando {campo}: {getattr(tipo_solicitacao, campo)} -> {data[campo]}")  # Para debug
             setattr(tipo_solicitacao, campo, data[campo])
     
     try:
         db.session.commit()
-        print("Commit realizado com sucesso!")  # Para debug
         return jsonify({'status': 'success', 'message': 'Tipo atualizado com sucesso!'})
     except Exception as e:
         db.session.rollback()
-        print(f"Erro no commit: {e}")  # Para debug
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
@@ -123,11 +112,10 @@ def editar_circuito(id):
 def get_tipo_solicitacao_api(id):
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
 
-    # Buscar documento padrão vinculado (se existir)
     doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
     doc_info = None
     if doc:
-        total_versoes = doc.versao # O total de versões é o número da última versão
+        total_versoes = doc.versao
         doc_info = {
             'id': doc.id_doc_padronizado,
             'nome_doc': doc.nome_doc,
@@ -143,6 +131,9 @@ def get_tipo_solicitacao_api(id):
         'viabilidade': tipo_solicitacao.viabilidade,
         'analise': tipo_solicitacao.analise,
         'pedido': tipo_solicitacao.pedido,
+        'viabilidade_abrev': tipo_solicitacao.viabilidade_abrev,
+        'analise_abrev': tipo_solicitacao.analise_abrev,
+        'pedido_abrev': tipo_solicitacao.pedido_abrev,
         'doc_padronizado': doc_info
     })
 
@@ -152,7 +143,6 @@ def get_tipo_solicitacao_api(id):
 def excluir_circuito(id):
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
-    # Verifica se NÃO há estudos associados
     if not tipo_solicitacao.estudos:
         try:
             db.session.delete(tipo_solicitacao)
@@ -166,7 +156,6 @@ def excluir_circuito(id):
             db.session.rollback()
             return jsonify({'status': 'error', 'message': 'Erro inesperado ao excluir o circuito.'}), 500
     else:
-        # Se houver estudos associados, retorna erro
         return jsonify({
             'status': 'error', 
             'message': 'Não foi possível apagar, pois há um estudo com esse tipo de solicitação.'
@@ -180,7 +169,6 @@ def adicionar_circuito():
     else:
         data = request.form.to_dict()
     
-    # Validação de campos obrigatórios
     campos_obrigatorios = ['viabilidade', 'analise', 'pedido']
     campos_faltantes = [campo for campo in campos_obrigatorios if not data.get(campo)]
     
@@ -193,8 +181,11 @@ def adicionar_circuito():
     try:
         novo_tipo_solicitacao = TipoSolicitacao(
             viabilidade=data.get('viabilidade'),
+            viabilidade_abrev=data.get('viabilidade_abrev'),
             analise=data.get('analise'),
-            pedido=data.get('pedido')
+            analise_abrev=data.get('analise_abrev'),
+            pedido=data.get('pedido'),
+            pedido_abrev=data.get('pedido_abrev')
         )
         db.session.add(novo_tipo_solicitacao)
         db.session.commit()
@@ -205,28 +196,9 @@ def adicionar_circuito():
         return jsonify({'status': 'error', 'message': str(e)}), 500
     
 
-# ---------------------------------
-# ROTAS PARA DOCUMENTO PADRONIZADO
-# ---------------------------------
-
-def _garantir_diretorios():
-    os.makedirs(BASE_DIR_DOCS, exist_ok=True)
-
-
-# UPLOAD REVISADO PARA ALTERAÇÃO DE TABELA DE VERSÃO
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/documento/upload', methods=['POST'])
 @requires_permission('editar')
 def upload_documento_tipo(id):
-    """
-    Upload/sobrescrita do documento padrão de um TipoSolicitacao.
-    Regras:
-      - Se já existe doc atual:
-          - mover o arquivo atual para /arquivos/doc_padronizados/historico
-            com sufixo _vN
-      - salvar o novo arquivo em /arquivos/doc_padronizados/
-      - atualizar/inserir registro em DocPadronizado
-      - registrar versão em DocPadronizadoVersao (opcional, mas recomendado)
-    """
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
 
     if 'arquivo' not in request.files:
@@ -235,8 +207,6 @@ def upload_documento_tipo(id):
     arquivo = request.files['arquivo']
     if arquivo.filename == '':
         return jsonify({'status': 'error', 'message': 'Nome de arquivo inválido.'}), 400
-
-    _garantir_diretorios()
 
     doc_mais_recente = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
 
@@ -247,21 +217,26 @@ def upload_documento_tipo(id):
         nova_versao = 1
         data_criacao = datetime.now()
 
-    # Preparar nome do arquivo
     _, ext = os.path.splitext(arquivo.filename)
     ext = ext.lower()
 
     nome_arquivo = f"doc_{id}_{nova_versao}{ext}"
-    caminho_arquivo = os.path.join(BASE_DIR_DOCS, nome_arquivo)
+
+    template_folder = current_app.config['TEMPLATE_FOLDER']
+    os.makedirs(template_folder, exist_ok=True)
+
+    template_folder = os.path.join(template_folder,nome_arquivo)
+
+    dir = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
+
+    caminho_arquivo = os.path.join(dir, template_folder)
 
     try:
-        # Salvar arquivo físico
         arquivo.save(caminho_arquivo)
 
-        # Criar novo registro na tabela
         doc = DocPadronizado(
             nome_doc = arquivo.filename,
-            caminho_doc = caminho_arquivo,
+            caminho_doc = template_folder,
             tipo_doc = ext.lstrip('.'),
             data_criacao = data_criacao,
             data_atualizacao = datetime.now(),
@@ -289,36 +264,33 @@ def upload_documento_tipo(id):
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/documento/download', methods=['GET'])
 @requires_permission('visualizar')
 def download_documento_atual(id):
-    tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
 
-    if not doc or not doc.caminho_doc or not os.path.isfile(doc.caminho_doc):
+    if not doc or not doc.caminho_doc:
         return jsonify({'status': 'error', 'message': 'Documento padrão não encontrado.'}), 404
 
+    dir = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
+
+    safe_path = os.path.join(dir,doc.caminho_doc)
+
     return send_file(
-        doc.caminho_doc,
+        safe_path,
         as_attachment=True,
         download_name=doc.nome_doc
     )
 
-
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/documento/versoes', methods=['GET'])
 @requires_permission('visualizar')
 def listar_versoes_documento(id):
-    # Verifica se o tipo de solicitação existe
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
-    # Busca TODAS as versões do documento (mais recente primeiro)
     versoes = DocPadronizado.query.filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).all()
 
-    # Se não tiver nenhuma versão -> lista vazia
     if not versoes:
         return jsonify({'status': 'success', 'versoes': []})
 
-    # Remove a versão atual (primeira da lista)
-    versoes_anteriores = versoes[1:] # do segundo item em diante
+    versoes_anteriores = versoes[1:]
 
-    # Se só tinha a versão atual -> lista vazia
     if not versoes_anteriores:
         return jsonify({'status': 'success', 'versoes': []})
 
@@ -340,8 +312,12 @@ def download_versao_documento(id_versao):
     if not versao.caminho_doc or not os.path.isfile(versao.caminho_doc):
         return jsonify({'status': 'error', 'message': 'Arquivo da versão não encontrado.'}), 404
 
+    dir = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
+
+    safe_path = os.path.join(dir,versao.caminho_doc)
+
     return send_file(
-        versao.caminho_doc,
+        safe_path,
         as_attachment=True,
         download_name=versao.nome_doc
     )

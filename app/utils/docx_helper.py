@@ -8,18 +8,6 @@ from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 # ----------------------------------------------------------------------
-# 1️⃣  Caminho base dos templates (pasta arquivos/doc_padronizados)
-# ----------------------------------------------------------------------
-TEMPLATE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "arquivos", "doc_padronizados")
-)
-
-def _load_template(filename: str) -> str:
-    """Retorna o caminho absoluto do template."""
-    return os.path.join(TEMPLATE_DIR, filename)
-
-
-# ----------------------------------------------------------------------
 # 2️⃣  Funções auxiliares
 # ----------------------------------------------------------------------
 def remover_content_control_por_tag(doc, tag_name):
@@ -246,9 +234,9 @@ def preencher_template(template_name: str, context: dict) -> BytesIO:
     Carrega o template .docx, preenche todos os content‑controls (corpo,
     cabeçalhos e rodapés) e devolve o documento em memória.
     """
-    template_path = _load_template(template_name)
+    #template_path = _load_template(template_name)
 
-    doc = Document(template_path)
+    doc = Document(template_name)
 
     # Tratando documentos com etapa única
     if context["multiplas_etapas"] == False:
@@ -305,7 +293,7 @@ def preencher_template(template_name: str, context: dict) -> BytesIO:
             context["tipo_geracao_1"] = "TERMOELÉTRICA"
 
     # Tratar caso em que não tem instalação
-    if context["instalacao"] == 0:
+    if context["instalacao"] == 0 or context["instalacao"] == "-":
         remover_content_control_por_tag(doc, "instalacao")
     else:
         context["instalacao"] = f"(Instalação: {context['instalacao']})"

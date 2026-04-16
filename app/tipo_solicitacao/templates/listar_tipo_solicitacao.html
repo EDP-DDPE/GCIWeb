@@ -61,12 +61,24 @@
                                 <label class="form-check-label" for="col-circuito">Viabilidade</label>
                             </div>
                             <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="viabilidade_abrev" id="col-viabilidade_abrev">
+                                <label class="form -check-label" for="col-viabilidade_abrev">Viabilidade Abrev.</label>
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="analise" id="col-analise" checked>
                                 <label class="form-check-label" for="col-subestacao">Análise</label>
                             </div>
                             <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="analise_abrev" id="col-analise_abrev">
+                                <label class="form -check-label" for="col-analise_abrev">Análise Abrev.</label>
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="pedido" id="col-pedido" checked>
                                 <label class="form-check-label" for="col-edp">Pedido</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="pedido_abrev" id="col-pedido_abrev">
+                                <label class="form -check-label" for="col-pedido_abrev">Pedido Abrev.</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="status_doc" id="col-status_doc" checked>
@@ -76,7 +88,6 @@
                                 <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
                                 <label class="form-check-label" for="col-acoes">Ações</label>
                             </div>
-
                         <hr>
                         <button class="btn btn-sm btn-outline-primary me-2" onclick="selectAllColumns()">Todas</button>
                         <button class="btn btn-sm btn-outline-secondary" onclick="deselectAllColumns()">Nenhuma</button>
@@ -131,6 +142,15 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="viabilidade_abrev" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Viabilidade Abrev.</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="viabilidade_abrev" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="analise" style="min-width: 200px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Análise</span>
@@ -140,11 +160,29 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="analise_abrev" style="min-width: 200px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Análise Abrev.</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="analise_abrev" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="pedido" style="min-width: 150px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Pedido</span>
                                     <div class="d-flex align-items-center">
                                         <i class="fas fa-sort sort-icon" data-sort="pedido" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="resizable-header" data-column="pedido_abrev" style="min-width: 150px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Pedido Abrev.</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="pedido_abrev" style="cursor: pointer; margin-left: 5px;"></i>
                                         <div class="resize-handle"></div>
                                     </div>
                                 </div>
@@ -173,11 +211,20 @@
                             <th data-column="viabilidade">
                                 <input type="text" class="filter-input" placeholder="Filtrar Viabilidade..." data-filter="viabilidade">
                             </th>
+                            <th data-column="viabilidade_abrev">
+                                <input type="text" class="filter-input" placeholder="Filtrar Viabilidade Abrev..." data-filter="viabilidade_abrev">
+                            </th>
                             <th data-column="analise">
                                 <input type="text" class="filter-input" placeholder="Filtrar Análise..." data-filter="analise">
                             </th>
+                            <th data-column="analise_abrev">
+                                <input type="text" class="filter-input" placeholder="Filtrar Análise Abrev..." data-filter="analise_abrev">
+                            </th>
                             <th data-column="pedido">
                                 <input type="text" class="filter-input" placeholder="Filtrar Pedido..." data-filter="pedido">
+                            </th>
+                            <th data-column="pedido_abrev">
+                                <input type="text" class="filter-input" placeholder="Filtrar Pedido Abrev..." data-filter="pedido_abrev">
                             </th>
                             <th data-column="status_doc">
                                 <input type="text" class="filter-input" placeholder="Filtrar status..." data-filter="status_doc">
@@ -192,8 +239,11 @@
                         <tr>
                             <td data-column="id">{{ doc.id_tipo_solicitacao }}</td>
                             <td data-column="viabilidade">{{ doc.viabilidade }}</td>
+                            <td data-column="viabilidade_abrev">{{ doc.viabilidade_abrev }}</td>
                             <td data-column="analise">{{ doc.analise }}</td>
+                            <td data-column="analise_abrev">{{ doc.analise_abrev }}</td>
                             <td data-column="pedido">{{ doc.pedido }}</td>
+                            <td data-column="pedido_abrev">{{ doc.pedido_abrev }}</td>
                             {% set status = status_map.get(doc.id_tipo_solicitacao, {'classe': 'secondary', 'icone': 'bi-file-earmark-x', 'texto': 'Sem documento', 'dias': none}) %}
                             <td data-column="status_doc">
                                 <span class="badge bg-{{ status.classe }} d-flex align-items-center gap-1"
@@ -308,7 +358,7 @@
           <input type="file" name="arquivo" id="arquivoDocumento" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt">
         </form>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-primary" onclick="enviarDocumentoPadrao()">Enviar Documento</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="enviarDocumentoPadrao()">Enviar Documento</button>
       </div>
     </div>
   </div>
