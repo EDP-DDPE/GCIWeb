@@ -281,6 +281,7 @@
                         data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success"
                         id="btnConfirmarDownload"
+                        data-bs-dismiss="modal"
                         onclick="confirmarDownload()">
                     <i class="fas fa-download me-1"></i>Gerar Documento
                 </button>
@@ -308,7 +309,7 @@
         modal.show();
     }
 
-    function confirmarDownload() {
+    async function confirmarDownload() {
         const multiplas_etapas = document.querySelector('input[name="multiplas_etapas"]:checked');
         const alternativa_unica = document.querySelector('input[name="alternativa_unica"]:checked');
 
@@ -335,11 +336,28 @@
             + `?multiplas_etapas=${multiplas_etapas.value}`
             + `&alternativa_unica=${alternativa_unica.value}`;
 
-        // Dispara o download e fecha o modal
-        window.open(url, '_blank');
+        try {
+            const response = await fetch(url);
 
-        bootstrap.Modal.getOrCreateInstance(
-            document.getElementById('modalDownloadOpcoes')
-        ).hide();
+            if (!response.ok) {
+                const data = await response.json();
+                alert(data.error || "Erro ao gerar documento.");
+                return;
+            }
+
+            // Dispara o download manualmente
+            const blob = await response.blob();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replaceAll('"', '') || 'documento.docx';
+            a.click();
+
+            bootstrap.Modal.getOrCreateInstance(
+                document.getElementById('modalDownloadOpcoes')
+            ).hide();
+
+        } catch (err) {
+            alert("Erro inesperado ao gerar documento.");
+        }
     }
 </script>

@@ -149,3 +149,5 @@ imgElement.addEventListener("load", () => {
 
     aplicarTransform();
 });
+
+

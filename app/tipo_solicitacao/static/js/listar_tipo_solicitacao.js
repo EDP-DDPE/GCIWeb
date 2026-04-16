@@ -25,10 +25,13 @@ function initializeData() {
         return {
             id: cells.eq(0).text().trim(),
             viabilidade: cells.eq(1).text().trim(),
-            analise: cells.eq(2).text().trim(),
-            pedido: cells.eq(3).text().trim(),
-            status_doc: cells.eq(4).text().trim(),
-            acoes: cells.eq(5).clone(), // era: acoes: cells.eq(4).html(),
+            viabilidade_abrev: cells.eq(2).text().trim(),
+            analise: cells.eq(3).text().trim(),
+            analise_abrev: cells.eq(4).text().trim(),
+            pedido: cells.eq(5).text().trim(),
+            pedido_abrev: cells.eq(6).text().trim(),
+            status_doc: cells.eq(7).text().trim(),
+            acoes: cells.eq(8).clone(), // era: acoes: cells.eq(4).html(),
             element: this
         };
     }).get();
@@ -193,8 +196,11 @@ function renderTable() {
 
             $('<td>').attr('data-column', 'id').text(item.id).appendTo($row);
             $('<td>').attr('data-column', 'viabilidade').text(item.viabilidade).appendTo($row);
+            $('<td>').attr('data-column', 'viabilidade_abrev').text(item.viabilidade_abrev).appendTo($row);
             $('<td>').attr('data-column', 'analise').text(item.analise).appendTo($row);
+            $('<td>').attr('data-column', 'analise_abrev').text(item.analise_abrev).appendTo($row);
             $('<td>').attr('data-column', 'pedido').text(item.pedido).appendTo($row);
+            $('<td>').attr('data-column', 'pedido_abrev').text(item.pedido_abrev).appendTo($row);
 
             // status_doc: clona o TD original para preservar o badge colorido
             const $tdStatus = currentData.find(d => d.id === item.id);
@@ -403,8 +409,11 @@ function setupColumnResizing() {
         const exportData = filteredData.map(item => ({
             ID: item.id,
             'Viabilidade': item.viabilidade,
+            'Viabilidade Abrev.': item.viabilidade_abrev,
             'Analise': item.analise,
-            'Pedido': item.pedido
+            'Analise Abrev.': item.analise_abrev,
+            'Pedido': item.pedido,
+            'Pedido Abrev.': item.pedido_abrev
         }));
 
         switch(format) {
@@ -585,7 +594,6 @@ function setupColumnResizing() {
                 }
                 console.log('ID HTML:', data.id);
     
-                // HTML do modal com apenas tensao editável
                 const editarHtml = `
                     <form id="formEdicao" data-tipo_solicitacao-id="${tipo_solicitacaoId}">
                         <div class="row g-3">
@@ -599,17 +607,35 @@ function setupColumnResizing() {
                                             <label class="form-label"><strong>ID:</strong></label>
                                             <input type="text" class="form-control" value="${data.id}" readonly>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Viabilidade:</strong></label>
-                                            <input type="text" name="viabilidade" class="form-control" value="${data.viabilidade || ''}" required>
+                                        <div class="mb-3 row g-2">
+                                            <div class="col-md-8">
+                                                <label class="form-label"><strong>Viabilidade:</strong></label>
+                                                <input type="text" name="viabilidade" class="form-control" value="${data.viabilidade || ''}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label"><strong>Viabilidade Abrev:</strong></label>
+                                                <input type="text" name="viabilidade_abrev" class="form-control" value="${data.viabilidade_abrev || ''}" required>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Análise:</strong></label>
-                                            <input type="text" name="analise" class="form-control" value="${data.analise || ''}" required>
+                                        <div class="mb-3 row g-2">
+                                            <div class="col-md-8">
+                                                <label class="form-label"><strong>Análise:</strong></label>
+                                                <input type="text" name="analise" class="form-control" value="${data.analise || ''}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label"><strong>Análise Abrev:</strong></label>
+                                                <input type="text" name="analise_abrev" class="form-control" value="${data.analise_abrev || ''}" required>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <label class="form-label"><strong>Pedido:</strong></label>
-                                            <input type="text" name="pedido" class="form-control" value="${data.pedido || ''}" required>
+                                        <div class="mb-3 row g-2">
+                                            <div class="col-md-8">
+                                                <label class="form-label"><strong>Pedido:</strong></label>
+                                                <input type="text" name="pedido" class="form-control" value="${data.pedido || ''}" required>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label"><strong>Pedido Abrev:</strong></label>
+                                                <input type="text" name="pedido_abrev" class="form-control" value="${data.pedido_abrev || ''}" required>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -736,50 +762,100 @@ function abrirModalAdicionar() {
                     <i class="fas fa-plus-circle me-2"></i>Novo Tipo de Solicitação
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Viabilidade:</strong> <span class="text-danger">*</span></label>
-                        <input 
-                            type="text" 
-                            name="viabilidade" 
-                            id="campo-viabilidade"
-                            class="form-control" 
-                            placeholder="Digite a viabilidade"
-                            required
-                        >
-                        <div class="invalid-feedback">
-                            Por favor, preencha o campo Viabilidade.
+
+                    <div class="mb-3 row g-2">
+                        <div class="col-md-8">
+                            <label class="form-label"><strong>Viabilidade:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="viabilidade" 
+                                id="campo-viabilidade"
+                                class="form-control" 
+                                placeholder="Digite a viabilidade"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Viabilidade.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Viabilidade Abrev:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="viabilidade_abrev" 
+                                id="campo-viabilidade-abrev"
+                                class="form-control" 
+                                placeholder="Digite a Viabilidade abrev"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Viabilidade Abrev.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row g-2">
+                        <div class="col-md-8">
+                            <label class="form-label"><strong>Análise:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="analise" 
+                                id="campo-analise"
+                                class="form-control" 
+                                placeholder="Digite a análise"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Análise.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Análise Abrev:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="analise_abrev" 
+                                id="campo-analise-abrev"
+                                class="form-control" 
+                                placeholder="Digite a Análise abrev"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Análise Abrev.
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Análise:</strong> <span class="text-danger">*</span></label>
-                        <input 
-                            type="text" 
-                            name="analise" 
-                            id="campo-analise"
-                            class="form-control" 
-                            placeholder="Digite a análise"
-                            required
-                        >
-                        <div class="invalid-feedback">
-                            Por favor, preencha o campo Análise.
+                    <div class="mb-3 row g-2">
+                        <div class="col-md-8">
+                            <label class="form-label"><strong>Pedido:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="pedido" 
+                                id="campo-pedido"
+                                class="form-control" 
+                                placeholder="Digite o pedido"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Pedido.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><strong>Pedido Abrev:</strong> <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                name="pedido_abrev" 
+                                id="campo-pedido-abrev"
+                                class="form-control" 
+                                placeholder="Digite o Pedido abrev"
+                                required
+                            >
+                            <div class="invalid-feedback">
+                                Por favor, preencha o campo Pedido Abrev.
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label"><strong>Pedido:</strong> <span class="text-danger">*</span></label>
-                        <input 
-                            type="text" 
-                            name="pedido" 
-                            id="campo-pedido"
-                            class="form-control" 
-                            placeholder="Digite o pedido"
-                            required
-                        >
-                        <div class="invalid-feedback">
-                            Por favor, preencha o campo Pedido.
-                        </div>
-                    </div>
                 </div>
             </div>
         </form>
@@ -1148,8 +1224,6 @@ function enviarDocumentoPadrao() {
         success: function(resp) {
             if (resp.status === 'success') {
                 alert('Documento enviado/atualizado com sucesso.');
-                // Recarrega as informações do modal
-                abrirModalDocumento(tipoSolicitacaoIdDocumento);
             } else {
                 alert(resp.message || 'Erro ao enviar documento.');
             }

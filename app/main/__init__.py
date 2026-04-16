@@ -48,6 +48,7 @@ def create_app():
         SESSION_USE_SIGNER=True,
         SESSION_FILE_THRESHOLD=100,
         UPLOAD_FOLDER='uploads',  # ou caminho desejado
+        TEMPLATE_FOLDER='templates_docs', # add caminho para os templates dos documentos (OE, EV, ...)
         DATABASE=os.path.join(app.instance_path, 'SQLSERVER'),
         JSON_AS_ASCII=False,
         PREFERRED_URL_SCHEME='https'
