@@ -35,7 +35,10 @@ def aplicar_fonte_em_todos_runs(doc):
     pass
 
 def ajustar_tamanho_tabela_word(doc, indice_tabela, qtd_linhas):
-    """Reduz linhas da tabela (exceto cabeçalho) até qtd_linhas."""
+    
+    if indice_tabela >= len(doc.tables):
+        return
+
     tabela = doc.tables[indice_tabela]
     linhas_atuais = len(tabela.rows)
     while linhas_atuais - 1 > qtd_linhas:
@@ -44,7 +47,10 @@ def ajustar_tamanho_tabela_word(doc, indice_tabela, qtd_linhas):
 
 
 def ajustar_tamanho_tabela_alternativas(doc, indice_tabela, qtd_linhas):
-    """Ajusta a tabela de alternativas para o layout pré‑definido."""
+    
+    if indice_tabela >= len(doc.tables):
+        return
+
     tabela = doc.tables[indice_tabela]
     linhas_atuais = len(tabela.rows)
 
@@ -242,6 +248,7 @@ def preencher_template(template_name: str, context: dict) -> BytesIO:
     if context["multiplas_etapas"] == False:
         idx = 0
         qtd_linhas_tabela_demanda = 2
+
         ajustar_tamanho_tabela_word(doc, idx, qtd_linhas_tabela_demanda)
 
         context["etapa_L5"] = "Atual"

@@ -274,6 +274,29 @@
                         Por favor, selecione uma opção.
                     </div>
                 </div>
+
+                <!-- Pergunta 3 -->
+                {% if 'MMGD' in e.analise and e.viabilidade != 'Solução AT' %}
+                <div class="mb-2">
+                    <label class="form-label fw-bold">É um documento de Fluxo Reverso?</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="fluxo_reverso" id="fluxo_sim" value="sim">
+                            <label class="form-check-label" for="fluxo_sim">Sim</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                   name="fluxo_reverso" id="fluxo_nao" value="nao">
+                            <label class="form-check-label" for="fluxo_nao">Não</label>
+                        </div>
+                    </div>
+                    <div id="erro_fluxo" class="text-danger small mt-1" style="display:none;">
+                        Por favor, selecione uma opção.
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
 
             <div class="modal-footer">
@@ -281,8 +304,7 @@
                         data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-success"
                         id="btnConfirmarDownload"
-                        data-bs-dismiss="modal"
-                        onclick="confirmarDownload()">
+                        onclick="confirmarDownload(event)">
                     <i class="fas fa-download me-1"></i>Gerar Documento
                 </button>
             </div>
@@ -290,74 +312,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    let _idEstudoDownload = null;
-
-    function abrirModalDownload(idEstudo) {
-        _idEstudoDownload = idEstudo;
-
-        // Limpa seleções anteriores
-        document.querySelectorAll('input[name="multiplas_etapas"]').forEach(r => r.checked = false);
-        document.querySelectorAll('input[name="alternativa_unica"]').forEach(r => r.checked = false);
-        document.getElementById('erro_etapas').style.display = 'none';
-        document.getElementById('erro_alternativa').style.display = 'none';
-
-        const modal = bootstrap.Modal.getOrCreateInstance(
-            document.getElementById('modalDownloadOpcoes')
-        );
-        modal.show();
-    }
-
-    async function confirmarDownload() {
-        const multiplas_etapas = document.querySelector('input[name="multiplas_etapas"]:checked');
-        const alternativa_unica = document.querySelector('input[name="alternativa_unica"]:checked');
-
-        // Validação
-        let valido = true;
-        if (!multiplas_etapas) {
-            document.getElementById('erro_etapas').style.display = 'block';
-            valido = false;
-        } else {
-            document.getElementById('erro_etapas').style.display = 'none';
-        }
-
-        if (!alternativa_unica) {
-            document.getElementById('erro_alternativa').style.display = 'block';
-            valido = false;
-        } else {
-            document.getElementById('erro_alternativa').style.display = 'none';
-        }
-
-        if (!valido) return;
-
-        // Monta a URL com os parâmetros
-        const url = `/listar/estudos/${_idEstudoDownload}/download_template`
-            + `?multiplas_etapas=${multiplas_etapas.value}`
-            + `&alternativa_unica=${alternativa_unica.value}`;
-
-        try {
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                const data = await response.json();
-                alert(data.error || "Erro ao gerar documento.");
-                return;
-            }
-
-            // Dispara o download manualmente
-            const blob = await response.blob();
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replaceAll('"', '') || 'documento.docx';
-            a.click();
-
-            bootstrap.Modal.getOrCreateInstance(
-                document.getElementById('modalDownloadOpcoes')
-            ).hide();
-
-        } catch (err) {
-            alert("Erro inesperado ao gerar documento.");
-        }
-    }
-</script>

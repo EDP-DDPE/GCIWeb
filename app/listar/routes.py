@@ -13,6 +13,7 @@ from fpdf import FPDF
 from datetime import datetime, date
 import pytz
 from app.utils.docx_helper import preencher_template
+from urllib.parse import quote
 
 listar_bp = Blueprint("listar", __name__, template_folder="templates",
                       static_folder="static", static_url_path='/listar/static')
@@ -424,15 +425,23 @@ def download_template(id_estudo):
 
     multiplas_etapas  = request.args.get("multiplas_etapas", "nao")
     alternativa_unica = request.args.get("alternativa_unica", "nao")
+    fluxo_reverso = request.args.get("fluxo_reverso", "nao")
 
     flag_multiplas_etapas  = multiplas_etapas  == "sim"
     flag_alternativa_unica = alternativa_unica == "sim"
+    flag_fluxo_reverso = fluxo_reverso == 'sim'
+
 
     estudo    = db.session.query(ViewEstudos).filter_by(id_estudo=id_estudo).first()
     estudo_2  = db.session.query(Estudo).filter_by(id_estudo=id_estudo).first()
 
     tipo_solicitacao = db.session.query(TipoSolicitacao).filter_by(id_tipo_solicitacao=estudo_2.id_tipo_solicitacao).first()
-    doc_padronizado = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=estudo_2.id_tipo_solicitacao).order_by(DocPadronizado.versao.desc()).first()
+    doc_padronizado = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=estudo_2.id_tipo_solicitacao,fluxo_reverso=flag_fluxo_reverso).order_by(DocPadronizado.versao.desc()).first()
+
+    print(f'DOC PADRONIZADO: {doc_padronizado}')
+    print(f'ID TIPO SOLICITACAO: {estudo_2.id_tipo_solicitacao}')
+    print(f'FLAG FLUXO REVERSO: {flag_fluxo_reverso}')
+
 
     if not doc_padronizado:
         #return jsonify({'status': 'error', 'message': 'Não há template cadastrado'}), 404
@@ -482,7 +491,8 @@ def download_template(id_estudo):
         "data_hoje": date.today().strftime("%d/%m/%Y"),
         "multiplas_etapas":      flag_multiplas_etapas,
         "alternativa_unica":     flag_alternativa_unica,
-        "c_g": c_g
+        "c_g": c_g,
+        "demanda": int(demanda)
     }
 
     dir = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
@@ -500,9 +510,17 @@ def download_template(id_estudo):
         f"_{tipo_solicitacao.analise_abrev}_{tipo_solicitacao.pedido_abrev}_{int(demanda)}_kW_{estudo.nome_projeto}_ALIM.docx"
     )
 
-    return send_file(
+    response = send_file(
         doc_io,
         as_attachment=True,
         download_name=filename,
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     )
+
+    encoded_filename = quote(filename)
+    response.headers["Content-Disposition"] = (
+        f"attachment; filename=\"{filename.encode('ascii', 'replace').decode()}\"; "
+        f"filename*=UTF-8''{encoded_filename}"
+    )
+
+    return response

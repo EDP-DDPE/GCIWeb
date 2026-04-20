@@ -533,6 +533,7 @@ class DocPadronizado(db.Model):
     data_criacao = db.Column(db.DateTime, nullable=False)
     data_atualizacao = db.Column(db.DateTime)
     versao = db.Column(db.Integer)
+    fluxo_reverso = db.Column(db.Boolean)
     id_tipo_solicitacao = db.Column(
         db.BigInteger,
         db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'),

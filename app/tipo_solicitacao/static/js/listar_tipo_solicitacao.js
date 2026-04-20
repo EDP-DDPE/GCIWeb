@@ -1076,10 +1076,13 @@ function getAlertaRevisao(dataAtualizacaoStr) {
 }
 
 
-function abrirModalDocumento(tipoId) {
+function abrirModalDocumento(tipoId, fluxoReverso = 0) {
     tipoSolicitacaoIdDocumento = tipoId;
 
-    const $modalBody = $('#modalDocumentoBody');
+    const $modalBody = fluxoReverso === 0
+        ? $('#modalDocumentoBody')
+        : $('#modalDocumentoInversoBody');
+
     $modalBody.html(`
         <div class="d-flex justify-content-center align-items-center" style="height: 150px;">
             <div class="spinner-border text-info" role="status">
@@ -1088,10 +1091,15 @@ function abrirModalDocumento(tipoId) {
         </div>
     `);
 
-    const modal = new bootstrap.Modal($('#modalDocumento')[0]);
+    const modal = new bootstrap.Modal(
+        fluxoReverso === 0
+            ? $('#modalDocumento')[0]
+            : $('#modalDocumentoInverso')[0]
+    );
+
     modal.show();
 
-    $.get(`/tipo_solicitacao/${tipoId}/api`)
+    $.get(`/tipo_solicitacao/${tipoId}/api?fluxo_reverso=${fluxoReverso}`)
         .done(function(data) {
             const doc = data.doc_padronizado;
 
@@ -1112,7 +1120,7 @@ function abrirModalDocumento(tipoId) {
                     <p><strong>Criado em:</strong> ${doc.data_criacao || '-'}</p>
                     <p><strong>Última atualização:</strong> ${doc.data_atualizacao || '-'}</p>
                     <p><strong>Total de versões:</strong> ${doc.total_versoes}</p>
-                    <button class="btn btn-sm btn-outline-primary mb-2" onclick="baixarDocumentoAtual()">
+                    <button class="btn btn-sm btn-outline-primary mb-2" onclick="baixarDocumentoAtual(${fluxoReverso})">
                         <i class="bi bi-download"></i> Baixar atual
                     </button>
                 `;
@@ -1144,17 +1152,17 @@ function abrirModalDocumento(tipoId) {
                 </div>
             `);
 
-            carregarVersoesDocumento();
+            carregarVersoesDocumento(fluxoReverso);
         })
         .fail(function() {
             $modalBody.html('<div class="alert alert-danger">Erro ao carregar informações do documento.</div>');
         });
 }
 
-function carregarVersoesDocumento() {
+function carregarVersoesDocumento(fluxoReverso = 0) {
     if (!tipoSolicitacaoIdDocumento) return;
 
-    $.get(`/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/versoes`)
+    $.get(`/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/versoes?fluxo_reverso=${fluxoReverso}`)
         .done(function(resp) {
             if (resp.status !== 'success') {
                 $('#listaVersoesDoc').html('<div class="alert alert-danger">Erro ao carregar versões.</div>');
@@ -1187,7 +1195,7 @@ function carregarVersoesDocumento() {
                         <td>${v.nome_doc}</td>
                         <td>${v.data_atualizaocao || '-'}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id})">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id},fluxoReverso)">
                                 <i class="bi bi-download"></i>
                             </button>
                         </td>
@@ -1203,10 +1211,16 @@ function carregarVersoesDocumento() {
         });
 }
 
-function enviarDocumentoPadrao() {
+function enviarDocumentoPadrao(fluxoReverso = 0) {
     if (!tipoSolicitacaoIdDocumento) return;
 
-    const arquivo = $('#arquivoDocumento')[0].files[0];
+    const inputArquivo = fluxoReverso === 0
+        ? $('#arquivoDocumento')
+        : $('#arquivoDocumentoInverso');
+
+    const arquivo = inputArquivo[0].files[0];
+
+
     if (!arquivo) {
         alert('Selecione um arquivo para enviar.');
         return;
@@ -1216,14 +1230,15 @@ function enviarDocumentoPadrao() {
     formData.append('arquivo', arquivo);
 
     $.ajax({
-        url: `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/upload`,
+        url: `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/upload?fluxo_reverso=${fluxoReverso}`,
         method: 'POST',
         data: formData,
         processData: false,
         contentType: false,
         success: function(resp) {
             if (resp.status === 'success') {
-                alert('Documento enviado/atualizado com sucesso.');
+                alert('Documento enviado com sucesso.');
+                inputArquivo.val('');
             } else {
                 alert(resp.message || 'Erro ao enviar documento.');
             }
@@ -1234,9 +1249,9 @@ function enviarDocumentoPadrao() {
     });
 }
 
-function baixarDocumentoAtual() {
+function baixarDocumentoAtual(fluxoReverso = 0) {
     if (!tipoSolicitacaoIdDocumento) return;
-    window.location.href = `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/download`;
+    window.location.href = `/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/download?fluxo_reverso=${fluxoReverso}`;
 }
 
 function baixarVersaoDocumento(idVersao) {

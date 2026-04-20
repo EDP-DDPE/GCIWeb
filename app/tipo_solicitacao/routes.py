@@ -112,7 +112,9 @@ def editar_circuito(id):
 def get_tipo_solicitacao_api(id):
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
 
-    doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
+    fluxoReverso = request.args.get('fluxo_reverso', 0, type=int)
+
+    doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id,fluxo_reverso=fluxoReverso).order_by(DocPadronizado.versao.desc()).first()
     doc_info = None
     if doc:
         total_versoes = doc.versao
@@ -123,6 +125,7 @@ def get_tipo_solicitacao_api(id):
             'data_criacao': doc.data_criacao.strftime('%d/%m/%Y %H:%M') if doc.data_criacao else None,
             'data_atualizacao': doc.data_atualizacao.strftime('%d/%m/%Y %H:%M') if doc.data_atualizacao else None,
             'versao': doc.versao,
+            'fluxo_reverso': doc.fluxo_reverso,
             'total_versoes': total_versoes
         }
 
@@ -201,6 +204,8 @@ def adicionar_circuito():
 def upload_documento_tipo(id):
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
 
+    fluxoReverso = request.args.get('fluxo_reverso', 0, type=int)
+
     if 'arquivo' not in request.files:
         return jsonify({'status': 'error', 'message': 'Nenhum arquivo enviado.'}), 400
 
@@ -208,7 +213,7 @@ def upload_documento_tipo(id):
     if arquivo.filename == '':
         return jsonify({'status': 'error', 'message': 'Nome de arquivo inválido.'}), 400
 
-    doc_mais_recente = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
+    doc_mais_recente = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id,fluxo_reverso=fluxoReverso).order_by(DocPadronizado.versao.desc()).first()
 
     if doc_mais_recente:
         nova_versao = doc_mais_recente.versao + 1
@@ -220,7 +225,7 @@ def upload_documento_tipo(id):
     _, ext = os.path.splitext(arquivo.filename)
     ext = ext.lower()
 
-    nome_arquivo = f"doc_{id}_{nova_versao}{ext}"
+    nome_arquivo = f"doc_{id}_{nova_versao}_{fluxoReverso}{ext}"
 
     template_folder = current_app.config['TEMPLATE_FOLDER']
     os.makedirs(template_folder, exist_ok=True)
@@ -241,7 +246,8 @@ def upload_documento_tipo(id):
             data_criacao = data_criacao,
             data_atualizacao = datetime.now(),
             id_tipo_solicitacao = id,
-            versao = nova_versao
+            versao = nova_versao,
+            fluxo_reverso = fluxoReverso
         )
 
         db.session.add(doc)
@@ -260,11 +266,13 @@ def upload_documento_tipo(id):
         return jsonify({'status': 'error', 'message': 'Erro ao salvar documento.'}), 500
 
 
-
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/documento/download', methods=['GET'])
 @requires_permission('visualizar')
 def download_documento_atual(id):
-    doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).first()
+
+    fluxoReverso = request.args.get('fluxo_reverso', 0, type=int)
+
+    doc = db.session.query(DocPadronizado).filter_by(id_tipo_solicitacao=id,fluxo_reverso=fluxoReverso).order_by(DocPadronizado.versao.desc()).first()
 
     if not doc or not doc.caminho_doc:
         return jsonify({'status': 'error', 'message': 'Documento padrão não encontrado.'}), 404
@@ -282,9 +290,12 @@ def download_documento_atual(id):
 @tipo_solicitacao_bp.route('/tipo_solicitacao/<int:id>/documento/versoes', methods=['GET'])
 @requires_permission('visualizar')
 def listar_versoes_documento(id):
+
+    fluxoReverso = request.args.get('fluxo_reverso', 0, type=int)
+
     tipo_solicitacao = TipoSolicitacao.query.get_or_404(id)
     
-    versoes = DocPadronizado.query.filter_by(id_tipo_solicitacao=id).order_by(DocPadronizado.versao.desc()).all()
+    versoes = DocPadronizado.query.filter_by(id_tipo_solicitacao=id,fluxo_reverso=fluxoReverso).order_by(DocPadronizado.versao.desc()).all() # NOT FLUXO REVERSO
 
     if not versoes:
         return jsonify({'status': 'success', 'versoes': []})
@@ -307,6 +318,7 @@ def listar_versoes_documento(id):
 @tipo_solicitacao_bp.route('/tipo_solicitacao/documento/versao/<int:id_versao>/download', methods=['GET'])
 @requires_permission('visualizar')
 def download_versao_documento(id_versao):
+
     versao = DocPadronizado.query.get_or_404(id_versao)
 
     if not versao.caminho_doc or not os.path.isfile(versao.caminho_doc):
