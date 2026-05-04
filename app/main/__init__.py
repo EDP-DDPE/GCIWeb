@@ -154,6 +154,7 @@ def create_app():
 
     @app.before_request
     def carregar_usuario():
+        
         g.user = get_usuario_logado()
         if g.user:
             g.user.first_name = str(g.user.nome).split(sep=' ')[0]
