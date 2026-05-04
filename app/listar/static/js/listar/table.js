@@ -80,13 +80,16 @@
 
             headerRow.append(`
                 <th class="resizable-header" data-column="${col.key}">
-                    <div class="d-flex align-items-center justify-content-between">
+                    <div class="header-content d-flex align-items-center justify-content-between">
                         <span>${col.label}</span>
-                        <div class="d-flex align-items-center">
-                            ${col.key !== "acoes" ? `<i class="fas fa-sort sort-icon" data-sort="${col.key}"></i>` : ""}
-                            <div class="resize-handle"></div>
-                        </div>
+                        ${
+                            col.key !== "acoes"
+                                ? `<i class="fas ${getSortIcon(col.key)} sort-icon" data-sort="${col.key}"></i>`
+                                : ""
+                        }
                     </div>
+            
+                    <div class="resize-handle"></div>
                 </th>
             `);
 
@@ -156,4 +159,12 @@
         html += `</div>`;
     
         return html;
+    }
+
+    function getSortIcon(colKey) {
+        if (state.sort !== colKey) return "fa-sort";
+
+        return state.direction === "asc"
+            ? "fa-sort-up"
+            : "fa-sort-down";
     }

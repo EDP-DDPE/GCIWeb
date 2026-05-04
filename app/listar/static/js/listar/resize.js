@@ -4,27 +4,54 @@ export function setupColumnResizing() {
     let currentColumn = null;
     let startX = 0;
     let startWidth = 0;
+    let colIndex = 0;
 
-    $(".resize-handle").on("mousedown", function (e) {
+    $(".resize-handle").off("mousedown").on("mousedown", function (e) {
         e.preventDefault();
+        e.stopPropagation();
+
         isResizing = true;
         currentColumn = $(this).closest("th");
+        colIndex = currentColumn.index();
         startX = e.clientX;
-        startWidth = parseInt(currentColumn.css("width"), 10);
+        startWidth = currentColumn.outerWidth();
 
-        $(document).on("mousemove", handleResize);
-        $(document).on("mouseup", stopResize);
+        $(document).on("mousemove.columnResize", handleResize);
+        $(document).on("mouseup.columnResize", stopResize);
     });
 
     function handleResize(e) {
         if (!isResizing) return;
-        const width = startWidth + e.clientX - startX;
-        currentColumn.css("width", width + "px");
+
+        const newWidth = startWidth + (e.clientX - startX);
+
+        if (newWidth < 60) return;
+
+        currentColumn.css({
+            width: newWidth + "px",
+            minWidth: newWidth + "px",
+            maxWidth: newWidth + "px"
+        });
+
+        // sincroniza filtro
+        $("#filterRow th").eq(colIndex).css({
+            width: newWidth + "px",
+            minWidth: newWidth + "px",
+            maxWidth: newWidth + "px"
+        });
+
+        // sincroniza tbody
+        $("#tableBody tr").each(function () {
+            $(this).find("td").eq(colIndex).css({
+                width: newWidth + "px",
+                minWidth: newWidth + "px",
+                maxWidth: newWidth + "px"
+            });
+        });
     }
 
     function stopResize() {
         isResizing = false;
-        $(document).off("mousemove", handleResize);
-        $(document).off("mouseup", stopResize);
+        $(document).off(".columnResize");
     }
 }

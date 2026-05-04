@@ -54,22 +54,33 @@
 
 .resizable-header {
     position: relative;
-    cursor: col-resize;
+    user-select: none;
+    white-space: nowrap;
+    cursor: default !important;
+    min-width: 80px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 12px;   /* espaço para o handle */
+    pointer-events: auto;
 }
 
 .resize-handle {
     position: absolute;
-    right: 0;
     top: 0;
-    bottom: 0;
-    width: 3px;
+    right: -2px;
+    width: 4px;
+    height: 100%;
     cursor: col-resize;
+    z-index: 50;
     background: transparent;
-    border-right: 2px solid transparent;
 }
 
 .resize-handle:hover {
-    border-right: 2px solid #007bff;
+    border-right: 2px solid #0d6efd;
 }
 
 .table-actions {
