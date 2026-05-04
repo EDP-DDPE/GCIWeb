@@ -3,6 +3,7 @@ import json
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, send_from_directory, \
     abort, flash, jsonify, g, Response, send_file
 from sqlalchemy import or_, String
+from sqlalchemy.orm import load_only
 from werkzeug.utils import safe_join
 from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, ViewEstudos, db, Alternativa, Anexo, StatusEstudo, DocPadronizado, TipoSolicitacao
 from app.auth import requires_permission, get_usuario_logado
@@ -14,6 +15,7 @@ from datetime import datetime, date
 import pytz
 from app.utils.docx_helper import preencher_template
 from urllib.parse import quote
+import math
 
 listar_bp = Blueprint("listar", __name__, template_folder="templates",
                       static_folder="static", static_url_path='/listar/static')
@@ -99,13 +101,23 @@ def api_estudos():
             c.strip() for c in raw_cols.split(",")
             if c.strip() in COLUMN_MAP
         ]
-        columns_requested = [c for c in columns_requested if c != "acoes"]
+
+    columns_requested = [c for c in columns_requested if c != "acoes"]
+    selected_keys = columns_requested if columns_requested else list(COLUMN_MAP.keys())
 
     filters_json = request.args.get("filters", "{}")
     column_filters = json.loads(filters_json)
 
-    query = db.session.query(ViewEstudos)
+    db_columns = [COLUMN_MAP[k] for k in selected_keys if k in COLUMN_MAP and k != "acoes"]
 
+    # garante coluna de ordenação
+    if sort_column in COLUMN_MAP and sort_column != "acoes":
+        if COLUMN_MAP[sort_column] not in db_columns:
+            db_columns.append(COLUMN_MAP[sort_column])
+
+    query = db.session.query(ViewEstudos).options(
+        load_only(*[getattr(ViewEstudos, c) for c in db_columns])
+    )
 
     # Busca global
     if search:
@@ -148,15 +160,30 @@ def api_estudos():
     query = query.order_by(sort_obj)
 
     # Paginação real
-    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    #pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    if export_format:
+        rows = query.all()
+        has_next = False
+    else:
+        offset = (page - 1) * per_page
+        rows = query.offset(offset).limit(per_page + 1).all()
+        has_next = len(rows) > per_page
+        rows = rows[:per_page]
 
     # SERIALIZAÇÃO DOS CAMPOS
     items = []
 
-    for e in pagination.items:
+
+    if "acoes" not in selected_keys:
+        selected_keys.append("acoes")
+
+    for e in rows:
         record = {}
 
-        for key, column in COLUMN_MAP.items():
+        for key in selected_keys:
+            column = COLUMN_MAP[key]
+
             try:
                 value = getattr(e, column)
             except AttributeError:
@@ -172,11 +199,11 @@ def api_estudos():
             record[key] = value
 
         # Ações vêm separadas
-        record["acoes"] = render_template(
-            "listar/partials/acoes.html",
-            id_estudo=e.id_estudo,
-            usuario=g.user
-        )
+        record["_permissoes"] = {
+            "editar": g.user.editar or g.user.admin,
+            "deletar": g.user.deletar or g.user.admin,
+            "visualizar": g.user.visualizar or g.user.admin
+        }
 
         items.append(record)
 
@@ -250,12 +277,13 @@ def api_estudos():
             )
 
     return jsonify({
-        "page": pagination.page,
-        "per_page": pagination.per_page,
-        "total": pagination.total,
-        "pages": pagination.pages,
+        "page": page,
+        "per_page": per_page,
+        "has_next": has_next,
         "items": items
     })
+        # "total": total,
+        # "pages": pages,
 
 # pasta 'uploads' dentro do projeto
 

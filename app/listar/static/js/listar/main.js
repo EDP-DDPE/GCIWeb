@@ -45,7 +45,8 @@ export let state = {
     search: "",
     sort: "id_estudo",
     direction: "desc",
-    columnFilters: {}
+    columnFilters: {},
+    hasNext: false
 };
 
 export function load() {
@@ -53,8 +54,9 @@ export function load() {
 
     fetchEstudos(state).done(resp => {
         window.__lastLoadedItems = resp.items;
+        state.hasNext = resp.has_next;
         renderTable(resp.items);
-        renderPagination(resp.page, resp.pages, p => {
+        renderPagination(resp.page, resp.has_next, p => {
             state.page = p;
             load();
         });
@@ -89,6 +91,7 @@ $(document).ready(() => {
     setupSorting((col, dir) => {
         state.sort = col;
         state.direction = dir;
+        state.page = 1;
         load();
     });
 

@@ -61,3 +61,13 @@ export const COLUMNS_CONFIG = [
     // sempre por último
     { key: "acoes", label: "Ações", visible: true }
 ];
+
+export function getVisibleColumnKeys() {
+    const visibles = COLUMNS_CONFIG
+        .filter(c => c.visible)
+        .map(c => c.key);
+
+    if (!visibles.includes("id_estudo")) visibles.push("id_estudo");
+
+    return visibles;
+}

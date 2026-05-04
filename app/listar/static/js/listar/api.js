@@ -1,13 +1,14 @@
 import { state } from "./main.js";
+import { getVisibleColumnKeys } from "./columns_config.js";
 
-// api.js
-export function fetchEstudos({ page, perPage, search, sort, direction }) {
+export function fetchEstudos() {
     return $.get("/listar/api/estudos", {
         page: state.page,
         per_page: state.perPage,
         search: state.search,
         sort: state.sort,
         direction: state.direction,
-        filters: JSON.stringify(state.columnFilters)
+        filters: JSON.stringify(state.columnFilters),
+        columns: getVisibleColumnKeys().join(",")
     });
 }
