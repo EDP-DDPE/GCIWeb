@@ -25,7 +25,7 @@ def run():
 
             # Mostrar informações do banco
             db_info = db_manager.get_database_info()
-            print(f"📊 Servidor: {db_info.get('server_name', 'N/A')}")
+            print(f"📊 servidor: {db_info.get('server_name', 'N/A')}")
             print(f"🗄️  Banco: {db_info.get('database_name', 'N/A')}")
 
             # Criar tabelas se necessário (cuidado em produção!)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     # serve(
     #     app,
     #     host='0.0.0.0',
-    #     port=443,  # Porta HTTPS padrão
+    #     port=443, # Porta HTTPS padrão
     #     url_scheme='https'
     #     # Certificados SSL
     # )
