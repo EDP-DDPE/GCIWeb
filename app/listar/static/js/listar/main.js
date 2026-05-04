@@ -65,10 +65,9 @@ export function load() {
     });
 }
 
-$(document).ready(() => {
+export function bindHeaderInteractions() {
 
-    renderColumnDropdown();
-    renderTableHeader();
+    restoreSearchValues();
 
     setupFilters(values => {
         if (values.search !== undefined) {
@@ -78,7 +77,6 @@ $(document).ready(() => {
         if (values.column !== undefined) {
             state.columnFilters[values.column] = values.value || "";
 
-            // se apagou o valor, remove o filtro
             if (!values.value) {
                 delete state.columnFilters[values.column];
             }
@@ -95,6 +93,16 @@ $(document).ready(() => {
         load();
     });
 
+    setupColumnResizing();
+}
+
+$(document).ready(() => {
+
+    renderColumnDropdown();
+    renderTableHeader();
+    bindHeaderInteractions();
+
+
     $("#pageSize").on("change", function () {
         state.perPage = parseInt($(this).val());
         state.page = 1;
@@ -102,7 +110,6 @@ $(document).ready(() => {
     });
 
     setupColumnVisibility();
-    setupColumnResizing();
 
     load();
 });
@@ -128,3 +135,7 @@ $(document).on("click", function (e) {
 window.atualizarLista = function() {
     load();  // Recarrega com paginação + filtros + ordenação atuais
 };
+
+function restoreSearchValues() {
+    $("#globalSearch").val(state.search);
+}

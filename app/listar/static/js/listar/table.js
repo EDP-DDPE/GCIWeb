@@ -1,5 +1,6 @@
     // table.js
     import { initializeTooltips } from "./utils.js";
+    import { state } from "./main.js";
     import { COLUMNS_CONFIG } from "./columns_config.js";
     
     export function renderTable(data) {
@@ -70,18 +71,13 @@
     export function renderTableHeader() {
         const headerRow = $("#tableHeader");
         const filterRow = $("#filterRow");
-    
+
         headerRow.empty();
         filterRow.empty();
-    
+
         COLUMNS_CONFIG.forEach(col => {
-            if (!col.visible) {
-                headerRow.append(`<th data-column="${col.key}" style="display:none;"></th>`);
-                filterRow.append(`<th data-column="${col.key}" style="display:none;"></th>`);
-                return;
-            }
-    
-            // Cabeçalho com sort e resize
+            if (!col.visible) return;
+
             headerRow.append(`
                 <th class="resizable-header" data-column="${col.key}">
                     <div class="d-flex align-items-center justify-content-between">
@@ -93,14 +89,19 @@
                     </div>
                 </th>
             `);
-    
-            // Linha de filtros (exceto Ações)
+
             if (col.key === "acoes") {
                 filterRow.append(`<th data-column="${col.key}"></th>`);
             } else {
+                const currentValue = state.columnFilters[col.key] || "";
+
                 filterRow.append(`
                     <th data-column="${col.key}">
-                        <input type="text" class="filter-input" data-filter="${col.key}" placeholder="Filtrar ${col.label}...">
+                        <input type="text"
+                               class="filter-input"
+                               data-filter="${col.key}"
+                               value="${currentValue}"
+                               placeholder="Filtrar ${col.label}...">
                     </th>
                 `);
             }
