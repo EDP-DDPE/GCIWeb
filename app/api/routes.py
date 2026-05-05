@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash, Response
-from app.models import db, Estudo, get_dashboard_stats, EDP, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
+from flask import Blueprint, jsonify, flash, Response
+from app.models import db, Estudo, get_dashboard_stats, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
     Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio, FatorK, Alternativa
 import requests
 import re
@@ -67,14 +67,6 @@ def api_dados_estudo(id_estudo):
         "tensao": estudo.tensao.tensao
 
     })
-
-
-@api_bp.route('/api/estudos')
-def api_listar_estudos():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 20, type=int)
-    return jsonify(listar_estudos(page, per_page))
-
 
 @api_bp.route('/api/estudos/<int:estudo_id>')
 def api_obter_estudo(estudo_id):

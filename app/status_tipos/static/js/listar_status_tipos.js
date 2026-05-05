@@ -488,12 +488,6 @@ function setupColumnResizing() {
 
         // Simular reload dos dados (em uma aplicação real, faria uma nova requisição)
         setTimeout(() => {
-            // Aqui você faria uma nova requisição para buscar dados atualizados
-            // $.get('/api/estudos').done(function(data) {
-            //     // Atualizar currentData com novos dados
-            //     initializeData();
-            // });
-
             hideLoading();
 
             // Mostrar notificação de sucesso
