@@ -68,30 +68,6 @@ def api_dados_estudo(id_estudo):
 
     })
 
-# @api_bp.route('/api/municipios/<int:municipio_id>')
-# def api_obter_municipio(municipio_id):
-#     try:
-#         # Método otimizado que carrega tudo de uma vez
-#         municipio = Municipio.query.get_or_404(municipio_id)
-#
-#         if not municipio:
-#             return jsonify({'error': 'Municipio não encontrado'}), 404
-#
-#         municipio_data = {
-#             'id': municipio.id_municipio,
-#             'nome': municipio.municipio,
-#             'edp': municipio.id_edp
-#
-#         }
-#
-#         return jsonify(municipio_data)
-#
-#     except Exception as e:
-#         return {
-#             'error': 'Erro ao obter municipio',
-#             'message': str(e)
-#         }, 500
-
 
 @api_bp.route('/api/estudos')
 def api_listar_estudos():
@@ -152,20 +128,6 @@ def get_cliente_by_cnpj(cnpj):
     except Exception as e:
         return Response(status=204)
 
-
-# @api_bp.route("/api/cliente/<cpf>")
-# def get_cliente_by_cpf(cpf):
-#     cliente = Instalacao.query.filter(Instalacao.CPF.contains(cpf)).first()
-#     return jsonify({
-#         'regiao': cliente.EMPRESA,
-#         'instalacao': cliente.INSTALACAO,
-#         'cnpj': cliente.CNPJ,
-#         'CPF': cliente.CPF,
-#         'nivel_tensao': cliente.TIPO_CLIENTE,
-#         'carga': cliente.CARGA,
-#         'nome': cliente.NOME_PARCEIRO,
-#         'cep': cliente.CEP
-#     })
 
 
 @api_bp.route("/api/consulta/<cnpj>")
@@ -235,6 +197,17 @@ def get_pedidos(viabilidade, analise):
     )
     return jsonify([{"id": s.id_tipo_solicitacao, "pedido": s.pedido} for s in solicitacoes])
 
+@api_bp.route("/api/id_tipo_solicitacao/<viabilidade>/<analise>/<pedido>")
+def get_id_tipo_solicitacao(viabilidade, analise, pedido):
+    item = (
+        db.session.query(TipoSolicitacao.id_tipo_solicitacao)
+        .filter_by(viabilidade=viabilidade, analise=analise, pedido=pedido)
+        .first()
+    )
+    return jsonify({"id": item.id_tipo_solicitacao})
+
+    pass
+
 
 @api_bp.route('/api/dashboard/stats')
 def dashboard_stats():
@@ -272,6 +245,11 @@ def internal_error(error):
 def not_found(error):
     return jsonify({'error': 'Endpoint não encontrado'}), 404
 
+@api_bp.route("/api/municipio/<municipio>/<int:id_edp>")
+def search_municipio_by_edp(municipio, id_edp):
+    municipio = municipio.upper()
+    municipio = Municipio.query.filter_by(id_edp=id_edp, municipio=municipio).first()
+    return {'id': municipio.id_municipio, 'id_regional':municipio.id_regional}
 
 # Rotas AJAX para filtros dinâmicos no forms Cadastrar
 @api_bp.route("/api/municipios/<int:id_edp>")

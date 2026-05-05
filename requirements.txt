@@ -20,4 +20,5 @@ waitress==3.0.2
 python-docx==1.2.0
 docxtpl==0.20.2
 lxml==6.1.0
-#pip install docxtpl --trusted-host pypi.org --trusted-host files.pythonhosted.org
+pdfplumber==0.11.9
+#pip install pdfplumber==0.11.9 --trusted-host pypi.org --trusted-host files.pythonhosted.org

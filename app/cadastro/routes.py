@@ -6,26 +6,27 @@ from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitaca
 
 from datetime import datetime, timedelta
 from app.auth import requires_permission, get_usuario_logado
+from app.api.routes import get_id_tipo_solicitacao, search_municipio_by_edp, get_resp_by_regional
+from app.bot.atlas_agent import AtlasAgent
 from sqlalchemy import desc 
 import os
 
+import tempfile
+import requests
+import pdfplumber
+import json
+
 cadastro_bp = Blueprint("cadastro", __name__, template_folder="templates", static_folder="static", static_url_path='/cadastro/static')
 
+AGENT = AtlasAgent(
+    llm_url=os.getenv("LLM_URL"),
+    llm_token=os.getenv("LLM_TOKEN"))
 
-#def gerar_proximo_documento():
-#    doc_atual = db.session.query(Estudo.num_doc).order_by(Estudo.num_doc.desc()).first()
-
-#    if doc_atual[0]:
-#        num, ano = str(doc_atual[0]).split('/')
-#        ano = int(ano) + 2000
-#        if ano == datetime.now().year:
-#            num = int(num) + 1
-#        else:
-#            ano = datetime.now().year
-#            num = 1
-#        proximo_doc = f"{num:04d}/{str(ano)[-2:]}"
-#        return proximo_doc
-
+def safe_int(d, chave):
+    try:
+        return int(d.get(chave))
+    except (ValueError, TypeError):
+        return None
 
 def gerar_proximo_documento():
     ano_atual = datetime.now().year
@@ -123,6 +124,70 @@ def cadastro_estudo():
     usuario = get_usuario_logado()
     # print(f'usuario: {usuario.nome}, id: {usuario.id_usuario}')
 
+    # ============================================
+    # PREFILL VIA IA (somente no GET)
+    # ============================================
+    if request.method == "GET" and request.args.get("ia_prefill") == "1":
+        dados_ia = session.get("ia_prefill_estudo", {})
+
+        print(f'dentro de cadastro: {dados_ia}')
+        ### Aba Básicas
+        form.nome_projeto.data = dados_ia.get("nome_projeto")
+        form.descricao.data = dados_ia.get("descricao")
+
+        if (classe := safe_int(dados_ia, "classe")) is not None:
+            form.tensao.data = classe
+
+        if (instalacao := safe_int(dados_ia, "instalacao")) is not None:
+            form.instalacao.data = instalacao
+
+        form.CNPJ.data = dados_ia.get('cnpj')
+
+        #Aba Demandas
+        form.dem_carga_solicit_fp.data = dados_ia.get("dem_carga_solicit_fp")
+        form.dem_carga_solicit_p.data = dados_ia.get("dem_carga_solicit_p")
+        form.dem_ger_solicit_fp.data = dados_ia.get("dem_ger_solicit_fp")
+        form.dem_ger_solicit_p.data = dados_ia.get("dem_ger_solicit_p")
+
+        #Aba Localização
+        if (edp := safe_int(dados_ia, "edp")) is not None:
+            form.edp.data = edp
+
+        m = search_municipio_by_edp(dados_ia.get('municipio'), int(dados_ia.get('edp')))
+        print(m)
+        if m is not None:
+            form.municipio.data = int(m['id'])
+            form.regional.data = int(m['id_regional'])
+            r = get_resp_by_regional(int(m['id_regional']))
+
+            form.resp_regiao.data = int(r['responsaveis'][0]['id'])
+
+        form.latitude_cliente.data = dados_ia.get("latitude_cliente")
+        form.longitude_cliente.data = dados_ia.get("longitude_cliente")
+
+        #Aba Classificação
+        form.tipo_viab.data = dados_ia.get("tipo_viab")
+        form.tipo_analise.data = dados_ia.get("tipo_analise")
+        try:
+            p = int(get_id_tipo_solicitacao(dados_ia.get("tipo_viab"), dados_ia.get("tipo_analise"), dados_ia.get("tipo_pedido"))['id'])
+        except:
+            p = None
+        if p is not None:
+            form.tipo_pedido.data = p
+        form.tipo_geracao.data = dados_ia.get("tipo_geracao")
+
+        #Aba Observações
+        form.observacao.data = dados_ia.get("observacao")
+
+        # Aba Datas
+        try:
+            if dados_ia.get("data_abertura_cliente"):
+                form.data_abertura_cliente.data = datetime.strptime(dados_ia.get("data_abertura_cliente"), "%Y-%m-%d")
+            if dados_ia.get("data_desejada_cliente"):
+                form.data_desejada_cliente.data = datetime.strptime(dados_ia.get("data_desejada_cliente"), "%Y-%m-%d")
+        except:
+            pass
+
     if request.method == 'POST' and form.validate_on_submit():
 
         if not form.tipo_pedido.data or form.tipo_pedido.data == '0':
@@ -213,6 +278,51 @@ def cadastro_estudo():
 
     return render_template('cadastro/cadastrar_estudo.html', form=form, datetime=datetime, timedelta=timedelta)
 
+@cadastro_bp.route("/estudos/ia/upload", methods=["POST"])
+@requires_permission('criar')
+def upload_ddpe_ia():
+    #try:
+    arquivo = request.files.get("arquivo")
+
+    if not arquivo:
+        return jsonify({"success": False, "message": "Nenhum arquivo enviado."}), 400
+
+    nome_seguro = secure_filename(arquivo.filename)
+
+    # salva temporariamente
+    temp_dir = tempfile.gettempdir()
+    temp_path = os.path.join(temp_dir, nome_seguro)
+    arquivo.save(temp_path)
+
+    # ==========================
+    # EXTRAIR TEXTO DO PDF
+    # ==========================
+    texto_pdf = ""
+    with pdfplumber.open(temp_path) as pdf:
+        for page in pdf.pages:
+            texto_pdf += page.extract_text() + "\n"
+
+    # ==========================
+    # CHAMAR MAVERICK NO DATABRICKS
+    # ==========================
+
+    dados_ia = AGENT.parse_pdf(texto_pdf)
+
+    # guarda na sessão para usar no cadastro
+    session["ia_prefill_estudo"] = dados_ia
+    session["ia_prefill_nome_pdf"] = nome_seguro
+
+    print('Resultado LLM:')
+    print(dados_ia)
+
+    return jsonify({
+        "success": True,
+        "redirect": url_for("cadastro.cadastro_estudo", ia_prefill=1)
+    })
+
+    # except Exception as e:
+    #     current_app.logger.error(f"Erro IA DDPE: {str(e)}")
+    #     return jsonify({"success": False, "message": str(e)}), 500
 
 def carregar_classificacao(form, id):
     classificacao = TipoSolicitacao.query.get_or_404(id)
@@ -393,71 +503,6 @@ def editar_estudo(id_estudo):
 
     form.observacao.data = estudo.observacao
     return render_template('cadastro/editar_estudo.html', form=form, estudo=estudo, anexos=anexos, datetime=datetime)
-
-
-# @cadastro_bp.route("/estudos/<int:id_estudo>/anexos/upload", methods=["GET", "POST"])
-# def upload_anexo(id_estudo):
-#     """Rota para upload de anexos de um estudo"""
-#     estudo = Estudo.query.get_or_404(id_estudo)
-#     form = AnexoForm()
-#
-#     if request.method == 'POST' and form.validate_on_submit():
-#         try:
-#             arquivo = form.arquivo.data
-#             nome_arquivo = secure_filename(arquivo.filename)
-#
-#             # Criar diretório se não existir
-#             upload_folder = os.path.join(current_app.config['UPLOAD_FOLDER'], 'estudos', str(id_estudo))
-#             os.makedirs(upload_folder, exist_ok=True)
-#
-#             # Gerar nome único se arquivo já existir
-#             base_name, ext = os.path.splitext(nome_arquivo)
-#             counter = 1
-#             while os.path.exists(os.path.join(upload_folder, nome_arquivo)):
-#                 nome_arquivo = f"{base_name}_{counter}{ext}"
-#                 counter += 1
-#
-#             # Salvar arquivo
-#             caminho_arquivo = os.path.join(upload_folder, nome_arquivo)
-#             arquivo.save(caminho_arquivo)
-#
-#             # Criar registro do anexo
-#             novo_anexo = Anexo(
-#                 nome_arquivo=form.descricao.data or nome_arquivo,
-#                 endereco=caminho_arquivo,
-#                 tamanho_arquivo=os.path.getsize(caminho_arquivo),
-#                 tipo_mime=arquivo.content_type,
-#                 id_estudo=id_estudo
-#             )
-#
-#             db.session.add(novo_anexo)
-#             db.session.commit()
-#
-#             flash('Arquivo enviado com sucesso!', 'success')
-#             return redirect(url_for('cadastro.detalhar_estudo', id_estudo=id_estudo))
-#
-#         except Exception as e:
-#             db.session.rollback()
-#             current_app.logger.error(f"Erro ao fazer upload do anexo: {str(e)}")
-#             flash('Erro ao enviar arquivo. Tente novamente.', 'error')
-#
-#     elif request.method == 'POST':
-#         flash('Por favor, corrija os erros no formulário.', 'error')
-#
-#     return render_template('cadastro/upload_anexo.html', form=form, estudo=estudo)
-
-
-# @cadastro_bp.route("/estudos/<int:id_estudo>")
-# def detalhar_estudo(id_estudo):
-#     """Rota para detalhar um estudo específico"""
-#     estudo = Estudo.query.get_or_404(id_estudo)
-#     alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).all()
-#     anexos = Anexo.query.filter_by(id_estudo=id_estudo).all()
-#
-#     return render_template('cadastro/detalhar_estudo.html',
-#                            estudo=estudo,
-#                            alternativas=alternativas,
-#                            anexos=anexos)
 
 
 @cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])

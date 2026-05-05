@@ -257,6 +257,21 @@
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+
+        .ai-drop-zone{
+            border:2px dashed #0d6efd;
+            border-radius:12px;
+            padding:60px;
+            text-align:center;
+            background:#f8fbff;
+            cursor:pointer;
+            transition:.3s;
+        }
+
+        .ai-drop-zone.dragover{
+            background:#e8f1ff;
+            transform:scale(1.01);
+        }
     </style>
 
     <link rel="icon" type="image/x-icon" href="{{ url_for('main.static', filename='images/favicon_v3.ico') }}">
@@ -365,6 +380,13 @@
 
                     </ul>
 
+                <div class="ms-3" id="ddpeDropZone">
+                    <label class="btn btn-outline-primary btn-sm mb-0">
+                        <i class="fas fa-robot me-1"></i> Cadastro de Estudo com IA
+                        <input type="file" id="ddpeFileInput" accept=".pdf" hidden>
+                    </label>
+                </div>
+
 
 
 
@@ -407,6 +429,7 @@
         <div id="loadingOverlay" class="loading-overlay hidden">
           <div class="spinner"></div>
         </div>
+
     </main>
 
     <!-- Footer -->
@@ -631,7 +654,41 @@
         });
     </script>
 
+    <script>
+        $(document).on("change", "#ddpeFileInput", function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("arquivo", file);
+
+            window.showLoading();
+
+            $.ajax({
+                url: "/estudos/ia/upload",
+                method: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(resp) {
+                    if (resp.success) {
+                        window.location.href = resp.redirect;
+                    } else {
+                        showToast(resp.message, "error");
+                    }
+                },
+                error: function(xhr) {
+                    showToast("Erro ao processar PDF com IA.", "error");
+                },
+                complete: function() {
+                    window.hideLoading();
+                }
+            });
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
+
 </body>
 </html>
 

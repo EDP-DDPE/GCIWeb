@@ -308,12 +308,85 @@ class AtlasAgent:
         clean = re.sub(r'(?<!\\)\n', r' ', clean)
         return json.loads(clean)
 
+
+    def parse_pdf(self, pdf_text):
+        system_prompt = f"""
+                Você é um extrator de documentos DDPE da EDP. O usuário esta tentando cadastrar automaticamente um novo estudo.
+                Extraia as informações do texto e devolva SOMENTE um JSON válido no seguinte formato abaixo:
+                
+                {{
+                    "nome_projeto": ,
+                    "descricao": "",
+                    "classe": "Esta será 1 (para AT) ou 2 (para MT) dependendo do nível de tensão do cliente, abaixo de 69kV é MT.",
+                    "instalacao": "Nos formulários é representado como UC (Unidade Consumidora) do cliente)  
+                    "cnpj": "",
+                    "empresa_nome": "",
+                    "dem_carga_solicit_fp": "Demanda de carga solicitada pelo cliente no horário Fora Ponta",
+                    "dem_carga_solicit_p": "Demanda de carga solicitada pelo cliente no horário de Ponta",
+                    "dem_ger_solicit_fp": "Demanda de geração solicitada pelo cliente no horário Fora Ponta",
+                    "dem_ger_solicit_p": "Demanda de geração solicitada pelo cliente no horário Ponta (Fotovoltaica não gera em horário de Ponta, deve ser 0.)",
+                    "edp": "Deve ser 1 para SP e 2 para ES dependendo da localização do cliente.",
+                    "municipio": "",
+                    "tipo_viab": "decida entre 'Orçamento de Conexão' ou 'Orçamento Estimado'",
+                    "tipo_analise": "decida entre 'Carga', 'MMGD', 'Autoprodutor', 'Produtor Independente', 'BESS', 'Carga e Autoprodutor' ou 'Carga e MMGD'",
+                    "tipo_pedido": "decida entre 'Aumento de Demanda', 'Ligação Nova', 'Decréscimo de Demanda' ou 'Reserva de Capacidade'",
+                    "tipo_geracao": "decida entre 'Fotovoltaica', 'Hidrelétrica', 'Termoelétrica' ou 'Eólica'",
+                    "latitude_cliente": "",
+                    "longitude_cliente": "",
+                    "data_abertura_cliente": "",
+                    "data_desejada_cliente": "",
+                    "observacao": ""
+                }}
+                
+                Se não encontrar algum campo, deixe vazio.
+                --------------------------------------
+                FORMATO FINAL (OBRIGATÓRIO)
+                --------------------------------------
+                Retorne APENAS um JSON puro:
+                Sem markdown. Sem explicações fora do JSON.
+
+                --------------------------------------
+                DADOS DO USUÁRIO:
+                --------------------------------------
+                Você esta falando com o {g.user.first_name}
+                matrícula: {g.user.matricula}
+                id_usuario: {g.user.id_usuario}
+                nome inteiro: {g.user.nome}
+
+
+                 --------------------------------------
+                O TEXTO NO ARQUIVO É:
+                --------------------------------------
+                """
+
+        body = {
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": pdf_text}
+            ]
+        }
+        response = self._call_llm(body)
+        # Remove bordas de markdown, se houver
+        clean = response.strip()
+        clean = clean.replace("```json", "").replace("```", "").strip()
+
+        # Se começar com "{\n" ou "{\r\n", o LLM devolveu JSON-STRING
+        if clean.startswith("{\\n") or "\\n" in clean:
+            # O modelo devolveu JSON com \n escapado. Transformamos só isso.
+            clean = clean.replace("\\n", "\n").replace("\\t", "\t")
+
+        # Agora corrige quebras de linha reais dentro das strings
+        clean = re.sub(r'(?<!\\)\n', r' ', clean)
+        return json.loads(clean)
+
+
     # ---------------------------
     # 3. Chamar LLM
     # ---------------------------
     def _call_llm(self, body, max_attempts=3):
         for attempt in range(max_attempts):
             try:
+                print(f"LLM: tentativa {attempt}" )
                 r = requests.post(
                     self.url,
                     headers={
@@ -321,14 +394,16 @@ class AtlasAgent:
                         "Content-Type": "application/json"
                     },
                     json=body,
-                    timeout=20
+                    timeout=60
                 )
                 r.raise_for_status()
+
                 content = r.json()["choices"][0]["message"]["content"]
                 content = content.replace("```json", "").replace("```", "").strip()
                 return content
 
             except Exception as e:
+                print(f"LLM: {e}")
                 time.sleep(1)
 
         raise Exception("Falha ao chamar LLM")
