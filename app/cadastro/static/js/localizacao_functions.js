@@ -107,6 +107,27 @@ $(document).ready(function() {
 
     var marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
 
+    // marcador vermelho do município
+    var markerMunicipio = null;
+    var layerMunicipio = L.layerGroup().addTo(map);
+
+    var overlayMaps = {
+        "Município Selecionado": layerMunicipio
+    };
+
+    L.control.layers(null, overlayMaps, {
+        collapsed: false
+    }).addTo(map);
+
+    var redIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
     // Tenta centralizar no local atual do usuário se os campos estiverem vazios
     if (!$('#latitude').val() || !$('#longitude').val()) {
         if (navigator.geolocation) {
@@ -345,14 +366,49 @@ $(document).ready(function() {
                         `;
 
                         // Atualiza marcador e mapa
-                        marker.setLatLng([lat, lng]);
-                        marker.bindPopup(popupContent);
-                        marker.openPopup();
-                        map.setView([lat, lng], 12);
+                        //marker.setLatLng([lat, lng]);
+
+                        if (markerMunicipio) {
+                            map.removeLayer(markerMunicipio);
+                        }
+
+                        layerMunicipio.clearLayers();
+
+                        // Cria novo marcador vermelho para o município
+                        markerMunicipio = L.marker([lat, lng], { icon: redIcon }).addTo(map);
+                        // Vincula popup ao marcador vermelho
+                        markerMunicipio.bindPopup(popupContent);
+                        markerMunicipio.openPopup();
+
+                        // Busca e desenha a malha geográfica do município
+                        $.getJSON('https://servicodados.ibge.gov.br/api/v4/malhas/municipios/' + municipio.id + '?formato=application/vnd.geo+json', function(geojson) {
+
+                            var geoLayer = L.geoJSON(geojson, {
+                                smoothFactor: 2,
+                                style: {
+                                    color: '#dc2626',
+                                    weight: 3,
+                                    opacity: 1,
+                                    fillColor: '#ef4444',
+                                    fillOpacity: 0.12
+                                }
+                            });
+
+                            layerMunicipio.addLayer(geoLayer);
+
+                            // enquadra o município inteiro na tela
+                            map.fitBounds(geoLayer.getBounds(), {
+                                padding: [20, 20]
+                            });
+
+                        }).fail(function() {
+                            console.error("Erro ao buscar malha geográfica");
+                            map.setView([lat, lng], 12);
+                        });
 
                         // Atualiza campos do formulário
-                        $('#latitude').val(lat.toFixed(8));
-                        $('#longitude').val(lng.toFixed(8));
+                        //$('#latitude').val(lat.toFixed(8));
+                        //$('#longitude').val(lng.toFixed(8));
 
                     }).fail(function() {
                         console.error("Erro ao buscar metadados do municipio");
