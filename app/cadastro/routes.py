@@ -153,8 +153,11 @@ def cadastro_estudo():
         if (edp := safe_int(dados_ia, "edp")) is not None:
             form.edp.data = edp
 
-        m = search_municipio_by_edp(dados_ia.get('municipio'), int(dados_ia.get('edp')))
-        print(m)
+        try:
+            m = search_municipio_by_edp(dados_ia.get('municipio'), int(dados_ia.get('edp')))
+        except:
+            m = None
+          
         if m is not None:
             form.municipio.data = int(m['id'])
             form.regional.data = int(m['id_regional'])
