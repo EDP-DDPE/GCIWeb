@@ -41,6 +41,7 @@ from flask import g, request
 @main_bp.before_app_request
 def carregar_usuario():
 
+    print('carregando usuário')
     g.user = None
     try:
 
@@ -59,16 +60,22 @@ def carregar_usuario():
 
             email = request.headers.get("X-Forwarded-Email")
 
+            print(f"E-mail: {email}")
+
             if not email:
                 return
 
             prefix_email = email.split('@')[0]
+
+            print(f"Prefix email: {prefix_email}")
 
             usuario = (
                 Usuario.query
                 .filter(Usuario.nome.like(f'{prefix_email}%'))
                 .first()
             )
+
+            print(f"usuario: {usuario}")
 
         if usuario:
             g.user = usuario
