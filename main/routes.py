@@ -69,11 +69,10 @@ def carregar_usuario():
 
             print(f"Prefix email: {prefix_email}")
 
-            usuario = (
-                Usuario.query
-                .filter(Usuario.email.like(f'{prefix_email}%'))
-                .first()
-            )
+            print(Usuario.query.all())
+
+            usuario = db.session.query(Usuario).filter(Usuario.email.like(f"{prefix_email}%")).first()
+
 
             print(f"usuario: {usuario}")
 
@@ -136,7 +135,7 @@ def health_db(sql):
             text(sql)
         )
 
-        version = result.fetchone()
+        version = result.fetchone()[0]
 
         return {
             "status": "success",
