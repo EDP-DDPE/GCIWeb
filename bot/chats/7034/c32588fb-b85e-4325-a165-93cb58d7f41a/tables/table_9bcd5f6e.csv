@@ -1,0 +1,14 @@
+﻿Quantidade;analise;pedido;viabilidade
+10;Carga;Aumento de Demanda;Orçamento de Conexão
+5;Carga;Ligação Nova;Orçamento Estimado
+3;MMGD;Ligação Nova;Orçamento Estimado
+3;Produtor Independente;Ligação Nova;DAL
+3;Carga;Aumento de Demanda;Orçamento Estimado
+2;MMGD;Aumento de Demanda;Orçamento de Conexão
+2;Carga;Reserva de Capacidade;Orçamento de Conexão
+2;Carga e MMGD;Aumento de Demanda;Orçamento de Conexão
+2;Anteprojeto;Linhas;Plano de Obras
+2;MMGD;Aumento de Demanda;Orçamento Estimado
+1;Carga e MMGD;Ligação Nova;Orçamento de Conexão
+1;MMGD;Ligação Nova;Orçamento de Conexão
+1;Produtor Independente;Aumento de Demanda;Orçamento de Conexão

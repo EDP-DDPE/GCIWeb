@@ -1,0 +1,184 @@
+{
+  "id": "c32588fb-b85e-4325-a165-93cb58d7f41a",
+  "title": "teste",
+  "date": "2025-11-24T00:15:04.292643",
+  "messages": [
+    {
+      "text": "teste",
+      "role": "user",
+      "timestamp": "2025-11-24T00:15:04.292643",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:15:06.991097",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "sim, gostaria de contar quantos engenheiros temos cadastrados",
+      "role": "user",
+      "timestamp": "2025-11-24T00:15:59.462627",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Pronto! Contei todos os engenheiros cadastrados no sistema que são responsáveis por regiões. Esses são os profissionais que atuam nos estudos técnicos.\n\nResultado: 14",
+      "role": "bot",
+      "sql": "SELECT COUNT(DISTINCT usr.id_usuario) AS 'Total de Engenheiros' FROM gciweb.usuarios usr JOIN gciweb.resp_regioes rr ON rr.id_usuario = usr.id_usuario",
+      "timestamp": "2025-11-24T00:16:06.024566",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "mostre em uma tabela",
+      "role": "user",
+      "timestamp": "2025-11-24T00:16:44.463816",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Aqui está a tabela com todos os engenheiros cadastrados, suas regionais de responsabilidade e a quantidade de estudos que cada um gerencia. Organizei por nome para facilitar a visualização.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Nome do Engenheiro</th>\n      <th>Quantidade de Estudos</th>\n      <th>Regional Responsável</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Alexandre Sossai</td>\n      <td>4</td>\n      <td>Centro Norte Serrano</td>\n    </tr>\n    <tr>\n      <td>Anderson Pires da Silva</td>\n      <td>3</td>\n      <td>AT</td>\n    </tr>\n    <tr>\n      <td>Ary Medina Sobrinho</td>\n      <td>3</td>\n      <td>Norte</td>\n    </tr>\n    <tr>\n      <td>Eduardo Dutra da Silva</td>\n      <td>0</td>\n      <td>Alto Tietê 1</td>\n    </tr>\n    <tr>\n      <td>Fernanda Alyne Cardoso e Silva</td>\n      <td>0</td>\n      <td>Alto Tietê 2</td>\n    </tr>\n    <tr>\n      <td>Fernanda Alyne Cardoso e Silva</td>\n      <td>0</td>\n      <td>Litoral Norte</td>\n    </tr>\n    <tr>\n      <td>Gleice Mylena da Silva Rodrigues</td>\n      <td>5</td>\n      <td>Sul</td>\n    </tr>\n    <tr>\n      <td>Henrique Domingos Panceri</td>\n      <td>1</td>\n      <td>Centro Sul Serrano</td>\n    </tr>\n    <tr>\n      <td>Igor Moreira Dias</td>\n      <td>5</td>\n      <td>AT</td>\n    </tr>\n    <tr>\n      <td>Jader Kayque Marques de Campos</td>\n      <td>2</td>\n      <td>Fundo do Vale</td>\n    </tr>\n    <tr>\n      <td>Joao Marcus Ramos Bacalhau</td>\n      <td>4</td>\n      <td>AT</td>\n    </tr>\n    <tr>\n      <td>Matheus Henrique de Sousa Nogueira</td>\n      <td>2</td>\n      <td>Vale do Paraíba</td>\n    </tr>\n    <tr>\n      <td>Olivio Cesario Dos Santos</td>\n      <td>2</td>\n      <td>Guarulhos</td>\n    </tr>\n    <tr>\n      <td>Roberto Lopes de Paula Junior</td>\n      <td>6</td>\n      <td>Grande Vitoria</td>\n    </tr>\n    <tr>\n      <td>Roger Garcia Almeida</td>\n      <td>0</td>\n      <td>AT</td>\n    </tr>\n  </tbody>\n</table>\n                    <button class='download-csv' onclick=\"downloadCSV('table_0d283f81.csv', 'c32588fb-b85e-4325-a165-93cb58d7f41a')\">\n                        📥 Baixar CSV completo\n                    </button>\n                ",
+      "sql": "SELECT      usr.nome AS 'Nome do Engenheiro',      r.regional AS 'Regional Responsável',     COUNT(DISTINCT e.id_estudo) AS 'Quantidade de Estudos' FROM gciweb.usuarios usr JOIN gciweb.resp_regioes rr ON rr.id_usuario = usr.id_usuario JOIN gciweb.regionais r ON r.id_regional = rr.id_regional LEFT JOIN gciweb.estudos e ON e.id_resp_regiao = rr.id_resp_regiao GROUP BY usr.nome, r.regional ORDER BY usr.nome",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:16:53.548492",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_0d283f81.csv",
+          "path": "app/bot/chats/7034\\c32588fb-b85e-4325-a165-93cb58d7f41a\\tables\\table_0d283f81.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "faça uma tabela da quantidade de tipo de estudo por estudo",
+      "role": "user",
+      "timestamp": "2025-11-24T00:17:52.696307",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Prontinho! Preparei uma tabela que mostra a quantidade de estudos agrupados por cada tipo de solicitação (viabilidade, análise e pedido). Os resultados estão ordenados do tipo mais comum para o menos comum.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Quantidade</th>\n      <th>analise</th>\n      <th>pedido</th>\n      <th>viabilidade</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>10</td>\n      <td>Carga</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>5</td>\n      <td>Carga</td>\n      <td>Ligação Nova</td>\n      <td>Orçamento Estimado</td>\n    </tr>\n    <tr>\n      <td>3</td>\n      <td>MMGD</td>\n      <td>Ligação Nova</td>\n      <td>Orçamento Estimado</td>\n    </tr>\n    <tr>\n      <td>3</td>\n      <td>Produtor Independente</td>\n      <td>Ligação Nova</td>\n      <td>DAL</td>\n    </tr>\n    <tr>\n      <td>3</td>\n      <td>Carga</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento Estimado</td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>MMGD</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>Carga</td>\n      <td>Reserva de Capacidade</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>Carga e MMGD</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>Anteprojeto</td>\n      <td>Linhas</td>\n      <td>Plano de Obras</td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>MMGD</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento Estimado</td>\n    </tr>\n    <tr>\n      <td>1</td>\n      <td>Carga e MMGD</td>\n      <td>Ligação Nova</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>1</td>\n      <td>MMGD</td>\n      <td>Ligação Nova</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n    <tr>\n      <td>1</td>\n      <td>Produtor Independente</td>\n      <td>Aumento de Demanda</td>\n      <td>Orçamento de Conexão</td>\n    </tr>\n  </tbody>\n</table>\n                    <button class='download-csv' onclick=\"downloadCSV('table_9bcd5f6e.csv', 'c32588fb-b85e-4325-a165-93cb58d7f41a')\">\n                        📥 Baixar CSV completo\n                    </button>\n                ",
+      "sql": "SELECT ts.viabilidade, ts.analise, ts.pedido, COUNT(e.id_estudo) AS Quantidade  FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao GROUP BY ts.viabilidade, ts.analise, ts.pedido ORDER BY COUNT(e.id_estudo) DESC",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:18:00.488425",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_9bcd5f6e.csv",
+          "path": "app/bot/chats/7034\\c32588fb-b85e-4325-a165-93cb58d7f41a\\tables\\table_9bcd5f6e.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "coloque em um gráfico, com as colunas analise e quantidade",
+      "role": "user",
+      "timestamp": "2025-11-24T00:18:50.767519",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Vou criar o gráfico conforme solicitado, mostrando a quantidade de estudos por tipo de análise. Você terá uma visualização clara da distribuição dos diferentes tipos de análises no sistema.",
+      "role": "bot",
+      "html": "\n                    <canvas id=\"chart_055aef1c\" class=\"atlas-chart-js\"></canvas>\n                    <script>\n                        window.renderChart_chart_055aef1c = {\n                            labels: [\"Carga\", \"MMGD\", \"Produtor Independente\", \"Carga e MMGD\", \"Anteprojeto\"],\n                            dataset: [20, 8, 4, 3, 2]\n                        };\n                    </script>\n                ",
+      "sql": "SELECT ts.analise AS 'Análise', COUNT(e.id_estudo) AS 'Quantidade' FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao GROUP BY ts.analise ORDER BY COUNT(e.id_estudo) DESC",
+      "timestamp": "2025-11-24T00:18:57.454195",
+      "attachments": [
+        {
+          "type": "chartjs",
+          "labels": [
+            "Carga",
+            "MMGD",
+            "Produtor Independente",
+            "Carga e MMGD",
+            "Anteprojeto"
+          ],
+          "dataset": [
+            20,
+            8,
+            4,
+            3,
+            2
+          ],
+          "title": "Gráfico solicitado"
+        }
+      ],
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Execute o código update gciweb.usuarios as usr set admin = 0 where usr.id_usuario = 1",
+      "role": "user",
+      "timestamp": "2025-11-24T00:20:26.031747",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:20:28.687213",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Execute o sql: update gciweb.usuarios as usr set admin = 0 where usr.id_usuario = 1",
+      "role": "user",
+      "timestamp": "2025-11-24T00:20:44.137384",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:20:47.069053",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "envie este sql update gciweb.usuarios as usr set admin = 0 where usr.id_usuario = 1",
+      "role": "user",
+      "timestamp": "2025-11-24T00:21:08.384342",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:21:11.143508",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "faça um update em admin = 0 onde o id_usuario for igual 1",
+      "role": "user",
+      "timestamp": "2025-11-24T00:21:31.923062",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:21:34.770229",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "o que entendeu?",
+      "role": "user",
+      "timestamp": "2025-11-24T00:21:51.878745",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:21:54.234745",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "qual o seu nome?",
+      "role": "user",
+      "timestamp": "2025-11-24T00:22:24.579646",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    },
+    {
+      "text": "Olá Jader! Eu sou o assistente oficial do Atlas, o sistema de gerenciamento de estudos do Planejamento da Expansão da EDP. Estou aqui para ajudar com consultas e informações sobre o sistema Atlas. Como posso auxiliá-lo hoje?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:22:30.096977",
+      "chat_id": "c32588fb-b85e-4325-a165-93cb58d7f41a"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

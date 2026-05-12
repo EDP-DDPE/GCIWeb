@@ -1,0 +1,56 @@
+{
+  "id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c",
+  "title": "Oi, Chat. Pode me informar a quantidade de orçamen",
+  "date": "2025-11-23T21:53:41.009154",
+  "messages": [
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos de conexão de geração que foram emitidos, com data de entrada em 2025, para a EDP SP?",
+      "role": "user",
+      "timestamp": "2025-11-23T21:53:41.009154",
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    },
+    {
+      "text": "Pronto Jader! Encontrei a quantidade de orçamentos de conexão para geração MMGD com entrada prevista para 2025 na EDP SP. Algo mais que você precise saber sobre esses dados?\n\nResultado: 1",
+      "role": "bot",
+      "sql": "SELECT COUNT(*) AS 'Quantidade de Orçamentos' FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao JOIN gciweb.edp ed ON ed.id_edp = e.id_edp WHERE YEAR(e.data_registro) = 2025 AND ts.viabilidade LIKE '%Orçamento de Conexão%' AND ts.analise LIKE '%MMGD%' AND ed.empresa = 'SP'",
+      "timestamp": "2025-11-23T21:53:49.344300",
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    },
+    {
+      "text": "rode essa consulta:",
+      "role": "user",
+      "timestamp": "2025-11-23T21:54:43.594130",
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-23T21:54:46.229731",
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    },
+    {
+      "text": "rode essa consulta: SELECT COUNT(*) AS 'Quantidade de Orçamentos' FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao JOIN gciweb.edp ed ON ed.id_edp = e.id_edp WHERE YEAR(e.data_registro) = 2025 AND ts.viabilidade LIKE '%Orçamento de Conexão%' AND ts.analise LIKE '%MMGD E CARGA%' AND ed.empresa = 'SP'",
+      "role": "user",
+      "timestamp": "2025-11-23T21:55:07.456520",
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    },
+    {
+      "text": "Executei a consulta conforme solicitado, Jader. Os resultados mostrarão a quantidade de orçamentos de conexão para MMGD e carga com entrada em 2025 para a EDP SP.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Quantidade de Orçamentos</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>0</td>\n    </tr>\n  </tbody>\n</table>\n                    <button class='download-csv' onclick=\"downloadCSV('table_781a7b41.csv', '862dbbd9-0e19-4e2e-8199-6e01c9a9b43c')\">\n                        📥 Baixar CSV completo\n                    </button>\n                ",
+      "sql": "SELECT COUNT(*) AS 'Quantidade de Orçamentos' FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao JOIN gciweb.edp ed ON ed.id_edp = e.id_edp WHERE YEAR(e.data_registro) = 2025 AND ts.viabilidade LIKE '%Orçamento de Conexão%' AND ts.analise LIKE '%MMGD E CARGA%' AND ed.empresa = 'SP'",
+      "role": "bot",
+      "timestamp": "2025-11-23T21:55:14.962659",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_781a7b41.csv",
+          "path": "app/bot/chats/7034\\862dbbd9-0e19-4e2e-8199-6e01c9a9b43c\\tables\\table_781a7b41.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "862dbbd9-0e19-4e2e-8199-6e01c9a9b43c"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

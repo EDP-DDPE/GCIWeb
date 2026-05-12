@@ -1,0 +1,22 @@
+{
+  "id": "234ef8f5-5e63-42aa-bcb7-7caddcecd064",
+  "title": "Oi, Chat. Pode me informar a quantidade de orçamen",
+  "date": "2025-11-23T21:46:34.248058",
+  "messages": [
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos de conexão de geração que foram emitidos, com data de entrada em 2025, para a EDP SP?",
+      "role": "user",
+      "timestamp": "2025-11-23T21:46:34.248058",
+      "chat_id": "234ef8f5-5e63-42aa-bcb7-7caddcecd064"
+    },
+    {
+      "text": "Pronto Jader! Contabilizei todos os orçamentos de conexão para geração com previsão de entrada em 2025 na EDP SP. Os resultados estão disponíveis para você.\n\nResultado: 0",
+      "role": "bot",
+      "sql": "SELECT COUNT(*) AS 'Quantidade de Orçamentos de Conexão de Geração'  FROM gciweb.estudos e JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao JOIN gciweb.edp ed ON ed.id_edp = e.id_edp WHERE ts.viabilidade = 'Orçamento de Conexão' AND YEAR(e.data_prevista_conexao) = 2025 AND e.dem_ger_solicit_fp > 0 AND ed.empresa = 'SP'",
+      "timestamp": "2025-11-23T21:46:43.130167",
+      "chat_id": "234ef8f5-5e63-42aa-bcb7-7caddcecd064"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

@@ -1,0 +1,114 @@
+{
+  "id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b",
+  "title": "Oi, Chat. Pode me informar a quantidade de orçamen",
+  "date": "2025-11-19T17:19:53.699434",
+  "messages": [
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos de conexão de geração que foram emitidos, com data de entrada em 2025, para a EDP SP?",
+      "role": "user",
+      "timestamp": "2025-11-19T17:19:53.699434",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Pronto Jader! Acabei de verificar a quantidade de orçamentos de conexão para geração que estão previstos para entrar em 2025 na EDP SP. Precisa de mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:20:02.024703",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos de conexão de MMGD que foram emitidos, com data de entrada em 2025, para a EDP SP?",
+      "role": "user",
+      "timestamp": "2025-11-19T17:20:29.277047",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Prontinho, Jader! Acabei de verificar quantos orçamentos de conexão de MMGD foram emitidos para a EDP SP com previsão de entrada em 2025. Precisa de mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:20:37.200707",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos estimados de geração que foram emitidos, com data de entrada em 2025, para a EDP SP?",
+      "role": "user",
+      "timestamp": "2025-11-19T17:21:34.550783",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Prontinho, Jader! Acabei de verificar a quantidade de orçamentos estimados de geração com previsão de entrada em 2025 para a EDP SP. Posso detalhar mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:21:42.099587",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos estimados de geração que foram emitidos, com data de entrada em 2025, para a EDP ES",
+      "role": "user",
+      "timestamp": "2025-11-19T17:22:18.729274",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Prontinho, Jader! Acabei de verificar a quantidade de orçamentos estimados de geração com previsão de entrada em 2025 para a EDP ES. Posso ajudar com mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:22:26.395019",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos estimados que foram emitidos, com data de entrada em 2025, para a EDP ES",
+      "role": "user",
+      "timestamp": "2025-11-19T17:23:19.615286",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Prontinho, Jader! Verifiquei a quantidade de orçamentos estimados previstos para entrada em 2025 na EDP ES. Posso ajudar com mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:23:27.430678",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos estimados de geração que foram emitidos, com data de cadastrado em 2025, para a EDP ES",
+      "role": "user",
+      "timestamp": "2025-11-19T17:24:50.862798",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Pronto, Jader! Verifiquei a quantidade de orçamentos estimados de geração cadastrados em 2025 para a EDP ES. Posso te ajudar com mais alguma informação sobre esses orçamentos?\n\nResultado: 0",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:24:58.547459",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Oi, Chat. Pode me informar a quantidade de orçamentos estimados de MMGD que foram emitidos, com data de cadastrado em 2025, para a EDP ES",
+      "role": "user",
+      "timestamp": "2025-11-19T17:26:42.556963",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Pronto, Jader! Verifiquei a quantidade de orçamentos estimados de MMGD cadastrados em 2025 para a EDP ES. Posso detalhar mais alguma informação sobre esses orçamentos se precisar.\n\nResultado: 4",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:26:51.195856",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "quais são eles?",
+      "role": "user",
+      "timestamp": "2025-11-19T17:27:03.723255",
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    },
+    {
+      "text": "Aqui estão os 4 orçamentos estimados de MMGD cadastrados em 2025 para a EDP ES que você solicitou, Jader. Estou mostrando o número do documento, nome do projeto, descrição, data de registro e o tipo de análise para cada um deles.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Data de Registro</th>\n      <th>Descrição</th>\n      <th>Nome do Projeto</th>\n      <th>Número do Documento</th>\n      <th>Tipo de Análise</th>\n      <th>id_estudo</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>10/11/2025</td>\n      <td></td>\n      <td>JOAO ARLINDO PEREIRA RAIMUNDO</td>\n      <td>1001/25</td>\n      <td>MMGD</td>\n      <td>33</td>\n    </tr>\n    <tr>\n      <td>10/11/2025</td>\n      <td></td>\n      <td>COOPERATIVA DE ENERGIA RENOVAVEL BR</td>\n      <td>1002/25</td>\n      <td>MMGD</td>\n      <td>34</td>\n    </tr>\n    <tr>\n      <td>10/11/2025</td>\n      <td></td>\n      <td>CONSORCIO SINERGIA AMBIENTAL</td>\n      <td>1003/25</td>\n      <td>MMGD</td>\n      <td>35</td>\n    </tr>\n    <tr>\n      <td>12/11/2025</td>\n      <td>PRO0290183-LIGAÇÃO NOVA MMGD - MT THV\\r\\n DEMANDA FORA PONTA 30KW-DEMANDA GD 1.332KW- Câmara/Cubículo-TRAFO 1.500KVA-\\r\\n CONTATO: JOSÉ MARIA 27 99505-9202\\r\\n AE MMGD: 45006132093\\r\\n VIABILIDADE: PLANEJAMENTO\\r\\n\\r\\nELABORAÇÃO DE CONTRATOS:\\r\\n PT CNT GD:1.332KW\\r\\n DEMANDA DE GD: 1.332KW\\r\\n DEMANDA DE CARGA: 30KW\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\nLatitude: -20.919608°\\r\\nLongitude: -41.220590°\\r\\nInstalação Vizinha Não Localizada.\\r\\nTelefone para Contato:\\r\\nComplemento:</td>\n      <td>CONSORCIO SANTA LUCIA SOLAR</td>\n      <td>1013/25</td>\n      <td>MMGD</td>\n      <td>45</td>\n    </tr>\n    <tr>\n      <td>14/11/2025</td>\n      <td>PRO0289796-LIGAÇÃO NOVA MMGD- MT THV DEMANDA FORA PONTA 0KW-DEMANDA GD 300KW-AÉREA-TRAFO 300KVA-\\r\\nCONTATO: PATRICK NOÉ  (27)99252-8990\\r\\nAE MMGD: 45006136317\\r\\nVIABILIDADE: PLANEJAMENTO\\r\\n\\r\\nELABORAÇÃO DE CONTRATOS:\\r\\n PT CNT GD: 300KW\\r\\n DEMANDA DE GD: 300KW\\r\\n DEMANDA DE CARGA: 0KW\\r\\nLeandro Nogueira 10/11/2025</td>\n      <td>JBA 03</td>\n      <td>1022/25</td>\n      <td>MMGD</td>\n      <td>54</td>\n    </tr>\n    <tr>\n      <td>14/11/2025</td>\n      <td>13.11.2025 15:24:04 M. JUNQUEIRA LOUZADA FURLAN (10204875) Tel. 27 999..\\r\\nVICENTHE ANDRE ANTONIO PAULO DE ANDRADE N B MORAES DA SILVA\\r\\nCONSULTA : LN NOVA MMGD\\r\\nCARGA: 30KW\\r\\nGERAÇÃO:120KW\\r\\nDATA PREVISTA:01/08/2026\\r\\nLOCALIDADE: CONCEIÇÃO DA BARRA\\r\\nCOORDENADAS:X 419257, Y 7947142\\r\\nCONTATO:ROGÉRIO NEVES (65)9276-4583\\r\\nInformar dados de curto-circuito\\r\\nPRO0290589</td>\n      <td>VICENTHE ANDRE ANTONIO PAULO DE ANDRADE N B MORAES DA SILVA</td>\n      <td>1023/25</td>\n      <td>MMGD</td>\n      <td>55</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_c4590f72.csv', 'a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T17:27:13.471417",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_c4590f72.csv",
+          "path": "app/bot/chats/7034\\a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b\\tables\\table_c4590f72.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "a7c02bc7-2e8b-4448-8cda-ce7a22e77e5b"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

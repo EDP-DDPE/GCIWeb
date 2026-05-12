@@ -1,0 +1,116 @@
+<!-- Modal para Status -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="statusModalLabel">
+          <i class="bi bi-clock-history me-2"></i>Gerenciar Status
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4 position-relative">
+
+        <!-- overlay do modal -->
+        <div id="statusLoadingOverlay" class="modal-loading-overlay">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+        </div>
+
+        <!-- Seção: Adicionar Novo Status -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0">
+              <i class="bi bi-plus-circle me-2"></i>Adicionar Novo Status
+            </h6>
+          </div>
+          <div class="card-body">
+            <form id="statusForm">
+              <input type="hidden" name="id_estudo" id="status_id_estudo">
+              <input type="hidden" name="id_status" id="status_id_status">
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="id_status_tipo" class="form-label fw-bold">
+                    <i class="bi bi-tag me-1"></i>Tipo de Status
+                  </label>
+                  <select class="form-select form-select-lg" name="id_status_tipo" id="id_status_tipo" required>
+                    <option value="">Selecione um status...</option>
+                    {% for tipo in status_tipos %}
+                      <option value="{{ tipo.id_status_tipo }}">{{ tipo.status }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label for="observacao" class="form-label fw-bold">
+                    <i class="bi bi-chat-left-text me-1"></i>Observação
+                  </label>
+                  <textarea class="form-control" name="observacao" id="observacao" rows="3" placeholder="Digite uma observação (opcional)"></textarea>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('statusForm').reset();">
+                  <i class="bi bi-x-circle me-1"></i>Limpar
+                </button>
+                <button type="submit" class="btn btn-success">
+                  <i class="bi bi-check-circle me-1"></i>Salvar Status
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Seção: Histórico -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+              <i class="bi bi-list-ul me-2"></i>Histórico de Status
+            </h6>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-striped mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 15%;">
+                      <i class="bi bi-calendar3 me-1"></i>Data
+                    </th>
+                    <th style="width: 20%;">
+                      <i class="bi bi-flag me-1"></i>Status
+                    </th>
+                    <th style="width: 35%;">
+                      <i class="bi bi-chat-dots me-1"></i>Observação
+                    </th>
+                    <th style="width: 15%;">
+                      <i class="bi bi-person me-1"></i>Criado por
+                    </th>
+                    <th style="width: 15%;" class="text-center">
+                      <i class="bi bi-gear me-1"></i>Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="status-historico-body">
+                  <!-- Exemplo de linha (será preenchido via JS) -->
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                      Nenhum status cadastrado ainda
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i>Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

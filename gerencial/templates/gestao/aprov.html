@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block titulo %}Estudos para Aprovação{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('gestao.static', filename='css/aprovacao.css') }}">
+
+<div class="container-fluid mt-4">
+  <!-- Cabeçalho -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div class="d-flex gap-2 align-items-center">
+      <label class="form-label mb-0 fw-bold text-muted">Custo Mínimo (R$)</label>
+      <input type="number" id="valorFiltro" value="{{ valor_minimo }}" class="form-control form-control-sm" style="width:150px;">
+      <button class="btn btn-outline-primary btn-sm" onclick="filtrarValor()">
+        <i class="bi bi-funnel"></i> Filtrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabela (vem primeiro) -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-list-task me-2"></i>Projetos acima de R$ {{ "{:,.2f}".format(valor_minimo or 0) }}</span>
+      <small>Gestores podem aprovar, reprovar ou comentar projetos.</small>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="tabelaAprovacao">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Projeto</th>
+              <th>Empresa</th>
+              <th>Município</th>
+              <th>Custo Modular</th>
+              <th>Status</th>
+              <th>Comentário</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for doc in documentos %}
+            {% set alt_escolhida = (doc.alternativas|selectattr('flag_alternativa_escolhida', 'equalto', 1)|list|first) %}
+            <tr id="estudo-{{ doc.id or doc.id_estudo }}">
+              <td>{{ doc.id or doc.id_estudo }}</td>
+              <td>{{ doc.nome_projeto or '-' }}</td>
+              <td>{{ doc.empresa.nome_empresa or '-' }}</td>
+              <td>{{ doc.municipio.municipio or '-' }}</td>
+              <td>R$ {{ "{:,.2f}".format((alt_escolhida.custo_modular if alt_escolhida else 0) or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
+              <td>
+                <span class="badge {{ 'bg-secondary' if doc.ultimo_status else 'bg-light text-muted' }}">
+                    {{ doc.ultimo_status.status_tipo.status if doc.ultimo_status and doc.ultimo_status.status_tipo else 'Sem status' }}
+                </span>
+              </td>
+              <td>
+                <textarea class="form-control form-control-sm" rows="1" id="comentario-{{doc.id_estudo}}" placeholder="Digite um comentário..."></textarea>
+              </td>
+              <td class="text-center">
+                <button class="btn btn-success btn-sm me-1" onclick="aprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Aprovar">
+                  <i class="bi bi-hand-thumbs-up"></i>
+                </button>
+                <button class="btn btn-danger btn-sm me-1" onclick="reprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Reprovar">
+                  <i class="bi bi-hand-thumbs-down"></i>
+                </button>
+                <button class="btn btn-sm btn-info"
+                                        onclick="verDetalhes({{doc.id_estudo}})"
+                                        data-bs-toggle="tooltip"
+                                        title="Ver detalhes">
+                                    <i class="bi bi-eye"></i>
+                                    </button>
+
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                Nenhum projeto encontrado acima desse valor.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer text-muted small text-end">
+      Total de projetos: {{ documentos|length }}
+    </div>
+  </div>
+
+  <!-- Gráfico (vem depois e menor) -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
+      <small>Distribuição por status</small>
+    </div>
+    <div class="card-body text-center">
+      <div class="grafico-wrapper">
+        <canvas id="graficoResumo"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalDetalhesLabel">
+                    <i class="fas fa-file-alt me-2"></i>Detalhes do Documento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo carregado via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('gestao.static', filename='js/aprovacao.js') }}"></script>
+
+<script>
+  // Dados do gráfico vindos do backend
+  const dataResumo = {
+    aprovado: {{ resumo["Aprovado"] }},
+    reprovado: {{ resumo["Reprovado"] }},
+    pendente: {{ resumo["Pendente"] }}
+  };
+</script>
+
+{% endblock %}

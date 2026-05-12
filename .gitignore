@@ -1,0 +1,19 @@
+# Ambiente
+.env
+.venv/
+venv/
+
+# IDEs
+.idea/
+
+# Cache e binários Python
+**/__pycache__/**
+*.pyc
+
+# Sessões Flask
+app/flask_session/
+
+# Arquivos temporários
+*.xml
+
+*.pem

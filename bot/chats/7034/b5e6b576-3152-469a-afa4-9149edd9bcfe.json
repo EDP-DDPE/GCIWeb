@@ -1,0 +1,84 @@
+{
+  "id": "b5e6b576-3152-469a-afa4-9149edd9bcfe",
+  "title": "bom dia, conte quantos estudos temos por municipio",
+  "date": "2025-11-19T15:51:05.891483",
+  "messages": [
+    {
+      "text": "bom dia, conte quantos estudos temos por municipio",
+      "role": "user",
+      "timestamp": "2025-11-19T15:51:05.891483",
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "Bom dia, Jader! Aqui está a contagem de estudos por município, ordenada do maior para o menor número de estudos. Precisa de mais alguma informação sobre esses dados?\n\nResultado: [{'municipio': 'SERRA', 'total_estudos': 5}, {'municipio': 'CACHOEIRO DE ITAPEMIRIM', 'total_estudos': 3}, {'municipio': 'CARIACICA', 'total_estudos': 3}, {'municipio': 'SÃO JOSÉ DOS CAMPOS', 'total_estudos': 2}, {'municipio': 'LINHARES', 'total_estudos': 2}, {'municipio': 'ARACRUZ', 'total_estudos': 2}, {'municipio': 'GUARULHOS', 'total_estudos': 2}, {'municipio': 'VILA VELHA', 'total_estudos': 2}, {'municipio': 'VITORIA', 'total_estudos': 1}, {'municipio': 'VIANA', 'total_estudos': 1}, {'municipio': 'CONCEICAO DA BARRA', 'total_estudos': 1}, {'municipio': 'ECOPORANGA', 'total_estudos': 1}, {'municipio': 'ATILIO VIVACQUA', 'total_estudos': 1}, {'municipio': 'BAIXO GUANDU', 'total_estudos': 1}, {'municipio': 'CAÇAPAVA', 'total_estudos': 1}, {'municipio': 'PINDAMONHANGABA', 'total_estudos': 1}, {'municipio': 'PINHEIROS', 'total_estudos': 1}, {'municipio': 'SAO MATEUS', 'total_estudos': 1}, {'municipio': 'SUZANO', 'total_estudos': 1}, {'municipio': 'SANTA TERESA', 'total_estudos': 1}, {'municipio': 'ROSEIRA', 'total_estudos': 1}, {'municipio': 'SALESÓPOLIS', 'total_estudos': 0}, {'municipio': 'SANTA BRANCA', 'total_estudos': 0}, {'municipio': 'SANTA LEOPOLDINA', 'total_estudos': 0}, {'municipio': 'SANTA MARIA DE JETIBA', 'total_estudos': 0}, {'municipio': 'SAO GABRIEL DA PALHA', 'total_estudos': 0}, {'municipio': 'SAO JOSE DO CALCADO', 'total_estudos': 0}, {'municipio': 'CASTELO', 'total_estudos': 0}, {'municipio': 'COLATINA', 'total_estudos': 0}, {'municipio': 'TAUBATÉ', 'total_estudos': 0}, {'municipio': 'UBATUBA', 'total_estudos': 0}, {'municipio': 'VENDA NOVA DO IMIGRANTE', 'total_estudos': 0}, {'municipio': 'SAO PAULO', 'total_estudos': 0}, {'municipio': 'SÃO SEBASTIÃO', 'total_estudos': 0}, {'municipio': 'PIUMA', 'total_estudos': 0}, {'municipio': 'POÁ', 'total_estudos': 0}, {'municipio': 'PONTO BELO', 'total_estudos': 0}, {'municipio': 'PRESIDENTE KENNEDY', 'total_estudos': 0}, {'municipio': 'RIO BANANAL', 'total_estudos': 0}, {'municipio': 'RIO NOVO DO SUL', 'total_estudos': 0}, {'municipio': 'RJ - MIMOSO DO SUL', 'total_estudos': 0}, {'municipio': 'RJ - MIMOSO DO SUL_2', 'total_estudos': 0}, {'municipio': 'LORENA', 'total_estudos': 0}, {'municipio': 'MAIRIPORÃ', 'total_estudos': 0}, {'municipio': 'MANTENOPOLIS', 'total_estudos': 0}, {'municipio': 'MARATAIZES', 'total_estudos': 0}, {'municipio': 'MARECHAL FLORIANO', 'total_estudos': 0}, {'municipio': 'MIMOSO DO SUL', 'total_estudos': 0}, {'municipio': 'MOGI DAS CRUZES', 'total_estudos': 0}, {'municipio': 'MONTANHA', 'total_estudos': 0}, {'municipio': 'MUNIZ FREIRE', 'total_estudos': 0}, {'municipio': 'NOVA VENECIA', 'total_estudos': 0}, {'municipio': 'PEDRO CANARIO', 'total_estudos': 0}, {'municipio': 'CACHOEIRA PAULISTA', 'total_estudos': 0}, {'municipio': 'CAMPOS DO JORDÃO', 'total_estudos': 0}, {'municipio': 'CARAGUATATUBA', 'total_estudos': 0}, {'municipio': 'AFONSO CLAUDIO', 'total_estudos': 0}, {'municipio': 'ALEGRE', 'total_estudos': 0}, {'municipio': 'ALFREDO CHAVES', 'total_estudos': 0}, {'municipio': 'ANCHIETA', 'total_estudos': 0}, {'municipio': 'APARECIDA', 'total_estudos': 0}, {'municipio': 'APIACA', 'total_estudos': 0}, {'municipio': 'BARRA DE SAO FRANCISCO', 'total_estudos': 0}, {'municipio': 'BERTIOGA', 'total_estudos': 0}, {'municipio': 'BIRITIBA MIRIM', 'total_estudos': 0}, {'municipio': 'BOA ESPERANCA', 'total_estudos': 0}, {'municipio': 'BOM JESUS DO NORTE', 'total_estudos': 0}, {'municipio': 'FERRAZ DE VASCONCELOS', 'total_estudos': 0}, {'municipio': 'FUNDAO', 'total_estudos': 0}, {'municipio': 'GUACUI', 'total_estudos': 0}, {'municipio': 'GUARAPARI', 'total_estudos': 0}, {'municipio': 'GUARAREMA', 'total_estudos': 0}, {'municipio': 'GUARATINGUETÁ', 'total_estudos': 0}, {'municipio': 'CONCEICAO DO CASTELO', 'total_estudos': 0}, {'municipio': 'CRUZEIRO', 'total_estudos': 0}, {'municipio': 'DOMINGOS MARTINS', 'total_estudos': 0}, {'municipio': 'DORES DO RIO PRETO', 'total_estudos': 0}, {'municipio': 'IBATIBA', 'total_estudos': 0}, {'municipio': 'IBIRACU', 'total_estudos': 0}, {'municipio': 'IBITIRAMA', 'total_estudos': 0}, {'municipio': 'ITAPEMIRIM', 'total_estudos': 0}, {'municipio': 'ITAQUAQUECETUBA', 'total_estudos': 0}, {'municipio': 'ITARANA', 'total_estudos': 0}, {'municipio': 'IUNA', 'total_estudos': 0}, {'municipio': 'JACAREÍ', 'total_estudos': 0}, {'municipio': 'JAGUARE', 'total_estudos': 0}, {'municipio': 'JAMBEIRO', 'total_estudos': 0}, {'municipio': 'JERONIMO MONTEIRO', 'total_estudos': 0}, {'municipio': 'JOAO NEIVA', 'total_estudos': 0}, {'municipio': 'LARANJA DA TERRA', 'total_estudos': 0}, {'municipio': 'LAVRINHAS', 'total_estudos': 0}, {'municipio': 'VILA PAVAO', 'total_estudos': 0}, {'municipio': 'VILA VALERIO', 'total_estudos': 0}, {'municipio': 'SOORETAMA', 'total_estudos': 0}]",
+      "role": "bot",
+      "timestamp": "2025-11-19T15:51:13.180332",
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "faça uma tabela com esses dados",
+      "role": "user",
+      "timestamp": "2025-11-19T15:51:29.638129",
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "Pronto, Jader! Aqui está a consulta que gera a tabela com a contagem de estudos por município, ordenada do maior para o menor número. Você pode usar essa query para visualizar os dados em formato tabular no seu sistema.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>municipio</th>\n      <th>total_estudos</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>SERRA</td>\n      <td>5</td>\n    </tr>\n    <tr>\n      <td>CACHOEIRO DE ITAPEMIRIM</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>CARIACICA</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>SÃO JOSÉ DOS CAMPOS</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>LINHARES</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>ARACRUZ</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>GUARULHOS</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>VILA VELHA</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>VITORIA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>VIANA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CONCEICAO DA BARRA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ECOPORANGA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ATILIO VIVACQUA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>BAIXO GUANDU</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CAÇAPAVA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>PINDAMONHANGABA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>PINHEIROS</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SAO MATEUS</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SUZANO</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SANTA TERESA</td>\n      <td>1</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_0778bfbd.csv', 'b5e6b576-3152-469a-afa4-9149edd9bcfe')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T15:51:37.970298",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_0778bfbd.csv",
+          "path": "app/bot/chats/7034\\b5e6b576-3152-469a-afa4-9149edd9bcfe\\tables\\table_0778bfbd.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "Faça um gráfico com esses dados",
+      "role": "user",
+      "timestamp": "2025-11-19T15:52:05.653191",
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "Aqui está a consulta para obter os dados de contagem de estudos por município. Para criar um gráfico, você precisará exportar esses resultados para uma ferramenta como Excel ou Power BI. Posso ajudar com alguma consulta específica para filtrar apenas os municípios com mais estudos?",
+      "role": "bot",
+      "html": "\n                   <img src=\"/api/chat_file/7034/b5e6b576-3152-469a-afa4-9149edd9bcfe/charts/chart_fdb8be5d.png\" class=\"atlas-chart\" />\n               ",
+      "timestamp": "2025-11-19T15:52:14.169662",
+      "attachments": [
+        {
+          "type": "chart",
+          "name": "Gráfico solicitado",
+          "file": "chart_fdb8be5d.png",
+          "url": "/api/chat_file/7034/b5e6b576-3152-469a-afa4-9149edd9bcfe/charts/chart_fdb8be5d.png"
+        }
+      ],
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "o gráfico não ficou muito legível, faça o gráfico com os 10 tops municipios",
+      "role": "user",
+      "timestamp": "2025-11-19T15:52:52.843017",
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    },
+    {
+      "text": "Entendi, Jader! Aqui está a consulta que retorna apenas os 10 municípios com mais estudos. Isso deve gerar um gráfico bem mais legível. Basta exportar esses dados para sua ferramenta de visualização preferida. Precisa de mais algum ajuste nos dados?",
+      "role": "bot",
+      "html": "\n                   <img src=\"/api/chat_file/7034/b5e6b576-3152-469a-afa4-9149edd9bcfe/charts/chart_46ae5ff9.png\" class=\"atlas-chart\" />\n               ",
+      "timestamp": "2025-11-19T15:53:00.732672",
+      "attachments": [
+        {
+          "type": "chart",
+          "name": "Gráfico solicitado",
+          "file": "chart_46ae5ff9.png",
+          "url": "/api/chat_file/7034/b5e6b576-3152-469a-afa4-9149edd9bcfe/charts/chart_46ae5ff9.png"
+        }
+      ],
+      "chat_id": "b5e6b576-3152-469a-afa4-9149edd9bcfe"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

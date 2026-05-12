@@ -1,0 +1,180 @@
+{
+  "id": "44224228-51d8-47ac-953b-26ab77744707",
+  "title": "olá, tudo bem?",
+  "date": "2025-11-19T16:24:45.498409",
+  "messages": [
+    {
+      "text": "olá, tudo bem?",
+      "role": "user",
+      "timestamp": "2025-11-19T16:24:45.498409",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Olá, Jader! Tudo bem sim, e com você? Como posso ajudá-lo hoje com o Atlas? \n\nEstou à disposição para auxiliar com qualquer informação sobre os estudos de expansão da EDP, consultas sobre alternativas, processos em andamento ou qualquer outra questão relacionada ao sistema de gerenciamento de estudos. Em que posso ser útil?",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:24:52.533441",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "conte quantos estudos temos por municipio",
+      "role": "user",
+      "timestamp": "2025-11-19T16:25:15.425188",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Prontinho, Jader! Acabei de contar todos os estudos agrupados por município. Os resultados estão ordenados do município com mais estudos para o com menos. Precisa de mais alguma informação sobre essa distribuição?",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Município</th>\n      <th>Quantidade de Estudos</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>SERRA</td>\n      <td>5</td>\n    </tr>\n    <tr>\n      <td>CACHOEIRO DE ITAPEMIRIM</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>CARIACICA</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>ARACRUZ</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>SÃO JOSÉ DOS CAMPOS</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>GUARULHOS</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>LINHARES</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>VILA VELHA</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>VITORIA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>PINDAMONHANGABA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>PINHEIROS</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ROSEIRA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SANTA TERESA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SAO MATEUS</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SUZANO</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>VIANA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ATILIO VIVACQUA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>BAIXO GUANDU</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CAÇAPAVA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CONCEICAO DA BARRA</td>\n      <td>1</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_0c0e0025.csv', '44224228-51d8-47ac-953b-26ab77744707')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:25:23.191235",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_0c0e0025.csv",
+          "path": "app/bot/chats/7034\\44224228-51d8-47ac-953b-26ab77744707\\tables\\table_0c0e0025.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "coloque num gráfico",
+      "role": "user",
+      "timestamp": "2025-11-19T16:26:06.987274",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Claro, Jader! Vou criar um gráfico com a contagem de estudos por município para você visualizar melhor essa distribuição. O gráfico mostrará os municípios no eixo horizontal e a quantidade de estudos no eixo vertical, ordenado do município com maior número de estudos para o menor.",
+      "role": "bot",
+      "html": "\n                   <img src=\"/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_47ac485f.png\" class=\"atlas-chart\" />\n               ",
+      "timestamp": "2025-11-19T16:26:15.414574",
+      "attachments": [
+        {
+          "type": "chart",
+          "name": "Gráfico solicitado",
+          "file": "chart_47ac485f.png",
+          "url": "/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_47ac485f.png"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "o gráfico não ficou legivel, mostre as primeiras 10 cidades",
+      "role": "user",
+      "timestamp": "2025-11-19T16:26:55.240738",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Entendi, Jader! Vou criar um gráfico mais legível mostrando apenas as 10 cidades com maior número de estudos. Isso deve melhorar bastante a visualização dos dados.",
+      "role": "bot",
+      "html": "\n                   <img src=\"/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_769d237b.png\" class=\"atlas-chart\" />\n               ",
+      "timestamp": "2025-11-19T16:27:04.044317",
+      "attachments": [
+        {
+          "type": "chart",
+          "name": "Gráfico solicitado",
+          "file": "chart_769d237b.png",
+          "url": "/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_769d237b.png"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "estou vendo cidades de SP e ES, mostre apenas de SP",
+      "role": "user",
+      "timestamp": "2025-11-19T16:27:28.172523",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Pronto! Ajustei o gráfico para mostrar apenas as 10 cidades de São Paulo com maior número de estudos. Agora a visualização deve estar mais clara, mostrando apenas os municípios da EDP São Paulo.",
+      "role": "bot",
+      "html": "\n                   <img src=\"/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_89f3b2a5.png\" class=\"atlas-chart\" />\n               ",
+      "timestamp": "2025-11-19T16:27:36.703946",
+      "attachments": [
+        {
+          "type": "chart",
+          "name": "Gráfico solicitado",
+          "file": "chart_89f3b2a5.png",
+          "url": "/api/chat_file/7034/44224228-51d8-47ac-953b-26ab77744707/charts/chart_89f3b2a5.png"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "quantos estudos temos por engenheiro?",
+      "role": "user",
+      "timestamp": "2025-11-19T16:27:56.906385",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Aqui está a contagem de estudos por engenheiro, ordenada do engenheiro com mais estudos para o com menos. Posso criar um gráfico com esses dados se você preferir visualizar melhor a distribuição.\n\nResultado: [{'Nome do Engenheiro': 'Igor Moreira Dias', 'Quantidade de Estudos': 5}, {'Nome do Engenheiro': 'Roberto Lopes de Paula Junior', 'Quantidade de Estudos': 5}, {'Nome do Engenheiro': 'Gleice Mylena da Silva Rodrigues', 'Quantidade de Estudos': 4}, {'Nome do Engenheiro': 'Joao Marcus Ramos Bacalhau', 'Quantidade de Estudos': 4}, {'Nome do Engenheiro': 'Alexandre Sossai', 'Quantidade de Estudos': 4}, {'Nome do Engenheiro': 'Anderson Pires da Silva', 'Quantidade de Estudos': 3}, {'Nome do Engenheiro': 'Ary Medina Sobrinho', 'Quantidade de Estudos': 3}, {'Nome do Engenheiro': 'Jader Kayque Marques de Campos', 'Quantidade de Estudos': 2}, {'Nome do Engenheiro': 'Matheus Henrique de Sousa Nogueira', 'Quantidade de Estudos': 2}, {'Nome do Engenheiro': 'Olivio Cesario Dos Santos', 'Quantidade de Estudos': 2}]",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:28:04.077620",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "coloque em tabela",
+      "role": "user",
+      "timestamp": "2025-11-19T16:28:14.336442",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Pronto, Jader! Organizei os dados em formato de tabela para você, mostrando a quantidade de estudos por engenheiro de forma mais estruturada e fácil de visualizar.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Nome do Engenheiro</th>\n      <th>Quantidade de Estudos</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Igor Moreira Dias</td>\n      <td>5</td>\n    </tr>\n    <tr>\n      <td>Roberto Lopes de Paula Junior</td>\n      <td>5</td>\n    </tr>\n    <tr>\n      <td>Gleice Mylena da Silva Rodrigues</td>\n      <td>4</td>\n    </tr>\n    <tr>\n      <td>Joao Marcus Ramos Bacalhau</td>\n      <td>4</td>\n    </tr>\n    <tr>\n      <td>Alexandre Sossai</td>\n      <td>4</td>\n    </tr>\n    <tr>\n      <td>Anderson Pires da Silva</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>Ary Medina Sobrinho</td>\n      <td>3</td>\n    </tr>\n    <tr>\n      <td>Jader Kayque Marques de Campos</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>Matheus Henrique de Sousa Nogueira</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>Olivio Cesario Dos Santos</td>\n      <td>2</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_2fce3fa8.csv', '44224228-51d8-47ac-953b-26ab77744707')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:28:22.270645",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_2fce3fa8.csv",
+          "path": "app/bot/chats/7034\\44224228-51d8-47ac-953b-26ab77744707\\tables\\table_2fce3fa8.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "liste os processos da EDP SP cuja alternativa de menor custo global tenha um custo associado",
+      "role": "user",
+      "timestamp": "2025-11-19T16:30:00.328934",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Aqui estão os processos da EDP SP que possuem alternativas de menor custo global com valores associados. Os resultados estão ordenados do maior para o menor custo. Precisa de mais alguma informação sobre esses processos?",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Custo da Alternativa</th>\n      <th>Engenheiro Responsável</th>\n      <th>Nome do Projeto</th>\n      <th>Número do Documento</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>1785000.00</td>\n      <td>Jader Kayque Marques de Campos</td>\n      <td>CONSÓRCIO SOLAR FLUTUANTE VALE DO PARAÍBA</td>\n      <td>1006/25</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_b9472b29.csv', '44224228-51d8-47ac-953b-26ab77744707')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:30:12.971134",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_b9472b29.csv",
+          "path": "app/bot/chats/7034\\44224228-51d8-47ac-953b-26ab77744707\\tables\\table_b9472b29.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "e na EDP ES?",
+      "role": "user",
+      "timestamp": "2025-11-19T16:30:52.049310",
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    },
+    {
+      "text": "Prontinho! Aqui estão os processos da EDP Espírito Santo que possuem alternativas de menor custo global com valores associados, também ordenados do maior para o menor custo.",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Custo (R$)</th>\n      <th>Descrição da Alternativa</th>\n      <th>Município</th>\n      <th>Nome do Projeto</th>\n      <th>Número do Documento</th>\n      <th>Responsável</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>30826693.00</td>\n      <td>A conexão do USUÁRIO à rede de distribuição da EDP, quando considerado individualmente, faz-se-à na tensão 13.8 kV, alimentador BSA02 da subestação Barra Do Sahy, com a demanda 400 kW.</td>\n      <td>ARACRUZ</td>\n      <td>ADUFERTIL FERTILIZANTES LTDA</td>\n      <td>1016/25</td>\n      <td>Alexandre Sossai</td>\n    </tr>\n    <tr>\n      <td>22331366.05</td>\n      <td>Quando considerada individualmente, a conexão da UTE Serra ao sistema de distribuição da EDP Espírito Santo Distribuição de Energia S.A. (EDP ES) far-se-á na tensão de 138 kV, a partir do seccionamento da Linha de Distribuição Carapina – Alto Lage (circuito 1 ou 2), mediante a construção de uma subestação de seccionamento  próximo ao seccionamento, arranjo barra principal de transferência e construção de Ramal 138 kV de aproximadamente 2,96 km em cabo 336,4 MCM da subestação de seccionamento até o ACESSANTE.</td>\n      <td>SERRA</td>\n      <td>UTE SERRA</td>\n      <td>1007/25</td>\n      <td>Joao Marcus Ramos Bacalhau</td>\n    </tr>\n    <tr>\n      <td>15674230.75</td>\n      <td>Quando considerada individualmente, a conexão do ACESSANTE à rede da Distribuidora far-se-á na tensão de 138 kV, a partir da construção de nova entrada de linha, barra principal e transferência, na subestação Rio Quartel, e construção de um ramal 138 kV com aproximadamente 5,78 km de extensão, cabo 336,4 MCM, circuito simples, interligando a SD Rio Quartel à subestação do ACESSANTE.</td>\n      <td>CARIACICA</td>\n      <td>UTE MARCA III</td>\n      <td>1010/25</td>\n      <td>Joao Marcus Ramos Bacalhau</td>\n    </tr>\n    <tr>\n      <td>4258419.73</td>\n      <td>Quando considerada individualmente, a conexão da UTE Cariacica ao sistema de distribuição da EDP ES far-se-á na tensão de 138 kV, mediante a construção de 1 bay de linha na subestação de distribuição (SD) Caçaroca, aquisição de terreno, e construção de aproximadamente 0,7 km de Linha de Distribuição (LD) de 138 kV, circuito simples, cabo 1x336,4 MCM, para conectar a SD Caçaroca a subestação do ACESSANTE.</td>\n      <td>CARIACICA</td>\n      <td>UTE CARIACICA</td>\n      <td>1008/25</td>\n      <td>Joao Marcus Ramos Bacalhau</td>\n    </tr>\n    <tr>\n      <td>698279.58</td>\n      <td>Derivação da Linha de Distribuição (LD) 34,5 kV Civit – Jacaraípe (C1), através da instalação de duas chaves seccionadoras e de um Religador de Linha no futuro ramal da FIBRASA;\\r\\nConstrução de Ramal em 34,5 kV, circuito simples, condutor 1x1/0 AWG, com temperatura de projeto de 60°C, entre o ponto de derivação e o ponto de entrega do ACESSANTE.</td>\n      <td>SERRA</td>\n      <td>FIBRASA</td>\n      <td>1005/25</td>\n      <td>Igor Moreira Dias</td>\n    </tr>\n    <tr>\n      <td>22947.81</td>\n      <td>Quando considerada individualmente, a conexão da PCH Cachoeira do Inferno ao sistema de distribuição da EDP ES será realizada na tensão de 69 kV, por meio do seccionamento da LD 69 kV Nova Venécia – Nova Amorés, da implantação de uma Subestação de Seccionamento e da construção de um ramal 69 kV de aproximadamente 2,9 km, de interesse restrito, interligando a Subestação de Seccionamento à Subestação do ACESSANTE.</td>\n      <td>SAO MATEUS</td>\n      <td>SANTA MARIA ENERGETICA S/A</td>\n      <td>1019/25</td>\n      <td>Igor Moreira Dias</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_cfc16cf3.csv', '44224228-51d8-47ac-953b-26ab77744707')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-19T16:31:04.061226",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_cfc16cf3.csv",
+          "path": "app/bot/chats/7034\\44224228-51d8-47ac-953b-26ab77744707\\tables\\table_cfc16cf3.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "44224228-51d8-47ac-953b-26ab77744707"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

@@ -1,0 +1,21 @@
+{
+  "id": "fbf118a7-6604-4805-ab71-933ba4453ffb",
+  "title": "Oi boa noite",
+  "date": "2025-11-24T00:12:24.905422",
+  "messages": [
+    {
+      "text": "Oi boa noite",
+      "role": "user",
+      "timestamp": "2025-11-24T00:12:24.905422",
+      "chat_id": "fbf118a7-6604-4805-ab71-933ba4453ffb"
+    },
+    {
+      "text": "Boa noite, Jader! Como posso ajudá-lo com o sistema Atlas hoje? Estou à disposição para auxiliar com informações sobre estudos, alternativas, ou qualquer outra funcionalidade relacionada ao gerenciamento de estudos do Planejamento da Expansão da EDP. Em que posso ser útil?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:12:31.195992",
+      "chat_id": "fbf118a7-6604-4805-ab71-933ba4453ffb"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

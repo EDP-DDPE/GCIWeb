@@ -1,0 +1,33 @@
+{
+  "id": "3fb3a3c7-ae3d-4c87-83e6-9b907fedce3f",
+  "title": "teste",
+  "date": "2025-11-24T00:06:49.341504",
+  "messages": [
+    {
+      "text": "teste",
+      "role": "user",
+      "timestamp": "2025-11-24T00:06:49.341504",
+      "chat_id": "3fb3a3c7-ae3d-4c87-83e6-9b907fedce3f"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:06:52.506577",
+      "chat_id": "3fb3a3c7-ae3d-4c87-83e6-9b907fedce3f"
+    },
+    {
+      "text": "bom dia, estou testando",
+      "role": "user",
+      "timestamp": "2025-11-24T00:07:12.664864",
+      "chat_id": "3fb3a3c7-ae3d-4c87-83e6-9b907fedce3f"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:07:15.724946",
+      "chat_id": "3fb3a3c7-ae3d-4c87-83e6-9b907fedce3f"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

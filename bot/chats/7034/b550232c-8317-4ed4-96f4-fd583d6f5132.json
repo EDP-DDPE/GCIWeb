@@ -1,0 +1,54 @@
+{
+  "id": "b550232c-8317-4ed4-96f4-fd583d6f5132",
+  "title": "testando",
+  "date": "2025-11-23T20:48:43.272892",
+  "messages": [
+    {
+      "text": "testando",
+      "role": "user",
+      "timestamp": "2025-11-23T20:48:43.272892",
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-23T20:48:47.192892",
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    },
+    {
+      "text": "boa noite, tudo bom?",
+      "role": "user",
+      "timestamp": "2025-11-23T20:49:15.077008",
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    },
+    {
+      "text": "Boa noite, Jader! Tudo ótimo por aqui, e com você? Em que posso ajudá-lo hoje com o sistema Atlas? Estou à disposição para auxiliar com consultas sobre estudos, alternativas, ou qualquer informação relacionada ao gerenciamento de estudos do Planejamento da Expansão da EDP. Como posso ser útil?",
+      "role": "bot",
+      "timestamp": "2025-11-23T20:49:22.326982",
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    },
+    {
+      "text": "quantos processos de MMGD temos por municipio?",
+      "role": "user",
+      "timestamp": "2025-11-23T21:15:34.120491",
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    },
+    {
+      "text": "Aqui está a contagem de processos MMGD por município, ordenada do maior para o menor número. Os dados estão prontos para sua análise!",
+      "html": "<table class=\"dataframe atlas-table\">\n  <thead>\n    <tr style=\"text-align: left;\">\n      <th>Município</th>\n      <th>Quantidade de Processos MMGD</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>LINHARES</td>\n      <td>2</td>\n    </tr>\n    <tr>\n      <td>ROSEIRA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>SERRA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ATILIO VIVACQUA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CARIACICA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>CONCEICAO DA BARRA</td>\n      <td>1</td>\n    </tr>\n    <tr>\n      <td>ECOPORANGA</td>\n      <td>1</td>\n    </tr>\n  </tbody>\n</table>\n                <button class='download-csv' onclick=\"downloadCSV('table_f9ed9e4d.csv', 'b550232c-8317-4ed4-96f4-fd583d6f5132')\">\n                    📥 Baixar CSV completo\n                </button>\n            ",
+      "role": "bot",
+      "timestamp": "2025-11-23T21:15:45.456552",
+      "attachments": [
+        {
+          "type": "csv",
+          "file": "table_f9ed9e4d.csv",
+          "path": "app/bot/chats/7034\\b550232c-8317-4ed4-96f4-fd583d6f5132\\tables\\table_f9ed9e4d.csv",
+          "name": "CSV Completo da Tabela"
+        }
+      ],
+      "chat_id": "b550232c-8317-4ed4-96f4-fd583d6f5132"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

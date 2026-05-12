@@ -1,0 +1,21 @@
+{
+  "id": "655f0177-93cd-4c37-8e93-e868f32d86f4",
+  "title": "teste",
+  "date": "2025-11-24T00:13:26.425543",
+  "messages": [
+    {
+      "text": "teste",
+      "role": "user",
+      "timestamp": "2025-11-24T00:13:26.425543",
+      "chat_id": "655f0177-93cd-4c37-8e93-e868f32d86f4"
+    },
+    {
+      "text": "Não consegui entender a solicitação. Pode reformular?",
+      "role": "bot",
+      "timestamp": "2025-11-24T00:13:28.651150",
+      "chat_id": "655f0177-93cd-4c37-8e93-e868f32d86f4"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

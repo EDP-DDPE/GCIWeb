@@ -1,0 +1,85 @@
+{
+  "id": "f0d1a956-32f9-436b-bde3-17676a167d7b",
+  "title": "faça um gráfico de quantidade de estudos por munic",
+  "date": "2025-11-19T16:46:09.826903",
+  "messages": [
+    {
+      "text": "faça um gráfico de quantidade de estudos por municipio de SP",
+      "role": "user",
+      "timestamp": "2025-11-19T16:46:09.826903",
+      "chat_id": "f0d1a956-32f9-436b-bde3-17676a167d7b"
+    },
+    {
+      "text": "Vou criar o gráfico com a quantidade de estudos por município de São Paulo conforme solicitado. Os dados estão organizados em ordem decrescente para destacar os municípios com maior volume de estudos.",
+      "role": "bot",
+      "html": "\n                <canvas id=\"chart_ba55041e\" class=\"atlas-chart-js\"></canvas>\n                <script>\n                    window.renderChart_chart_ba55041e = {\n                        labels: ['GUARULHOS', 'SÃO JOSÉ DOS CAMPOS', 'SUZANO', 'PINDAMONHANGABA', 'ROSEIRA', 'CAÇAPAVA'],\n                        dataset: [2, 2, 1, 1, 1, 1]\n                    };\n                </script>\n            ",
+      "timestamp": "2025-11-19T16:46:17.901995",
+      "attachments": [
+        {
+          "type": "chartjs",
+          "labels": [
+            "GUARULHOS",
+            "SÃO JOSÉ DOS CAMPOS",
+            "SUZANO",
+            "PINDAMONHANGABA",
+            "ROSEIRA",
+            "CAÇAPAVA"
+          ],
+          "dataset": [
+            2,
+            2,
+            1,
+            1,
+            1,
+            1
+          ],
+          "title": "Gráfico solicitado"
+        }
+      ],
+      "chat_id": "f0d1a956-32f9-436b-bde3-17676a167d7b"
+    },
+    {
+      "text": "agora por engenheiro do ES",
+      "role": "user",
+      "timestamp": "2025-11-19T16:46:40.777757",
+      "chat_id": "f0d1a956-32f9-436b-bde3-17676a167d7b"
+    },
+    {
+      "text": "Vou criar o gráfico com a quantidade de estudos por engenheiro responsável no Espírito Santo. Os dados estão organizados em ordem decrescente para você visualizar quais engenheiros têm mais estudos sob sua responsabilidade.",
+      "role": "bot",
+      "html": "\n                <canvas id=\"chart_985100a5\" class=\"atlas-chart-js\"></canvas>\n                <script>\n                    window.renderChart_chart_985100a5 = {\n                        labels: ['Alexandre Sossai', 'Gleice Mylena da Silva Rodrigues', 'Ary Medina Sobrinho'],\n                        dataset: [8, 8, 3]\n                    };\n                </script>\n            ",
+      "timestamp": "2025-11-19T16:46:48.205793",
+      "attachments": [
+        {
+          "type": "chartjs",
+          "labels": [
+            "Alexandre Sossai",
+            "Gleice Mylena da Silva Rodrigues",
+            "Ary Medina Sobrinho"
+          ],
+          "dataset": [
+            8,
+            8,
+            3
+          ],
+          "title": "Gráfico solicitado"
+        }
+      ],
+      "chat_id": "f0d1a956-32f9-436b-bde3-17676a167d7b"
+    },
+    {
+      "text": "quero ver a quantidade cadastrada por data",
+      "role": "user",
+      "timestamp": "2025-11-19T16:47:39.658746",
+      "chat_id": "f0d1a956-32f9-436b-bde3-17676a167d7b"
+    },
+    {
+      "text": "Prontinho! Vou criar um gráfico mostrando a quantidade de estudos cadastrados por data. Você conseguirá visualizar claramente como os registros estão distribuídos ao longo do tempo.",
+      "role": "bot",
+      "html": "\n                <canvas id=\"chart_8b99eaf8\" class=\"atlas-chart-js\"></canvas>\n                <script>\n                    window.renderChart_chart_8b99eaf8 = {\n                        labels: [datetime.date(2025, 8, 15), datetime.date(2025, 11, 10), datetime.date(2025, 11, 11), datetime.date(2025, 11, 12), datetime.date(2025, 11, 13), datetime.date(2025, 11, 14), datetime.date(2025, 11, 17), datetime.date(2025, 11, 18), datetime.date(2025, 11, 19)],\n                        dataset: [1, 5, 3, 8, 4, 4, 1, 6, 2]\n                    };\n                </script>\n            ",
+      "timestamp": "2025-11-19T16:47:47.025055"
+    }
+  ],
+  "tables": [],
+  "charts": []
+}

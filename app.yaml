@@ -1,0 +1,17 @@
+command: [
+  "gunicorn",
+  "--bind",
+  "0.0.0.0:8000",
+  "app:app"
+]
+
+env:
+  - name: db
+    valueFrom: db
+
+  - name: DATABASE_URL
+    valueFrom: DATABASE_URL
+
+
+  - name: SECRET_KEY
+    valueFrom: SECRET_KEY
