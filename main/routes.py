@@ -71,7 +71,7 @@ def carregar_usuario():
 
             print(Usuario.query.all())
 
-            usuario = db.session.query(Usuario).filter(Usuario.email.like(f"{prefix_email}%")).first()
+            usuario = db.session.query(Usuario).filter(Usuario.email.startswith(f"{prefix_email}%")).first()
 
 
             print(f"usuario: {usuario}")
