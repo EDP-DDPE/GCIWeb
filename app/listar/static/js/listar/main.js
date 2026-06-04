@@ -26,19 +26,25 @@ export let state = {
 export function load() {
     window.showLoading();
 
-    fetchEstudos(state).done(resp => {
-        window.__lastLoadedItems = resp.items;
-        state.hasNext = resp.has_next;
+    fetchEstudos(state)
+        .done(resp => {
+            window.__lastLoadedItems = resp.items;
+            state.hasNext = resp.has_next;
 
-        renderTable(resp.items);
-        renderPagination(resp.page, resp.has_next, p => {
-            state.page = p;
-            load();
+            renderTable(resp.items);
+            renderPagination(resp.page, resp.has_next, p => {
+                state.page = p;
+                load();
+            });
+
+            updateRecordInfo(resp);
+        })
+        .fail(err => {
+            console.error("Erro ao carregar estudos:", err);
+        })
+        .always(() => {
+            window.hideLoading();
         });
-
-        updateRecordInfo(resp);
-        window.hideLoading();
-    });
 }
 
 export function bindHeaderInteractions() {
