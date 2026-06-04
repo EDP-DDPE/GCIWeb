@@ -35,6 +35,10 @@ export function preencherFormulario(data) {
     $("#ERD").val(data.ERD);
     $("#custo_modular").val(data.custo_modular);
 
+    // coordenadas
+    $("#latitude_ponto_conexao").val(data.latitude_ponto_conexao);
+    $("#longitude_ponto_conexao").val(data.longitude_ponto_conexao);
+
     // flags
     $("#flag_carga").prop("checked", data.flag_carga);
     $("#flag_geracao").prop("checked", data.flag_geracao);
