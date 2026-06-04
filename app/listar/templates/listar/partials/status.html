@@ -25,7 +25,7 @@
             </h6>
           </div>
           <div class="card-body">
-            <form id="statusForm">
+            <form id="statusForm" method="post">
               <input type="hidden" name="id_estudo" id="status_id_estudo">
               <input type="hidden" name="id_status" id="status_id_status">
 
@@ -54,7 +54,7 @@
                 <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('statusForm').reset();">
                   <i class="bi bi-x-circle me-1"></i>Limpar
                 </button>
-                <button type="submit" class="btn btn-success">
+                <button type="submit" class="btn btn-success" data-no-loading="true">
                   <i class="bi bi-check-circle me-1"></i>Salvar Status
                 </button>
               </div>
