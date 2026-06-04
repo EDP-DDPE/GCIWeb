@@ -331,18 +331,18 @@ class Estudo(db.Model):
     )
 
 
-    # Relacionamentos com lazy estratégico
-    edp = db.relationship('EDP', back_populates='estudos', lazy='joined')
-    regional = db.relationship('Regional', back_populates='estudos', lazy='joined')
+    # Relacionamentos com lazy='select' — get_with_all_relations() usa joinedload explícito quando necessário
+    edp = db.relationship('EDP', back_populates='estudos', lazy='select')
+    regional = db.relationship('Regional', back_populates='estudos', lazy='select')
     criado_por = db.relationship('Usuario', foreign_keys=[id_criado_por], back_populates='estudos_criados',
-                                 lazy='joined')
+                                 lazy='select')
     alterado_por = db.relationship('Usuario', foreign_keys=[id_resp_alteracao], back_populates='resp_alteracao',
-                                   lazy='joined')
-    resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='joined')
-    empresa = db.relationship('Empresa', back_populates='estudos', lazy='joined')
-    municipio = db.relationship('Municipio', back_populates='estudos', lazy='joined')
-    tensao = db.relationship('Tensao', back_populates='estudos', lazy='joined')
-    tipo_solicitacao = db.relationship('TipoSolicitacao', back_populates='estudos', lazy='joined')
+                                   lazy='select')
+    resp_regiao = db.relationship('RespRegiao', back_populates='estudos', lazy='select')
+    empresa = db.relationship('Empresa', back_populates='estudos', lazy='select')
+    municipio = db.relationship('Municipio', back_populates='estudos', lazy='select')
+    tensao = db.relationship('Tensao', back_populates='estudos', lazy='select')
+    tipo_solicitacao = db.relationship('TipoSolicitacao', back_populates='estudos', lazy='select')
 
     # Relacionamentos 1:N com lazy='select' para evitar carregamento automático
     anexos = db.relationship('Anexo', back_populates='estudo', lazy='select', cascade='all, delete-orphan')
@@ -488,11 +488,11 @@ class Alternativa(db.Model):
     id_img_anexo = db.Column(db.BigInteger, db.ForeignKey('gciweb.anexos.id_anexo'), nullable=True)
 
 
-    # Relacionamentos simples - sem ambiguidade
-    circuito = db.relationship('Circuito', back_populates='alternativas', lazy='joined')
-    estudo = db.relationship('Estudo', back_populates='alternativas', lazy='joined')
-    fatorK = db.relationship('FatorK', back_populates='alternativas', lazy='joined')
-    img_anexo = db.relationship('Anexo', back_populates='alternativas', lazy='joined')
+    # Relacionamentos com lazy='select' — evita JOINs automáticos em operações de escrita
+    circuito = db.relationship('Circuito', back_populates='alternativas', lazy='select')
+    estudo = db.relationship('Estudo', back_populates='alternativas', lazy='select')
+    fatorK = db.relationship('FatorK', back_populates='alternativas', lazy='select')
+    img_anexo = db.relationship('Anexo', back_populates='alternativas', lazy='select')
 
     # Relacionamento 1:N - Uma alternativa pode ter várias obras
     obras = db.relationship(

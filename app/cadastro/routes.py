@@ -238,10 +238,13 @@ def cadastro_estudo():
             db.session.add(novo_estudo)
             db.session.flush()  # Para obter o ID do estudo
 
+            num_doc = novo_estudo.num_doc
+            id_estudo_novo = novo_estudo.id_estudo
+
             # Processar arquivo se foi enviado
             for file in form.arquivos.data:
                 if file:
-                    prefix = f"DDPE_{str(novo_estudo.num_doc).replace('/', '_')}"
+                    prefix = f"DDPE_{str(num_doc).replace('/', '_')}"
                     if not prefix in file.filename:
                         new_name = f"{prefix}_{file.filename}"
                     else:
@@ -262,14 +265,13 @@ def cadastro_estudo():
                         endereco=caminho_arquivo,
                         tamanho_arquivo=os.path.getsize(caminho_arquivo),
                         tipo_mime=file.content_type,
-                        id_estudo=novo_estudo.id_estudo
+                        id_estudo=id_estudo_novo
                     )
                     db.session.add(novo_anexo)
-                    db.session.flush()
 
             db.session.commit()
-            flash(f'Estudo {novo_estudo.num_doc} cadastrado com sucesso!', 'success')
-            return redirect(url_for('alternativa.listar', id_estudo=novo_estudo.id_estudo))
+            flash(f'Estudo {num_doc} cadastrado com sucesso!', 'success')
+            return redirect(url_for('alternativa.listar', id_estudo=id_estudo_novo))
 
         except Exception as e:
             db.session.rollback()

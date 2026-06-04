@@ -9,6 +9,7 @@ from app.models import Alternativa, Estudo, Circuito, db, FatorK, Anexo
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
 from sqlalchemy import literal_column, and_
+from sqlalchemy.orm import joinedload
 
 
 alternativa_bp = Blueprint(
@@ -63,7 +64,7 @@ def get_fator_k(subgrupo, data, edp):
 
 def save_image(file, estudo):
     """
-    Salva imagem e retorna: (id_anexo, caminho)
+    Salva imagem e retorna: (objeto Anexo, caminho). O flush/commit fica a cargo do caller.
     """
     if not file:
         return None, None
@@ -85,9 +86,8 @@ def save_image(file, estudo):
         id_estudo=estudo.id_estudo
     )
     db.session.add(anexo)
-    db.session.flush()
 
-    return anexo.id_anexo, path
+    return anexo, path
 
 
 # ===========================================
@@ -102,7 +102,7 @@ def listar(id_estudo):
     form = AlternativaForm()
     form.id_estudo.data = id_estudo
     form.atualizar_circuitos(estudo.id_edp, 'A2' if estudo.tensao.tensao == 'AT' else 'A4')
-    alternativas = Alternativa.query.filter_by(id_estudo=id_estudo).all()
+    alternativas = Alternativa.query.options(joinedload(Alternativa.circuito)).filter_by(id_estudo=id_estudo).all()
 
     # ========= CRIAÇÃO =========
     if request.method == 'POST':
@@ -110,7 +110,7 @@ def listar(id_estudo):
         if form.validate_on_submit():
             try:
                 arquivo = form.imagem_blob.data
-                id_anexo, path = save_image(arquivo, estudo)
+                img_anexo_obj, path = save_image(arquivo, estudo)
 
                 nova = Alternativa(
                     id_estudo=id_estudo,
@@ -136,8 +136,9 @@ def listar(id_estudo):
                     demanda_disponivel_ponto=form.demanda_disponivel_ponto.data,
                     subgrupo_tarifario=form.subgrupo_tarif.data,
                     etapa=form.etapa.data,
-                    id_img_anexo=id_anexo
                 )
+                if img_anexo_obj:
+                    nova.img_anexo = img_anexo_obj
 
                 estudo.n_alternativas += 1
 
@@ -216,17 +217,17 @@ def editar_alternativa(id_alternativa):
 
     alt = Alternativa.query.get_or_404(id_alternativa)
     estudo = Estudo.query.get_or_404(alt.id_estudo)
+    id_estudo = estudo.id_estudo  # captura antes do commit para evitar reload pós-expiração
 
     form = AlternativaForm()
     form.atualizar_circuitos(estudo.id_edp, alt.subgrupo_tarifario)
     if form.validate_on_submit():
         try:
             arquivo = form.imagem_blob.data
-            novo_id_anexo = alt.id_img_anexo
 
             # nova imagem
             if arquivo:
-                novo_id_anexo, path = save_image(arquivo, estudo)
+                novo_img_anexo, path = save_image(arquivo, estudo)
 
                 # remove imagem antiga
                 if alt.id_img_anexo:
@@ -234,6 +235,8 @@ def editar_alternativa(id_alternativa):
                     if antigo and os.path.exists(antigo.endereco):
                         os.remove(antigo.endereco)
                     db.session.delete(antigo)
+
+                alt.img_anexo = novo_img_anexo
 
             # atualizar campos
             alt.id_circuito = form.id_circuito.data
@@ -257,7 +260,6 @@ def editar_alternativa(id_alternativa):
             alt.ERD = form.ERD.data
             alt.demanda_disponivel_ponto = form.demanda_disponivel_ponto.data
             alt.proporcionalidade = calc_prop(form)
-            alt.id_img_anexo = novo_id_anexo
 
             db.session.commit()
             flash("Alternativa atualizada com sucesso!", "success")
@@ -269,7 +271,7 @@ def editar_alternativa(id_alternativa):
     else:
         flash("Erros no formulário.", "danger")
 
-    return redirect(url_for("alternativa.listar", id_estudo=estudo.id_estudo))
+    return redirect(url_for("alternativa.listar", id_estudo=id_estudo))
 
 
 # ===========================================
