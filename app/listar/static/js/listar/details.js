@@ -253,6 +253,7 @@ async function confirmarDownload(e) {
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = filename;
+        a.dataset.noLoading = "true";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

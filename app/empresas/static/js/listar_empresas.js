@@ -457,7 +457,8 @@ function setupColumnResizing() {
         const url = URL.createObjectURL(blob);
         const link = $('<a>').attr({
             href: url,
-            download: filename
+            download: filename,
+            'data-no-loading': 'true'
         })[0];
 
         $('body').append(link);
