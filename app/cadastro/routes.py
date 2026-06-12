@@ -512,7 +512,6 @@ def editar_estudo(id_estudo):
 
 @cadastro_bp.route("/estudos/excluir/<int:id_estudo>", methods=['DELETE'])
 @requires_permission('deletar')
-@requires_permission('deletar')
 def excluir_estudo(id_estudo):
     print("entrei no excluir")
     user = get_usuario_logado()
