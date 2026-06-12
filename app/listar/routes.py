@@ -348,18 +348,6 @@ def salvar_status():
     return jsonify({"success": True})
 
 
-@listar_bp.route('/listar/teste/')
-def teste():
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.dirname(current_app.root_path))).replace('\\', '/')
-    print(current_app.root_path)
-    print(os.path.dirname(current_app.root_path))
-    print(os.path.dirname(os.path.dirname(current_app.root_path)))
-    print(os.path.join(os.path.dirname(current_app.root_path)))
-    print(UPLOAD_FOLDER)
-    return jsonify({
-        'teste': 'ok'
-    })
-
 @listar_bp.get("/listar/estudos/<int:id_estudo>")
 def api_detalhes_estudo(id_estudo):
     e = db.session.query(ViewEstudos).filter_by(id_estudo=id_estudo).first()
