@@ -1,8 +1,14 @@
 from app.models import db
 import pandas as pd
+import time
+
+# Cache em módulo: o schema do banco quase nunca muda, então evitamos
+# 3 round-trips ao INFORMATION_SCHEMA a cada mensagem do chat.
+_SCHEMA_CACHE_TTL = 600  # segundos
+_schema_cache = {"text": None, "timestamp": 0.0}
 
 
-def get_schema_from_sqlserver():
+def get_schema_from_sqlserver(force_refresh=False):
     """
     Retorna um schema compacto contendo:
     - tabelas
@@ -11,7 +17,15 @@ def get_schema_from_sqlserver():
     - PK
     - FK
     Em formato de texto pronto para colocar no prompt do LLM.
+
+    O resultado fica em cache por _SCHEMA_CACHE_TTL segundos.
+    Use force_refresh=True para ignorar o cache.
     """
+
+    if (not force_refresh
+            and _schema_cache["text"] is not None
+            and time.time() - _schema_cache["timestamp"] < _SCHEMA_CACHE_TTL):
+        return _schema_cache["text"]
 
     engine = db.engine
 
@@ -116,4 +130,7 @@ def get_schema_from_sqlserver():
 
         schema_text.append("")  # linha de espaço
 
-    return "\n".join(schema_text)
+    result = "\n".join(schema_text)
+    _schema_cache["text"] = result
+    _schema_cache["timestamp"] = time.time()
+    return result
