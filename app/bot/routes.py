@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, session, g, send_file
+from flask import Blueprint, render_template, request, jsonify, session, g, send_file, current_app
 from app.auth import get_usuario_logado, requires_permission
 from datetime import datetime
 import json
@@ -42,9 +42,6 @@ def ensure_chat_structure(chat_data):
 @bot_bp.route('/atlas')
 @requires_permission('visualizar')
 def atlas():
-    schema = get_schema_from_sqlserver()
-    print(schema)
-
     return render_template('bot/chat.html')
 
 
@@ -148,7 +145,7 @@ def get_chat_history():
                             'charts_count': len(chat_data['charts'])
                         })
                 except Exception as e:
-                    print(f"Erro ao carregar {filename}: {e}")
+                    current_app.logger.warning("Erro ao carregar %s: %s", filename, e)
 
     # Ordenar por data (mais recentes primeiro)
     chats.sort(key=lambda x: x['date'], reverse=True)
@@ -175,7 +172,6 @@ def load_chat(chat_id):
             chat_data = ensure_chat_structure(chat_data)
             # Recarregar no armazenamento ativo
             active_chats[chat_id] = chat_data
-            print(chat_data)
             return jsonify(chat_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -380,7 +376,7 @@ def llm_query():
         intent = intent_obj["intent"]
         confidence = intent_obj.get("confidence", 0.80)
 
-        print(f"[INTENT] {intent}  | conf: {confidence}")
+        current_app.logger.debug("[INTENT] %s | conf: %s", intent, confidence)
 
 
         # ====================================================
@@ -458,7 +454,7 @@ def llm_query():
             sql_command = sql_json["sql"]
             sql_comment = sql_json["comment"]
 
-            print(f"[SQL] {sql_command}")
+            current_app.logger.debug("[SQL] %s", sql_command)
 
             # ------------------------------------------------
             # 4.3 — executar SQL
@@ -534,8 +530,6 @@ def llm_query():
                     "chat_id": chat_id
                 }
 
-                print(bot_message)
-
                 chat["messages"].append(bot_message)
                 return jsonify(bot_message)
 
@@ -544,8 +538,6 @@ def llm_query():
             # RESPOSTA GRÁFICO
             # ====================================================
             if intent == "sql_plot":
-
-                print(df)
 
                 x, y = detectar_colunas(df)
 
@@ -609,7 +601,7 @@ def llm_query():
         return jsonify(bot_message)
 
     except Exception as e:
-        print("ERRO NO LLM_QUERY:", str(e))  # Log no servidor
+        current_app.logger.exception("Erro no llm_query")
         return jsonify({
             "text": f"⚠️ Ocorreu um erro interno ao processar sua solicitação. {str(e)}",
             "role": "bot",

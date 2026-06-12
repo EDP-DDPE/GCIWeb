@@ -25,7 +25,6 @@ class DatabaseConfig:
     USERNAME = os.getenv('SQLSERVER_USERNAME', '')
     PASSWORD = os.getenv('SQLSERVER_PASSWORD', '')
     DRIVER = os.getenv('SQLSERVER_DRIVER')
-    print(f"Driver Selecionado: {DRIVER}")
     
     # Configurações de conexão
     TRUST_SERVER_CERTIFICATE = os.getenv('TRUST_SERVER_CERTIFICATE', 'no')
@@ -110,7 +109,6 @@ class DatabaseManager:
         
         # Aplicar configurações do SQLAlchemy
         config = DatabaseConfig.get_sqlalchemy_config()
-        print(f"Configuração SQL: {config}")
         for key, value in config.items():
             app.config[key] = value
         
