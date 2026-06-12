@@ -11,8 +11,11 @@ from contextlib import contextmanager
 from dotenv import load_dotenv
 
 # Configuração de logging para SQL Server
+# WARNING: no nível INFO o SQLAlchemy loga toda query executada, o que
+# custa muito I/O em produção (o wsgi.py tentava silenciar depois, mas
+# este módulo reconfigurava no import).
 logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
 
 class DatabaseConfig:
