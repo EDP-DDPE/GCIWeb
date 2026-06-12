@@ -475,7 +475,8 @@ def download_template(id_estudo):
         demanda = max(float(estudo.dem_carga_solicit_p), float(estudo.dem_carga_solicit_fp),
                       float(estudo.dem_ger_solicit_p),   float(estudo.dem_ger_solicit_fp))
         c_g = "G"
-    elif dif_dem_ger == 0 and dif_dem_carga > 0:
+    else:
+        # Decréscimo de demanda (ou nenhuma variação): sem valor de referência
         demanda = 0
         c_g = "-"
 
