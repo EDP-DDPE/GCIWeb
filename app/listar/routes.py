@@ -328,35 +328,21 @@ def salvar_status():
     id_estudo = data.get("id_estudo")
     id_status_tipo = data.get("id_status_tipo")
     observacao = data.get("observacao", "").strip()
-    #id_status = data.get("id_status")  # usado para edição opcional
 
     if not id_estudo or not id_status_tipo:
         return jsonify({"error": "Dados incompletos."}), 400
 
-    # if id_status:
-    #     # editar um status existente
-    #     status = StatusEstudo.query.get(id_status)
-    #     if not status:
-    #         return jsonify({"error": "Status não encontrado."}), 404
+    tz = pytz.timezone("America/Sao_Paulo")
+    horario = datetime.now(tz)
 
-        # status.id_status_tipo = id_status_tipo
-        # status.observacao = observacao
-
-    else:
-
-        tz = pytz.timezone("America/Sao_Paulo")
-        horario = datetime.now(tz)
-
-        # adicionar novo
-        status = StatusEstudo(
-            id_estudo=id_estudo,
-            id_status_tipo=id_status_tipo,
-            observacao=observacao,
-            id_criado_por=g.user.id_usuario,  # quem criou
-            data=horario
-        )
-        db.session.add(status)
-
+    status = StatusEstudo(
+        id_estudo=id_estudo,
+        id_status_tipo=id_status_tipo,
+        observacao=observacao,
+        id_criado_por=g.user.id_usuario,  # quem criou
+        data=horario
+    )
+    db.session.add(status)
     db.session.commit()
 
     return jsonify({"success": True})
