@@ -902,6 +902,12 @@ $(document).ready(function() {
         }
     });
 
+    // Se o CNPJ já veio preenchido (ex.: prefill via IA a partir de um PDF),
+    // dispara a busca do cliente da mesma forma que no preenchimento manual.
+    if ($('#CNPJ').val().replace(/\D/g, '')) {
+        $('#CNPJ').trigger('change');
+    }
+
     // Ativar tooltips se necessário
     const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
     const tooltipList = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
