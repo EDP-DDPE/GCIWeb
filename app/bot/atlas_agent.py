@@ -328,7 +328,7 @@ class AtlasAgent:
                     "dem_ger_solicit_p": "Demanda de geração solicitada pelo cliente no horário Ponta (Fotovoltaica não gera em horário de Ponta, deve ser 0.)",
                     "edp": "Deve ser 1 para SP e 2 para ES dependendo da localização do cliente.",
                     "municipio": "",
-                    "tipo_viab": "decida entre 'Orçamento de Conexão' ou 'Orçamento Estimado'" Atenção: Orçamento estimado pode ser descrito como consulta de acesso no formulário,
+                    "tipo_viab": "decida entre 'Orçamento de Conexão' ou 'Orçamento Estimado'. Atenção: Orçamento Estimado pode aparecer como 'consulta de acesso' no formulário",
                     "tipo_analise": "decida entre 'Carga', 'MMGD', 'Autoprodutor', 'Produtor Independente', 'BESS', 'Carga e Autoprodutor' ou 'Carga e MMGD'",
                     "tipo_pedido": "decida entre 'Aumento de Demanda', 'Ligação Nova', 'Decréscimo de Demanda' ou 'Reserva de Capacidade'",
                     "tipo_geracao": "decida entre 'Fotovoltaica', 'Hidrelétrica', 'Termoelétrica' ou 'Eólica'",
