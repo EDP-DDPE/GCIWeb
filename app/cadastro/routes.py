@@ -130,9 +130,9 @@ def cadastro_estudo():
     if request.method == "GET" and request.args.get("ia_prefill") == "1":
         dados_ia = session.get("ia_prefill_estudo", {})
 
-        print(f'dentro de cadastro: {dados_ia}')
         ### Aba Básicas
         form.nome_projeto.data = dados_ia.get("nome_projeto")
+        form.protocolo.data = dados_ia.get('protocolo')
         form.descricao.data = dados_ia.get("descricao")
 
         if (classe := safe_int(dados_ia, "classe")) is not None:
@@ -189,6 +189,9 @@ def cadastro_estudo():
                 form.data_abertura_cliente.data = datetime.strptime(dados_ia.get("data_abertura_cliente"), "%Y-%m-%d")
             if dados_ia.get("data_desejada_cliente"):
                 form.data_desejada_cliente.data = datetime.strptime(dados_ia.get("data_desejada_cliente"), "%Y-%m-%d")
+            if dados_ia.get("data_vencimento_cliente"):
+                    form.data_vencimento_cliente.data = datetime.strptime(dados_ia.get("data_vencimento_cliente"),
+                                                                        "%Y-%m-%d")
         except:
             pass
 

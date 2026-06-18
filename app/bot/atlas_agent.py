@@ -317,6 +317,7 @@ class AtlasAgent:
                 {{
                     "nome_projeto": ,
                     "descricao": "",
+                    "protocolo": "",
                     "classe": "Esta será 1 (para AT) ou 2 (para MT) dependendo do nível de tensão do cliente, abaixo de 69kV é MT.",
                     "instalacao": "Nos formulários é representado como UC (Unidade Consumidora) do cliente)  
                     "cnpj": "",
@@ -327,14 +328,15 @@ class AtlasAgent:
                     "dem_ger_solicit_p": "Demanda de geração solicitada pelo cliente no horário Ponta (Fotovoltaica não gera em horário de Ponta, deve ser 0.)",
                     "edp": "Deve ser 1 para SP e 2 para ES dependendo da localização do cliente.",
                     "municipio": "",
-                    "tipo_viab": "decida entre 'Orçamento de Conexão' ou 'Orçamento Estimado'",
+                    "tipo_viab": "decida entre 'Orçamento de Conexão' ou 'Orçamento Estimado'" Atenção: Orçamento estimado pode ser descrito como consulta de acesso no formulário,
                     "tipo_analise": "decida entre 'Carga', 'MMGD', 'Autoprodutor', 'Produtor Independente', 'BESS', 'Carga e Autoprodutor' ou 'Carga e MMGD'",
                     "tipo_pedido": "decida entre 'Aumento de Demanda', 'Ligação Nova', 'Decréscimo de Demanda' ou 'Reserva de Capacidade'",
                     "tipo_geracao": "decida entre 'Fotovoltaica', 'Hidrelétrica', 'Termoelétrica' ou 'Eólica'",
                     "latitude_cliente": "",
                     "longitude_cliente": "",
-                    "data_abertura_cliente": "",
-                    "data_desejada_cliente": "",
+                    "data_abertura_cliente": "Considere a data de assinatura do formulário",
+                    "data_vencimento_cliente": "Some 30 dias à data de abertura",
+                    "data_desejada_cliente": "Verifique se há em algum arquivo a data final que o cliente gostaria de estar conectado",
                     "observacao": ""
                 }}
                 
