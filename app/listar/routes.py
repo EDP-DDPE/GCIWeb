@@ -7,6 +7,7 @@ from sqlalchemy.orm import load_only
 from werkzeug.utils import safe_join
 from app.models import listar_estudos, obter_estudo, Estudo, StatusTipo, ViewEstudos, db, Alternativa, Anexo, StatusEstudo, DocPadronizado, TipoSolicitacao
 from app.auth import requires_permission, get_usuario_logado
+from app.utils.activity_log import registrar_log
 import os
 from io import BytesIO
 import pandas as pd
@@ -381,6 +382,7 @@ def download_file(filename):
         directory = os.path.dirname(safe_path)
         file = os.path.basename(safe_path)
 
+        registrar_log('baixar_arquivo', 'anexo', None, f'Baixou o arquivo "{file}"')
         return send_from_directory(directory, file, as_attachment=True)
     except Exception as e:
         print(f'Erro em listar/routes: def download_file() - {str(e)} ')

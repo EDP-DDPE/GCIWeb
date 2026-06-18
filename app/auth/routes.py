@@ -80,6 +80,11 @@ def create_auth_blueprint(redirect_path="/auth/callback"):
     @auth_bp.route("/logout")
     def logout():
         cfg = current_app.config
+        try:
+            from app.utils.activity_log import registrar_log
+            registrar_log('logout', descricao='Encerrou a sessão')
+        except Exception:
+            pass
         session.clear()
         # Se não existir um blueprint "main" para a home, troque por url_for("index")
         return redirect(
@@ -166,6 +171,15 @@ def create_auth_blueprint(redirect_path="/auth/callback"):
 
             user_name = result.get('id_token_claims', {}).get('name', 'N/A')
             print(f"[DEBUG] Login bem-sucedido para: {user_name}")
+
+            try:
+                from app.models import Usuario
+                from app.utils.activity_log import registrar_log
+                matricula = (session["user"].get("preferred_username") or "").split("@")[0]
+                u = Usuario.query.filter_by(matricula=matricula).first()
+                registrar_log('login', usuario=u, descricao=f'Login de {user_name}')
+            except Exception:
+                pass
 
             return redirect(url_for("main.home"))
 

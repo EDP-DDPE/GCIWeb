@@ -118,6 +118,7 @@ def create_app():
     from app.resp_regioes.routes import resp_regioes_bp
     from app.empresas.routes import empresas_bp
     from app.bot.routes import bot_bp
+    from app.admin.routes import admin_bp
 
     app.register_blueprint(create_auth_blueprint(redirect_path="/callback"), url_prefix="/auth")
     # REDIRECT_URI deve ser http://localhost:5000/auth/callback
@@ -140,6 +141,7 @@ def create_app():
     app.register_blueprint(resp_regioes_bp)
     app.register_blueprint(empresas_bp)
     app.register_blueprint(bot_bp)
+    app.register_blueprint(admin_bp)
 
 
     # with app.app_context():

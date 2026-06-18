@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 from app.auth import requires_permission, get_usuario_logado
 from app.api.routes import search_municipio_by_edp, get_resp_by_regional
 from app.bot.atlas_agent import AtlasAgent
-from sqlalchemy import desc 
+from app.utils.activity_log import registrar_log
+from sqlalchemy import desc
 import os
 
 import tempfile
@@ -246,6 +247,7 @@ def cadastro_estudo():
             id_estudo_novo = novo_estudo.id_estudo
 
             # Processar arquivo se foi enviado
+            anexos_salvos = []
             for file in form.arquivos.data:
                 if file:
                     prefix = f"DDPE_{str(num_doc).replace('/', '_')}"
@@ -272,8 +274,14 @@ def cadastro_estudo():
                         id_estudo=id_estudo_novo
                     )
                     db.session.add(novo_anexo)
+                    anexos_salvos.append(nome_arquivo)
 
             db.session.commit()
+            registrar_log('criar_estudo', 'estudo', id_estudo_novo,
+                          f'Cadastrou o estudo {num_doc} - {novo_estudo.nome_projeto}')
+            for nome_anexo in anexos_salvos:
+                registrar_log('anexar_arquivo', 'estudo', id_estudo_novo,
+                              f'Anexou "{nome_anexo}" ao estudo {num_doc}')
             flash(f'Estudo {num_doc} cadastrado com sucesso!', 'success')
             return redirect(url_for('alternativa.listar', id_estudo=id_estudo_novo))
 
@@ -332,6 +340,9 @@ def upload_ddpe_ia():
 
     print('Resultado LLM:')
     print(dados_ia)
+
+    registrar_log('ia_cadastro', 'estudo', None,
+                  f'Usou a IA para pré-cadastrar estudo a partir de: {nome_seguro}')
 
     return jsonify({
         "success": True,
@@ -457,6 +468,8 @@ def editar_estudo(id_estudo):
                     db.session.delete(anexo)
 
             db.session.commit()
+            registrar_log('editar_estudo', 'estudo', estudo.id_estudo,
+                          f'Editou o estudo {estudo.num_doc} - {estudo.nome_projeto}')
             flash(f'Estudo {estudo.num_doc} atualizado com sucesso!', 'success')
             return redirect(url_for('alternativa.listar', id_estudo=estudo.id_estudo))
 
@@ -536,8 +549,12 @@ def excluir_estudo(id_estudo):
             return jsonify({'success': False, 'message': 'Você não tem permissão para deletar esse estudo. Solicite ao criador do estudo, o resposável da região ou à algum admin.'})
 
         print(f"{datetime.now()}: Estudo {id_estudo} excluído pelo usuário {user.nome} ")
+        num_doc_excluido = estudo.num_doc
         db.session.delete(estudo)
         db.session.commit()
+
+        registrar_log('excluir_estudo', 'estudo', id_estudo,
+                      f'Excluiu o estudo {num_doc_excluido}')
 
         return jsonify({'success': True, 'message': 'Estudo excluído com sucesso!'}), 200
 
