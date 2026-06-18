@@ -6,7 +6,7 @@ from app.models import (db, Estudo, Empresa, Municipio, Regional, TipoSolicitaca
 
 from datetime import datetime, timedelta
 from app.auth import requires_permission, get_usuario_logado
-from app.api.routes import get_id_tipo_solicitacao, search_municipio_by_edp, get_resp_by_regional
+from app.api.routes import search_municipio_by_edp, get_resp_by_regional
 from app.bot.atlas_agent import AtlasAgent
 from sqlalchemy import desc 
 import os
@@ -171,12 +171,13 @@ def cadastro_estudo():
         #Aba Classificação
         form.tipo_viab.data = dados_ia.get("tipo_viab")
         form.tipo_analise.data = dados_ia.get("tipo_analise")
-        try:
-            p = int(get_id_tipo_solicitacao(dados_ia.get("tipo_viab"), dados_ia.get("tipo_analise"), dados_ia.get("tipo_pedido"))['id'])
-        except:
-            p = None
-        if p is not None:
-            form.tipo_pedido.data = p
+        tipo_sol = TipoSolicitacao.query.filter_by(
+            viabilidade=dados_ia.get("tipo_viab"),
+            analise=dados_ia.get("tipo_analise"),
+            pedido=dados_ia.get("tipo_pedido"),
+        ).first()
+        if tipo_sol is not None:
+            form.tipo_pedido.data = tipo_sol.id_tipo_solicitacao
         form.tipo_geracao.data = dados_ia.get("tipo_geracao")
 
         #Aba Observações

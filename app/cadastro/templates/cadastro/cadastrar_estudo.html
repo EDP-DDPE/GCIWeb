@@ -503,7 +503,7 @@
                                     <div class="col-md-3" id="divTipoGeracao">
                                         <div class="mb-3">
                                             {{ form.tipo_geracao.label(class="form-label") }}
-                                            {{ form.tipo_geracao(class="form-select", id="tipo_geracao") }}
+                                            {{ form.tipo_geracao(class="form-select", id="tipo_geracao", data_selected=form.tipo_geracao.data) }}
                                             {% if form.tipo_geracao.errors %}
                                                 <div class="text-danger small mt-1">
                                                     {% for error in form.tipo_geracao.errors %}

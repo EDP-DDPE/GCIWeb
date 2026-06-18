@@ -16,7 +16,7 @@ $(document).ready(function () {
     const selectedViab = $tipoViab.data('selected');
     const selectedAnalise = $tipoAnalise.data('selected');
     const selectedPedido = $tipoPedido.data('selected');
-    const selectedGeracao = $tipoGeracao.data('selected');
+    let selectedGeracao = $tipoGeracao.data('selected');
 
     if (selectedGeracao) {
         mostrarTipoGeracao();
@@ -88,6 +88,13 @@ $(document).ready(function () {
 
             if (analise != 'Carga') {
                 mostrarTipoGeracao();
+                // Restaura o tipo de geração vindo do servidor (ex.: prefill via IA),
+                // que foi limpo acima ao resetar os campos dependentes. Consome o
+                // valor inicial para não sobrescrever mudanças manuais posteriores.
+                if (selectedGeracao) {
+                    $tipoGeracao.val(selectedGeracao);
+                    selectedGeracao = null;
+                }
             } else
                 {esconderTipoGeracao();}
 
@@ -120,6 +127,15 @@ $(document).ready(function () {
         }, 1000);
     };
     // Fim do Bloco para repopular a aba Classificação automaticamente
+
+    // Prefill (ex.: via IA): tipo_pedido e tipo_geracao são carregados
+    // dinamicamente pela cascata. Se o tipo_viab já vem preenchido pelo
+    // servidor, dispara a cascata no load para que esses campos também sejam
+    // preenchidos, sem depender da troca de abas.
+    if ($tipoViab.val()) {
+        atualizou = true; // evita recarga duplicada ao abrir a aba Classificação
+        $tipoViab.trigger('change');
+    }
 
     function esconderTipoGeracao() {
         $("#divTipoGeracao").hide();
