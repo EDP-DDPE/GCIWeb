@@ -312,6 +312,7 @@ def upload_ddpe_ia():
         temp_path = os.path.join(temp_dir, nome_seguro)
         arquivo.save(temp_path)
 
+        texto_pdf += f"Nome do arquivo: {nome_seguro} \n"
         with pdfplumber.open(temp_path) as pdf:
             for page in pdf.pages:
                 texto_pdf += page.extract_text() + "\n"
