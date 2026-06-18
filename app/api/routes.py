@@ -301,8 +301,12 @@ def get_resp_by_regional(id_regional):
 
 @api_bp.route("/api/fator_k/<int:id_edp>/<subgrupo>/<data_ref>/<carga>")
 def get_fator_k(id_edp, subgrupo, data_ref, carga):
-    # Converte a string de data (YYYY-MM-DD)
-    data_ref_dt = datetime.strptime(data_ref, "%Y-%m-%d")
+    # data_ref pode chegar como 'None'/'undefined' quando o estudo ainda não
+    # tem data de abertura definida. Sem data válida não há fator aplicável.
+    try:
+        data_ref_dt = datetime.strptime(data_ref, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return jsonify({"k": 0})
 
     k = (
         FatorK.query.filter(
