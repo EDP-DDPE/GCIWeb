@@ -2,109 +2,124 @@
 {% block titulo %}Estudos para Aprovação{% endblock %}
 {% block content %}
 
+<link rel="stylesheet" href="{{ url_for('listar.static', filename='css/listar_estudos.css') }}">
 <link rel="stylesheet" href="{{ url_for('gestao.static', filename='css/aprovacao.css') }}">
 
 <div class="container-fluid mt-4">
-  <!-- Cabeçalho -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-
-    <div class="d-flex gap-2 align-items-center">
-      <label class="form-label mb-0 fw-bold text-muted">Custo Mínimo (R$)</label>
-      <input type="number" id="valorFiltro" value="{{ valor_minimo }}" class="form-control form-control-sm" style="width:150px;">
-      <button class="btn btn-outline-primary btn-sm" onclick="filtrarValor()">
-        <i class="bi bi-funnel"></i> Filtrar
-      </button>
-    </div>
-  </div>
-
-  <!-- Tabela (vem primeiro) -->
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-list-task me-2"></i>Projetos acima de R$ {{ "{:,.2f}".format(valor_minimo or 0) }}</span>
-      <small>Gestores podem aprovar, reprovar ou comentar projetos.</small>
+    <!-- Cabeçalho: filtro de custo mínimo -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="d-flex gap-2 align-items-center">
+            <h4 class="mb-0"><i class="bi bi-list-task me-2 text-primary"></i>Estudos para Aprovação</h4>
+            <button class="btn btn-success btn-sm" id="btnAtualizar">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <label class="form-label mb-0 fw-bold text-muted">Custo Mínimo (R$)</label>
+            <input type="number" id="valorFiltro" value="{{ valor_minimo }}" class="form-control form-control-sm" style="width:150px;">
+            <button class="btn btn-outline-primary btn-sm" id="btnFiltrarValor">
+                <i class="bi bi-funnel"></i> Filtrar
+            </button>
+        </div>
     </div>
 
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" id="tabelaAprovacao">
-          <thead class="table-light">
-            <tr>
-              <th>ID</th>
-              <th>Projeto</th>
-              <th>Empresa</th>
-              <th>Município</th>
-              <th>Custo Modular</th>
-              <th>Status</th>
-              <th>Comentário</th>
-              <th class="text-center">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for doc in documentos %}
-            {% set alt_escolhida = (doc.alternativas|selectattr('flag_alternativa_escolhida', 'equalto', 1)|list|first) %}
-            <tr id="estudo-{{ doc.id or doc.id_estudo }}">
-              <td>{{ doc.id or doc.id_estudo }}</td>
-              <td>{{ doc.nome_projeto or '-' }}</td>
-              <td>{{ doc.empresa.nome_empresa or '-' }}</td>
-              <td>{{ doc.municipio.municipio or '-' }}</td>
-              <td>R$ {{ "{:,.2f}".format((alt_escolhida.custo_modular if alt_escolhida else 0) or 0).replace(",", "X").replace(".", ",").replace("X", ".") }}</td>
-              <td>
-                <span class="badge {{ 'bg-secondary' if doc.ultimo_status else 'bg-light text-muted' }}">
-                    {{ doc.ultimo_status.status_tipo.status if doc.ultimo_status and doc.ultimo_status.status_tipo else 'Sem status' }}
-                </span>
-              </td>
-              <td>
-                <textarea class="form-control form-control-sm" rows="1" id="comentario-{{doc.id_estudo}}" placeholder="Digite um comentário..."></textarea>
-              </td>
-              <td class="text-center">
-                <button class="btn btn-success btn-sm me-1" onclick="aprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Aprovar">
-                  <i class="bi bi-hand-thumbs-up"></i>
+    <!-- Tabela dinâmica (padrão listar) -->
+    <div class="card shadow-sm mb-4">
+        <div class="table-header-controls">
+            <div class="d-flex flex-wrap gap-3 align-items-center w-100">
+                <!-- Busca global -->
+                <div class="flex-grow-1" style="max-width: 300px;">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="globalSearch" class="form-control" placeholder="Buscar em todas as colunas...">
+                    </div>
+                </div>
+
+                <!-- Registros por página -->
+                <div class="d-flex align-items-center">
+                    <label class="form-label mb-0 me-2">Exibir:</label>
+                    <select id="pageSize" class="form-select form-select-sm me-1" style="width:auto;">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span>registros</span>
+                </div>
+
+                <!-- Seletor de colunas -->
+                <div class="column-selector">
+                    <button id="btnColumnSelector" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-columns"></i> Colunas
+                    </button>
+                    <div id="columnDropdown" class="column-dropdown"></div>
+                </div>
+
+                <!-- Exportar -->
+                <div class="export-dropdown">
+                    <button class="btn btn-outline-info btn-sm" id="btnExport">
+                        <i class="fas fa-download"></i> Exportar
+                    </button>
+                    <div id="exportMenu" class="export-menu">
+                        <a href="#" data-export="csv"><i class="fas fa-file-csv me-2"></i>CSV</a>
+                        <a href="#" data-export="xlsx"><i class="fas fa-file-excel me-2"></i>Excel</a>
+                        <a href="#" data-export="pdf"><i class="fas fa-file-pdf me-2"></i>PDF</a>
+                    </div>
+                </div>
+
+                <!-- Limpar filtros -->
+                <button class="btn btn-outline-warning btn-sm" id="btnClearFilters">
+                    <i class="fas fa-times"></i> Limpar Filtros
                 </button>
-                <button class="btn btn-danger btn-sm me-1" onclick="reprovarProjeto({{doc.id_estudo}})" data-bs-toggle="tooltip" title="Reprovar">
-                  <i class="bi bi-hand-thumbs-down"></i>
-                </button>
-                <button class="btn btn-sm btn-info"
-                                        onclick="verDetalhes({{doc.id_estudo}})"
-                                        data-bs-toggle="tooltip"
-                                        title="Ver detalhes">
-                                    <i class="bi bi-eye"></i>
-                                    </button>
+            </div>
+        </div>
 
-              </td>
-            </tr>
-            {% else %}
-            <tr>
-              <td colspan="8" class="text-center text-muted py-4">
-                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                Nenhum projeto encontrado acima desse valor.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+        <div class="table-container">
+            <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            </div>
+
+            <div class="table-responsive-custom">
+                <table class="table table-hover table-sm mb-0" id="estudosTable">
+                    <thead class="table-light sticky-top">
+                        <tr id="tableHeader"></tr>
+                        <tr id="filterRow" class="filter-row"></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer">
+            <div class="table-actions">
+                <div class="pagination-info">
+                    Exibindo <span id="startRecord">0</span> a <span id="endRecord">0</span>
+                    | <span id="totalRecords">Página 1</span>
+                </div>
+                <nav aria-label="Paginação da tabela">
+                    <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+                </nav>
+            </div>
+        </div>
     </div>
 
-    <div class="card-footer text-muted small text-end">
-      Total de projetos: {{ documentos|length }}
+    <!-- Gráfico -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
+            <small>Distribuição por status (todos os estudos do filtro)</small>
+        </div>
+        <div class="card-body text-center">
+            <div class="grafico-wrapper">
+                <canvas id="graficoResumo"></canvas>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <!-- Gráfico (vem depois e menor) -->
-  <div class="card shadow-sm">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <span><i class="bi bi-bar-chart me-2"></i>Resumo de Status dos Projetos</span>
-      <small>Distribuição por status</small>
-    </div>
-    <div class="card-body text-center">
-      <div class="grafico-wrapper">
-        <canvas id="graficoResumo"></canvas>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- Modal para detalhes do documento (mantido o mesmo do código original) -->
+<!-- Modal de detalhes -->
 <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -114,9 +129,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="modalDetalhesBody">
-                <!-- Conteúdo carregado via JavaScript -->
-            </div>
+            <div class="modal-body" id="modalDetalhesBody"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
@@ -124,19 +137,13 @@
     </div>
 </div>
 
+{# Modal de imagem (zoom/pan) usado pela ficha de detalhes do listar #}
+{% include "listar/partials/view.html" %}
 
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_js %}
 <script src="{{ url_for('gestao.static', filename='js/aprovacao.js') }}"></script>
-
-<script>
-  // Dados do gráfico vindos do backend
-  const dataResumo = {
-    aprovado: {{ resumo["Aprovado"] }},
-    reprovado: {{ resumo["Reprovado"] }},
-    pendente: {{ resumo["Pendente"] }}
-  };
-</script>
-
+{# Ficha de detalhes idêntica à do listar (anexos, baixar modelo preenchido, imagem) #}
+<script type="module" src="{{ url_for('listar.static', filename='js/listar/details.js') }}"></script>
 {% endblock %}

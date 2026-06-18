@@ -1,410 +1,476 @@
-let grafico = null;
+// Página gerencial de aprovação — tabela dinâmica (busca, filtros por coluna,
+// ordenação, seleção de colunas, exportação e paginação) + gráfico de resumo.
+(function () {
+    "use strict";
 
-$(document).ready(function () {
-  inicializarTooltips();
-  inicializarGraficoResumo();
-});
+    // Colunas disponíveis (mesmas da view do listar). `visible` define o
+    // conjunto padrão exibido; o usuário liga/desliga pelo seletor de colunas.
+    const COLUMNS = [
+        { key: "id_estudo", label: "ID", visible: false },
+        { key: "num_doc", label: "Nº Documento", visible: true },
+        { key: "protocolo", label: "Protocolo", visible: false },
+        { key: "nome_projeto", label: "Projeto", visible: true },
+        { key: "descricao", label: "Descrição", visible: false },
+        { key: "instalacao", label: "Instalação", visible: false },
+        { key: "n_alternativas", label: "Nº Alternativas", visible: false },
+        { key: "empresa", label: "Empresa", visible: true },
+        { key: "regional", label: "Regional", visible: false },
+        { key: "nome_criador", label: "Criado por", visible: false },
+        { key: "nome_responsavel", label: "Responsável", visible: true },
+        { key: "nome_empresa", label: "Nome Empresa", visible: false },
+        { key: "municipio", label: "Município", visible: true },
+        { key: "data_registro", label: "Data Registro", visible: false },
+        { key: "viabilidade", label: "Viabilidade", visible: false },
+        { key: "analise", label: "Análise", visible: true },
+        { key: "pedido", label: "Pedido", visible: false },
+        { key: "data_abertura_cliente", label: "Abertura Cliente", visible: false },
+        { key: "data_desejada_cliente", label: "Data Desejada", visible: false },
+        { key: "data_vencimento_cliente", label: "Vencimento Cliente", visible: false },
+        { key: "data_prevista_conexao", label: "Conexão Prevista", visible: false },
+        { key: "data_vencimento_ddpe", label: "Vencimento DDPE", visible: false },
+        { key: "tensao", label: "Tensão", visible: false },
+        { key: "qtd_anexos", label: "Nº Anexos", visible: false },
+        { key: "custo_modular", label: "Custo Modular", visible: true },
+        { key: "alternativa_circuito", label: "Circuito", visible: false },
+        { key: "subestacao", label: "Subestação", visible: false },
+        { key: "ultimo_status", label: "Status", visible: true },
+        { key: "acoes", label: "Ações", visible: true },
+    ];
 
-function verDetalhes(estudoId) {
-        const $modalBody = $('#modalDetalhesBody');
-        $modalBody.html(`
-            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Carregando...</span>
-                </div>
-            </div>
-        `);
+    const state = {
+        page: 1,
+        perPage: 25,
+        search: "",
+        sort: "custo_modular",
+        direction: "desc",
+        columnFilters: {},
+        minValor: parseFloat($("#valorFiltro").val()) || 0,
+        hasNext: false,
+    };
 
-        const modal = new bootstrap.Modal($('#modalDetalhes')[0]);
-        modal.show();
+    let grafico = null;
+    let lastItems = [];
 
-        $.get(`/api/estudos/${estudoId}`)
-            .done(function(data) {
-                if (data.error) {
-                    $modalBody.html(`<div class="alert alert-danger">${data.error}</div>`);
-                    return;
-                }
-
-                const detalhesHtml = `
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-info-circle me-2"></i>Informações Básicas
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Protocolo:</strong> ${data.protocolo || 'N/A'}</p>
-                                    <p><strong>Nº Documento:</strong> ${data.num_doc || 'N/A'}</p>
-                                    <p><strong>Projeto:</strong> ${data.nome_projeto || 'N/A'}</p>
-                                    <p><strong>Descrição:</strong> ${data.descricao || 'N/A'}</p>
-                                    <p><strong>Cliente:</strong> ${data.empresa?.nome || 'N/A'}</p>
-                                    <p><strong>CNPJ:</strong> ${data.empresa?.cnpj || 'N/A'}</p>
-                                    <p><strong>Município:</strong> ${data.municipio?.nome || 'N/A'}</p>
-                                    <p><strong>Regional:</strong> ${data.regional?.nome || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-cogs me-2"></i>Detalhes Técnicos
-                                </div>
-                                <div class="card-body">
-                                    <p><strong>Viabilidade:</strong> ${data.tipo_solicitacao?.viabilidade || 'N/A'}</p>
-                                    <p><strong>Análise:</strong> ${data.tipo_solicitacao?.analise || 'N/A'}</p>
-                                    <p><strong>Pedido:</strong> ${data.tipo_solicitacao?.pedido || 'N/A'}</p>
-                                    <p><strong>Criado por:</strong> ${data.criado_por?.nome || 'N/A'}</p>
-                                    <p><strong>Responsável Região:</strong> ${data.responsavel_regiao?.usuario?.nome || 'N/A'}</p>
-                                    <p><strong>Data Registro:</strong> ${data.data_registro || 'N/A'}</p>
-                                    <p><strong>Latitude:</strong> ${data.latitude_cliente || 'N/A'}</p>
-                                    <p><strong>Longitude:</strong> ${data.longitude_cliente || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-chart-bar me-2"></i>Demandas
-                                </div>
-                                <div class="card-body">
-                                    <div class='row'>
-                                        <div class="col-md-6">
-                                            <p><strong>Demanda Atual Carga FP:</strong> ${data.dem_carga_atual_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Carga P:</strong> ${data.dem_carga_atual_p || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Geração FP:</strong> ${data.dem_ger_atual_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Atual Geração P:</strong> ${data.dem_ger_atual_p || 'N/A'}</p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p><strong>Demanda Solicitada Carga FP:</strong> ${data.dem_carga_solicit_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Carga P:</strong> ${data.dem_carga_solicit_p || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Geração FP:</strong> ${data.dem_ger_solicit_fp || 'N/A'}</p>
-                                            <p><strong>Demanda Solicitada Geração P:</strong> ${data.dem_ger_solicit_p || 'N/A'}</p>
-                                        </div>
-                                    </row>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="bi bi-list-check"></i>Alternativas
-                                </div>
-                                <div class="card-body">
-                                     ${data.alternativas && data.alternativas.length > 0 ? `
-                                        <div class="table-responsive">
-                                            <table class="table table-striped table-sm align-middle mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>ID</th>
-                                                        <th>Descrição</th>
-                                                        <th>Custo Modular (R$)</th>
-                                                        <th>Circuito</th>
-                                                        <th>Tensão</th>
-                                                        <th>Escolhida?</th>
-                                                        <th>Imagem</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    ${data.alternativas.map(a => `
-                                                        <tr>
-                                                            <td>${a.id || '-'}</td>
-                                                            <td>${a.descricao || '-'}</td>
-                                                            <td>${a.custo_modular?.toLocaleString('pt-BR', {minimumFractionDigits: 2}) || '-'}</td>
-                                                            <td>${a.circuito?.nome || '-'}</td>
-                                                            <td>${a.circuito?.tensao || '-'}</td>
-                                                            <td>
-                                                                ${a.flag_alternativa_escolhida
-                                                                    ? '<span class="badge bg-success">Sim</span>'
-                                                                    : '<span class="badge bg-secondary">Não</span>'
-                                                                }
-                                                            </td>
-                                                            <td>
-                                                              ${a.has_image
-                                                                    ? `<button class="btn btn-sm btn-outline-primary ver-imagem-db"
-                                                                                data-id="${a.id}">
-                                                                            <i class="bi bi-image"></i> Ver Imagem
-                                                                       </button>`
-                                                                    : '<span class="text-muted">Sem imagem</span>'
-                                                                }
-                                                            </td>
-                                                        </tr>
-                                                    `).join('')}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    ` : '<p>Nenhuma alternativa cadastrada.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-file-upload me-2"></i>Anexos
-                                </div>
-                                <div class="card-body">
-
-                                    ${data.anexos && data.anexos.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.anexos.map(a => {
-                                                const caminho = a.endereco.replace(/\\/g, '/'); // troca '\' por '/'
-                                                return `
-                                                    <li class="list-group-item  d-flex justify-content-between align-items-center">${a.nome_arquivo || 'N/A'}
-                                                        <a href="/listar/download/${caminho}" class="btn btn-sm btn-outline-primary">
-                                                          <i class="bi bi-download"></i> Baixar
-                                                        </a>
-                                                    </li>
-                                                `;
-                                            }).join('')}
-                                        </ul>
-                                    ` : '<p>Nenhum anexo.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-secondary text-white">
-                                    <i class="fas fa-history me-2"></i>Status Histórico
-                                </div>
-                                <div class="card-body">
-                                    ${data.status_historico && data.status_historico.length > 0 ? `
-                                        <ul class="list-group list-group-flush">
-                                            ${data.status_historico.map(s => `
-                                                <li class="list-group-item">
-                                                    <strong>${s.status || 'N/A'}</strong> - ${s.data || 'N/A'} - ${s.criado_por || 'N/A'}
-                                                    ${s.observacao ? `<br><small>${s.observacao}</small>` : ''}
-                                                </li>
-                                            `).join('')}
-                                        </ul>
-                                    ` : '<p>Sem histórico de status.</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                if (!$('#modalImagemDB').length) {
-                    $('body').append(`
-                        <div class="modal fade" id="modalImagemDB" tabindex="-1" aria-labelledby="modalImagemDBLabel"
-                             aria-hidden="true" data-bs-backdrop="static">
-                          <div class="modal-dialog modal-xl modal-dialog-centered">
-                            <div class="modal-content" style="z-index: 99999 !important;">
-                              <div class="modal-header bg-dark text-white">
-                                <h5 class="modal-title" id="modalImagemDBLabel">
-                                  <i class="bi bi-image"></i> Imagem da Alternativa
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                              </div>
-                              <div class="modal-body text-center">
-                                  <div id="loadingImg" class="my-3" style="display:none;">
-                                    <div class="spinner-border text-primary" role="status">
-                                      <span class="visually-hidden">Carregando...</span>
-                                    </div>
-                                  </div>
-
-                                  <div id="panzoom-container" class="d-inline-block border rounded p-2 bg-light">
-                                    <img id="imagemDB" src="" alt="Imagem da alternativa" class="img-fluid rounded shadow d-none" style="cursor: grab;">
-                                  </div>
-
-                                  <div class="mt-3">
-                                    <button id="zoomIn" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-in"></i></button>
-                                    <button id="zoomOut" class="btn btn-sm btn-outline-primary me-2"><i class="bi bi-zoom-out"></i></button>
-                                    <button id="resetZoom" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i></button>
-                                  </div>
-                              </div>
-
-                            </div>
-                          </div>
-                        </div>
-                    `);
-                }
-
-                $modalBody.html(detalhesHtml);
-            })
-            .fail(function(xhr, status, error) {
-                console.error('Erro:', error);
-                $modalBody.html(`<div class="alert alert-danger">Erro ao carregar detalhes do documento</div>`);
-            });
+    // ===================== Helpers =====================
+    function debounce(fn, delay = 400) {
+        let t;
+        return function (...args) {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, args), delay);
+        };
     }
 
-    $(document).on('click', '.ver-imagem-db', function() {
-        const idAlt = $(this).data('id');
+    function visibleColumns() {
+        return COLUMNS.filter(c => c.visible);
+    }
 
-        // mostra loading
-        $('#imagemDB').addClass('d-none');
-        $('#loadingImg').show();
+    function visibleKeys() {
+        const keys = visibleColumns().map(c => c.key).filter(k => k !== "acoes");
+        if (!keys.includes("id_estudo")) keys.push("id_estudo");
+        return keys;
+    }
 
-        $('#modalImagemDB').modal('show');
+    function formatarMoeda(v) {
+        const n = parseFloat(v);
+        if (isNaN(n)) return v || "";
+        return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-        $.getJSON(`/api/imagem_alternativa/${idAlt}`)
-            .done(function(resp) {
-                if (resp.imagem) {
-                    $('#imagemDB').attr('src', resp.imagem).removeClass('d-none');
-                } else {
-                    $('#imagemDB').replaceWith('<p class="text-danger">Sem imagem disponível.</p>');
-                }
+    function escapeHtml(s) {
+        return String(s ?? "").replace(/[&<>"']/g, c =>
+            ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function badgeStatus(status) {
+        if (!status) return '<span class="badge bg-light text-muted">Sem status</span>';
+        let cor = "bg-secondary";
+        if (status === "Aprovado" || status === "Aprovado Gestor") cor = "bg-success";
+        else if (["Reprovado", "Reprovado Gestor", "Rejeitado Gestor"].includes(status)) cor = "bg-danger";
+        return `<span class="badge ${cor}">${escapeHtml(status)}</span>`;
+    }
+
+    // ===================== Dados =====================
+    function fetchData() {
+        return $.get("/gestao/api/aprovacao", {
+            page: state.page,
+            per_page: state.perPage,
+            search: state.search,
+            sort: state.sort,
+            direction: state.direction,
+            filters: JSON.stringify(state.columnFilters),
+            columns: visibleKeys().join(","),
+            min_valor: state.minValor,
+        });
+    }
+
+    function load() {
+        if (window.showLoading) window.showLoading();
+        fetchData()
+            .done(resp => {
+                lastItems = resp.items || [];
+                state.hasNext = resp.has_next;
+                renderBody(lastItems);
+                renderPagination(resp);
+                updateInfo(resp);
             })
-            .fail(function() {
-                $('#imagemDB').replaceWith('<p class="text-danger">Erro ao carregar a imagem.</p>');
-            })
-            .always(function() {
-                $('#loadingImg').hide();
+            .fail(err => console.error("Erro ao carregar estudos:", err))
+            .always(() => { if (window.hideLoading) window.hideLoading(); });
+    }
+
+    function loadChart() {
+        $.getJSON("/gestao/api/resumo", { min_valor: state.minValor }, function (resumo) {
+            const dados = [resumo.Aprovado || 0, resumo.Reprovado || 0, resumo.Pendente || 0];
+            if (grafico) {
+                grafico.data.datasets[0].data = dados;
+                grafico.update();
+                return;
+            }
+            const ctx = document.getElementById("graficoResumo");
+            if (!ctx) return;
+            grafico = new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Aprovado", "Reprovado", "Pendente"],
+                    datasets: [{ data: dados, backgroundColor: ["#198754", "#dc3545", "#6c757d"], borderWidth: 1 }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: { position: "bottom" },
+                        tooltip: { callbacks: { label: c => `${c.label}: ${c.raw}` } },
+                    },
+                },
             });
-    });
+        });
+    }
 
-    $('#modalImagemDB').on('hidden.bs.modal', function () {
-        $('body').addClass('modal-open'); // mantém o scroll travado do modal anterior
-    });
+    // ===================== Render =====================
+    function renderHeader() {
+        const $h = $("#tableHeader").empty();
+        const $f = $("#filterRow").empty();
 
-    let panzoomInstance = null;
+        visibleColumns().forEach(col => {
+            const sortIcon = col.key === state.sort
+                ? (state.direction === "asc" ? "fa-sort-up" : "fa-sort-down")
+                : "fa-sort";
 
-    $(document).on('shown.bs.modal', '#modalImagemDB', function() {
-        const image = document.getElementById('imagemDB');
-        const container = document.getElementById('panzoom-container');
+            $h.append(`
+                <th class="resizable-header" data-column="${col.key}">
+                    <div class="header-content d-flex align-items-center justify-content-between">
+                        <span>${col.label}</span>
+                        ${col.key !== "acoes"
+                            ? `<i class="fas ${sortIcon} sort-icon" data-sort="${col.key}" style="cursor:pointer;"></i>`
+                            : ""}
+                    </div>
+                    <div class="resize-handle"></div>
+                </th>`);
 
-        // Destroi instância anterior se existir
-        if (panzoomInstance) {
-            panzoomInstance.destroy();
-        }
-
-        // Inicializa Panzoom
-        panzoomInstance = Panzoom(container, {
-            contain: 'outside',
-            maxScale: 8,
-            minScale: 0.5,
-            cursor: 'grab',
-            step: 0.3,
+            if (col.key === "acoes") {
+                $f.append(`<th data-column="${col.key}"></th>`);
+            } else {
+                const val = state.columnFilters[col.key] || "";
+                $f.append(`
+                    <th data-column="${col.key}">
+                        <input type="text" class="filter-input" data-filter="${col.key}"
+                               value="${escapeHtml(val)}" placeholder="Filtrar ${col.label}...">
+                    </th>`);
+            }
         });
 
-        // Zoom com scroll
-        container.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
+        bindHeaderEvents();
+    }
 
-        // Botões de controle
-        $('#zoomIn').off('click').on('click', () => panzoomInstance.zoomIn());
-        $('#zoomOut').off('click').on('click', () => panzoomInstance.zoomOut());
-        $('#resetZoom').off('click').on('click', () => panzoomInstance.reset());
+    function renderBody(data) {
+        const $tbody = $("#tableBody").empty();
+
+        if (!data.length) {
+            const span = visibleColumns().length || 1;
+            $tbody.append(`<tr><td colspan="${span}" class="text-center text-muted py-4">
+                <i class="bi bi-inbox fs-4 d-block mb-2"></i>Nenhum projeto encontrado.</td></tr>`);
+            return;
+        }
+
+        data.forEach(item => {
+            const id = item.id_estudo;
+            const $row = $(`<tr id="estudo-${id}"></tr>`);
+
+            visibleColumns().forEach(col => {
+                if (col.key === "acoes") {
+                    $row.append(`<td data-column="acoes">${buildActions(item)}</td>`);
+                } else if (col.key === "custo_modular") {
+                    $row.append(`<td data-column="custo_modular">${formatarMoeda(item.custo_modular)}</td>`);
+                } else if (col.key === "ultimo_status") {
+                    $row.append(`<td data-column="ultimo_status">${badgeStatus(item.ultimo_status)}</td>`);
+                } else {
+                    let v = item[col.key];
+                    $row.append(`<td data-column="${col.key}">${escapeHtml(v ?? "")}</td>`);
+                }
+            });
+
+            $tbody.append($row);
+        });
+
+        $('[data-bs-toggle="tooltip"]').each(function () { new bootstrap.Tooltip(this); });
+    }
+
+    function buildActions(item) {
+        const p = item._permissoes || {};
+        const id = item.id_estudo;
+        let html = `<div class="d-flex align-items-center gap-1">`;
+        html += `<textarea class="form-control form-control-sm" rows="1" style="min-width:140px;"
+                    id="comentario-${id}" placeholder="Comentário..."></textarea>`;
+        if (p.aprovar) {
+            html += `<button class="btn btn-success btn-sm" title="Aprovar" data-acao="aprovar" data-id="${id}">
+                        <i class="bi bi-hand-thumbs-up"></i></button>`;
+            html += `<button class="btn btn-danger btn-sm" title="Reprovar" data-acao="reprovar" data-id="${id}">
+                        <i class="bi bi-hand-thumbs-down"></i></button>`;
+        }
+        if (p.visualizar) {
+            html += `<button class="btn btn-info btn-sm" title="Ver detalhes" data-acao="detalhes" data-id="${id}">
+                        <i class="bi bi-eye"></i></button>`;
+        }
+        html += `</div>`;
+        return html;
+    }
+
+    function renderPagination(resp) {
+        const $p = $("#pagination").empty();
+        const add = (label, page, disabled, active) => {
+            $p.append(`<li class="page-item ${disabled ? "disabled" : ""} ${active ? "active" : ""}">
+                <a class="page-link" href="#" data-page="${page}">${label}</a></li>`);
+        };
+        add("Anterior", resp.page - 1, resp.page === 1, false);
+        add(resp.page, resp.page, false, true);
+        add("Próximo", resp.page + 1, !resp.has_next, false);
+
+        $("#pagination a").on("click", function (e) {
+            e.preventDefault();
+            const $li = $(this).closest("li");
+            if ($li.hasClass("disabled") || $li.hasClass("active")) return;
+            const np = parseInt($(this).data("page"));
+            if (!isNaN(np)) { state.page = np; load(); }
+        });
+    }
+
+    function updateInfo(resp) {
+        const qtd = resp.items.length;
+        const start = qtd ? ((resp.page - 1) * resp.per_page) + 1 : 0;
+        const end = ((resp.page - 1) * resp.per_page) + qtd;
+        $("#startRecord").text(start);
+        $("#endRecord").text(end);
+        $("#totalRecords").text(`Página ${resp.page}`);
+    }
+
+    // ===================== Seletor de colunas =====================
+    function renderColumnDropdown() {
+        const $c = $("#columnDropdown").empty();
+        COLUMNS.forEach(col => {
+            $c.append(`
+                <div class="form-check">
+                    <input class="form-check-input column-toggle" type="checkbox"
+                           value="${col.key}" id="col-${col.key}" ${col.visible ? "checked" : ""}>
+                    <label class="form-check-label" for="col-${col.key}">${col.label}</label>
+                </div>`);
+        });
+        $c.append(`<hr>
+            <button class="btn btn-sm btn-outline-primary me-2" id="btnSelectAll">Todas</button>
+            <button class="btn btn-sm btn-outline-secondary" id="btnSelectNone">Nenhuma</button>`);
+    }
+
+    // ===================== Eventos do cabeçalho =====================
+    function bindHeaderEvents() {
+        $(".filter-input").off("input").on("input", debounce(function () {
+            const col = $(this).data("filter");
+            const value = $(this).val().trim();
+            if (value) state.columnFilters[col] = value;
+            else delete state.columnFilters[col];
+            state.page = 1;
+            load();
+        }, 400));
+
+        $(".sort-icon").off("click").on("click", function () {
+            const col = $(this).data("sort");
+            state.direction = (state.sort === col && state.direction === "desc") ? "asc" : "desc";
+            state.sort = col;
+            state.page = 1;
+            renderHeader();
+            load();
+        });
+
+        setupColumnResizing();
+    }
+
+    // Redimensionamento de colunas arrastando o `.resize-handle` (igual ao listar).
+    function setupColumnResizing() {
+        let isResizing = false;
+        let currentColumn = null;
+        let startX = 0;
+        let startWidth = 0;
+        let colIndex = 0;
+
+        function handleResize(e) {
+            if (!isResizing) return;
+            const newWidth = startWidth + (e.clientX - startX);
+            if (newWidth < 60) return;
+            const css = { width: newWidth + "px", minWidth: newWidth + "px", maxWidth: newWidth + "px" };
+            currentColumn.css(css);
+            $("#filterRow th").eq(colIndex).css(css);
+            $("#tableBody tr").each(function () {
+                $(this).find("td").eq(colIndex).css(css);
+            });
+        }
+
+        function stopResize() {
+            isResizing = false;
+            $(document).off(".columnResize");
+        }
+
+        $(".resize-handle").off("mousedown").on("mousedown", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            currentColumn = $(this).closest("th");
+            colIndex = currentColumn.index();
+            startX = e.clientX;
+            startWidth = currentColumn.outerWidth();
+            $(document).on("mousemove.columnResize", handleResize);
+            $(document).on("mouseup.columnResize", stopResize);
+        });
+    }
+
+    // ===================== Ações de aprovação =====================
+    function enviarAcao(id, status) {
+        const comentario = $(`#comentario-${id}`).val() || "";
+        $.ajax({
+            url: `/gestao/aprovacao/${id}/status`,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ status, comentario }),
+            success: function (res) {
+                // O backend grava o StatusTipo com o mesmo nome enviado
+                // ("Aprovado"/"Reprovado"), que passa a ser o último status.
+                $(`#estudo-${id} [data-column="ultimo_status"]`).html(badgeStatus(status));
+                $(`#comentario-${id}`).val("");
+                showToast(res.message || `Projeto ${status.toLowerCase()} com sucesso!`, "success");
+                loadChart();
+            },
+            error: function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || "Erro ao enviar ação.";
+                showToast(msg, "error");
+            },
+        });
+    }
+
+    // ===================== Exportação =====================
+    async function exportData(format) {
+        const params = new URLSearchParams({
+            search: state.search,
+            sort: state.sort,
+            direction: state.direction,
+            filters: JSON.stringify(state.columnFilters),
+            columns: visibleKeys().join(","),
+            min_valor: state.minValor,
+            export: format,
+            per_page: 999999,
+            page: 1,
+        });
+        const resp = await fetch(`/gestao/api/aprovacao?${params.toString()}`);
+        if (!resp.ok) { showToast("Erro ao gerar arquivo de exportação.", "error"); return; }
+        const blob = await resp.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `aprovacao_export.${format}`;
+        link.click();
+    }
+
+    // ===================== Init =====================
+    $(document).ready(function () {
+        renderColumnDropdown();
+        renderHeader();
+        loadChart();
+        load();
+
+        // Busca global
+        $("#globalSearch").on("input", debounce(function () {
+            state.search = $(this).val().trim();
+            state.page = 1;
+            load();
+        }, 400));
+
+        // Custo mínimo
+        $("#btnFiltrarValor").on("click", function () {
+            state.minValor = parseFloat($("#valorFiltro").val()) || 0;
+            state.page = 1;
+            load();
+            loadChart();
+        });
+        $("#valorFiltro").on("keypress", function (e) {
+            if (e.which === 13) $("#btnFiltrarValor").click();
+        });
+
+        // Registros por página
+        $("#pageSize").on("change", function () {
+            state.perPage = parseInt($(this).val());
+            state.page = 1;
+            load();
+        });
+
+        // Limpar filtros
+        $("#btnClearFilters").on("click", function () {
+            state.columnFilters = {};
+            state.search = "";
+            $("#globalSearch").val("");
+            $(".filter-input").val("");
+            state.page = 1;
+            load();
+        });
+
+        // Seletor de colunas
+        $("#btnColumnSelector").on("click", e => { e.stopPropagation(); $("#columnDropdown").toggle(); });
+        // Ao ligar/desligar coluna, recarrega do servidor: a API só retorna
+        // as colunas selecionadas, então uma coluna recém-ligada viria vazia
+        // se renderizássemos apenas o cache local.
+        $("#columnDropdown").on("change", ".column-toggle", function () {
+            const col = COLUMNS.find(c => c.key === $(this).val());
+            if (col) col.visible = $(this).is(":checked");
+            renderHeader();
+            load();
+        });
+        $("#columnDropdown").on("click", "#btnSelectAll", () => {
+            COLUMNS.forEach(c => c.visible = true);
+            renderColumnDropdown(); renderHeader(); load();
+        });
+        $("#columnDropdown").on("click", "#btnSelectNone", () => {
+            COLUMNS.forEach(c => c.visible = (c.key === "acoes"));
+            renderColumnDropdown(); renderHeader(); load();
+        });
+
+        // Botão Atualizar
+        $("#btnAtualizar").on("click", function () { load(); loadChart(); });
+
+        // Exportar
+        $("#btnExport").on("click", e => { e.stopPropagation(); $("#exportMenu").toggle(); });
+        $("#exportMenu").on("click", "a[data-export]", function (e) {
+            e.preventDefault();
+            exportData($(this).data("export"));
+            $("#exportMenu").hide();
+        });
+
+        // Fechar dropdowns ao clicar fora
+        $(document).on("click", function (e) {
+            if (!$(e.target).closest(".column-selector").length) $("#columnDropdown").hide();
+            if (!$(e.target).closest(".export-dropdown").length) $("#exportMenu").hide();
+        });
+
+        // Ações por linha (delegado, pois as linhas são dinâmicas)
+        $("#tableBody").on("click", "button[data-acao]", function () {
+            const id = $(this).data("id");
+            const acao = $(this).data("acao");
+            if (acao === "aprovar") enviarAcao(id, "Aprovado");
+            else if (acao === "reprovar") enviarAcao(id, "Reprovado");
+            else if (acao === "detalhes" && window.verDetalhes) window.verDetalhes(id);
+        });
     });
 
-// --- Inicialização ---
-
-function inicializarTooltips() {
-  $('[data-bs-toggle="tooltip"]').each(function () {
-    new bootstrap.Tooltip(this);
-  });
-}
-
-function inicializarGraficoResumo() {
-  const ctx = document.getElementById("graficoResumo");
-  grafico = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Aprovado", "Reprovado", "Pendente"],
-      datasets: [
-        {
-          data: [dataResumo.aprovado, dataResumo.reprovado, dataResumo.pendente],
-          backgroundColor: ["#198754", "#dc3545", "#6c757d"],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      maintainAspectRatio: false,     // permite controlar a altura via CSS
-      aspectRatio: 2,                 // backup
-      plugins: {
-        legend: { position: "bottom" },
-        tooltip: {
-          callbacks: {
-            label: (context) => `${context.label}: ${context.raw}`,
-          },
-        },
-      },
-    },
-  });
-}
-
-// --- Ações ---
-
-function filtrarValor() {
-  const valor = $("#valorFiltro").val() || 0;
-  window.location.href = `/gestao/aprovacao?min_valor=${valor}`;
-}
-
-function aprovarProjeto(id) {
-  enviarAcao(id, "Aprovado");
-}
-
-function reprovarProjeto(id) {
-  enviarAcao(id, "Reprovado");
-}
-
-
-function enviarAcao(id, status) {
-  const comentario = $(`#comentario-${id}`).val();
-
-  $.ajax({
-    url: `/gestao/aprovacao/${id}/status`,
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ status, comentario }),
-    success: function (res) {
-      // Badge coerente com a decisão do Gestor
-      let badgeClasse = "bg-info";
-      let textoBadge = "Comentado Gestor";
-
-      if (status === "Aprovado") {
-        badgeClasse = "bg-success";
-        textoBadge = "Aprovado Gestor";
-        dataResumo.aprovado++;
-        dataResumo.pendente = Math.max(0, dataResumo.pendente - 1);
-      } else if (status === "Reprovado") {
-        badgeClasse = "bg-danger";
-        textoBadge = "Rejeitado Gestor";
-        dataResumo.reprovado++;
-        dataResumo.pendente = Math.max(0, dataResumo.pendente - 1);
-      }
-
-      $(`#estudo-${id} td:nth-child(6)`).html(
-        `<span class="badge ${badgeClasse}">${textoBadge}</span>`
-      );
-
-      showNotification(res.message || `Projeto ${status.toLowerCase()} com sucesso!`, "success");
-      atualizarGrafico();
-      $(`#comentario-${id}`).val("");
-    },
-    error: function (xhr) {
-      const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : "Erro ao enviar ação.";
-      showNotification(msg, "danger");
-    },
-  });
-}
-
-// --- Atualiza o gráfico dinamicamente ---
-function atualizarGrafico() {
-  if (!grafico) return;
-  grafico.data.datasets[0].data = [
-    dataResumo.aprovado,
-    dataResumo.reprovado,
-    dataResumo.pendente,
-  ];
-  grafico.update();
-}
-
-// --- Notificações ---
-function showNotification(message, type = "info") {
-  const $notification = $(`
-    <div class="alert alert-${type} alert-dismissible fade show position-fixed shadow"
-         style="top:20px; right:20px; z-index:9999; min-width:300px;">
-      ${message}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  `);
-  $("body").append($notification);
-  setTimeout(() => $notification.alert("close"), 3000);
-}
+})();
