@@ -383,7 +383,7 @@
                 <div class="ms-3" id="ddpeDropZone">
                     <label class="btn btn-outline-primary btn-sm mb-0">
                         <i class="fas fa-robot me-1"></i> Cadastro de Estudo com IA
-                        <input type="file" id="ddpeFileInput" accept=".pdf" hidden>
+                        <input type="file" id="ddpeFileInput" accept=".pdf" multiple hidden>
                     </label>
                 </div>
 
@@ -656,11 +656,13 @@
 
     <script>
         $(document).on("change", "#ddpeFileInput", function() {
-            const file = this.files[0];
-            if (!file) return;
+            const files = this.files;
+            if (!files || files.length === 0) return;
 
             const formData = new FormData();
-            formData.append("arquivo", file);
+            for (let i = 0; i < files.length; i++) {
+                formData.append("arquivo", files[i]);
+            }
 
             window.showLoading();
 

@@ -287,25 +287,33 @@ def cadastro_estudo():
 @requires_permission('criar')
 def upload_ddpe_ia():
     #try:
-    arquivo = request.files.get("arquivo")
+    arquivos = request.files.getlist("arquivo")
+    arquivos = [a for a in arquivos if a and a.filename]
 
-    if not arquivo:
+    if not arquivos:
         return jsonify({"success": False, "message": "Nenhum arquivo enviado."}), 400
 
-    nome_seguro = secure_filename(arquivo.filename)
-
-    # salva temporariamente
     temp_dir = tempfile.gettempdir()
-    temp_path = os.path.join(temp_dir, nome_seguro)
-    arquivo.save(temp_path)
 
     # ==========================
-    # EXTRAIR TEXTO DO PDF
+    # EXTRAIR TEXTO DOS PDFs
     # ==========================
     texto_pdf = ""
-    with pdfplumber.open(temp_path) as pdf:
-        for page in pdf.pages:
-            texto_pdf += page.extract_text() + "\n"
+    nomes_seguros = []
+    for arquivo in arquivos:
+        nome_seguro = secure_filename(arquivo.filename)
+        nomes_seguros.append(nome_seguro)
+
+        # salva temporariamente
+        temp_path = os.path.join(temp_dir, nome_seguro)
+        arquivo.save(temp_path)
+
+        with pdfplumber.open(temp_path) as pdf:
+            for page in pdf.pages:
+                texto_pdf += page.extract_text() + "\n"
+        texto_pdf += "\n"
+
+    nome_seguro = ", ".join(nomes_seguros)
 
     # ==========================
     # CHAMAR MAVERICK NO DATABRICKS
