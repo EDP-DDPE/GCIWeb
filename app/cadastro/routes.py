@@ -291,9 +291,21 @@ def cadastro_estudo():
             flash(f'Erro ao cadastrar estudo. Tente novamente.', 'error')
 
     elif request.method == 'POST':
-        flash('Por favor, corrija os erros no formulário.', 'error')
+        campos_invalidos = [f for f in form.errors if f != 'csrf_token']
+        nomes = []
+        for field_name in campos_invalidos:
+            field = getattr(form, field_name, None)
+            rotulo = field.label.text if field is not None and getattr(field, 'label', None) else field_name
+            nomes.append(rotulo)
+        if nomes:
+            flash('Verifique os seguintes campos: ' + ', '.join(nomes), 'error')
+        else:
+            flash('Por favor, corrija os erros no formulário.', 'error')
 
-    return render_template('cadastro/cadastrar_estudo.html', form=form, datetime=datetime, timedelta=timedelta)
+    erros_campos = [f for f in form.errors if f != 'csrf_token']
+    return render_template('cadastro/cadastrar_estudo.html', form=form,
+                           datetime=datetime, timedelta=timedelta,
+                           erros_campos=erros_campos)
 
 @cadastro_bp.route("/estudos/ia/upload", methods=["POST"])
 @requires_permission('criar')

@@ -984,6 +984,29 @@ $(document).ready(function() {
 
 
     updateButton();
+
+    // Após uma falha de validação no servidor: destaca os campos com erro,
+    // navega até a aba do primeiro campo inválido e rola a página até ele.
+    const errosCampos = {{ erros_campos|tojson if erros_campos is defined else [] }};
+    if (Array.isArray(errosCampos) && errosCampos.length) {
+        errosCampos.forEach(function (nome) {
+            const el = document.querySelector('[name="' + nome + '"]');
+            if (el) el.classList.add('is-invalid');
+        });
+
+        const primeiro = document.querySelector('[name="' + errosCampos[0] + '"]');
+        if (primeiro) {
+            const pane = primeiro.closest('.tab-pane');
+            if (pane) {
+                const tabBtn = document.querySelector('#estudoTabs [data-bs-target="#' + pane.id + '"]');
+                if (tabBtn) bootstrap.Tab.getOrCreateInstance(tabBtn).show();
+            }
+            setTimeout(function () {
+                primeiro.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                try { primeiro.focus({ preventScroll: true }); } catch (e) {}
+            }, 250);
+        }
+    }
 });
 
 

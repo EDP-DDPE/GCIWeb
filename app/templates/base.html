@@ -516,7 +516,7 @@
         <script>
           document.addEventListener('DOMContentLoaded', function () {
             {% for category, message in messages %}
-              showToast({{ message|tojson }}, {{ ('error' if category=='error' else category)|tojson }});
+              showToast({{ message|tojson }}, {{ ('error' if category=='error' else category)|tojson }}, {{ 8000 if category in ['error', 'warning'] else 3000 }});
             {% endfor %}
           });
         </script>
