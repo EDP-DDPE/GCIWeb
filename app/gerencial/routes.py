@@ -2,6 +2,8 @@ import json
 import datetime as dt
 from io import BytesIO, StringIO
 
+import pytz
+
 from flask import Blueprint, render_template, request, jsonify, Response, g
 from sqlalchemy import or_, String
 from sqlalchemy.orm import load_only
@@ -245,9 +247,11 @@ def gestao_aprovacao_status(id_estudo):
     #     if ja_finalizado:
     #         return jsonify({"success": False, "message": "Este estudo já foi decidido pelo Gestor."}), 400
 
+    hoje_sp = dt.datetime.now(pytz.timezone("America/Sao_Paulo")).date()
     novo = StatusEstudo(
         id_estudo=estudo.id_estudo,
         data=dt.datetime.utcnow(),
+        data_ocorrencia=hoje_sp,
         id_status_tipo=tipo.id_status_tipo,
         observacao=comentario,
         id_criado_por=user.id_usuario
