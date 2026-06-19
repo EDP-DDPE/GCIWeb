@@ -43,6 +43,14 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
+                  <label for="status_data_ocorrencia" class="form-label fw-bold">
+                    <i class="bi bi-calendar-event me-1"></i>Data de Ocorrência
+                  </label>
+                  <input type="date" class="form-control form-control-lg"
+                         name="data_ocorrencia" id="status_data_ocorrencia" required>
+                </div>
+
+                <div class="col-md-12 mb-3">
                   <label for="observacao" class="form-label fw-bold">
                     <i class="bi bi-chat-left-text me-1"></i>Observação
                   </label>
@@ -74,19 +82,22 @@
               <table class="table table-hover table-striped mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th style="width: 15%;">
-                      <i class="bi bi-calendar3 me-1"></i>Data
+                    <th style="width: 13%;">
+                      <i class="bi bi-calendar-event me-1"></i>Ocorrência
                     </th>
-                    <th style="width: 20%;">
+                    <th style="width: 15%;">
                       <i class="bi bi-flag me-1"></i>Status
                     </th>
-                    <th style="width: 35%;">
+                    <th style="width: 32%;">
                       <i class="bi bi-chat-dots me-1"></i>Observação
                     </th>
-                    <th style="width: 15%;">
+                    <th style="width: 12%;">
                       <i class="bi bi-person me-1"></i>Criado por
                     </th>
-                    <th style="width: 15%;" class="text-center">
+                    <th style="width: 15%;">
+                      <i class="bi bi-calendar3 me-1"></i>Cadastro
+                    </th>
+                    <th style="width: 13%;" class="text-center">
                       <i class="bi bi-gear me-1"></i>Ações
                     </th>
                   </tr>
@@ -94,7 +105,7 @@
                 <tbody id="status-historico-body">
                   <!-- Exemplo de linha (será preenchido via JS) -->
                   <tr>
-                    <td colspan="5" class="text-center text-muted py-4">
+                    <td colspan="6" class="text-center text-muted py-4">
                       <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                       Nenhum status cadastrado ainda
                     </td>

@@ -1,9 +1,15 @@
 export function abrirStatus(idEstudo) {
     $("#status_id_estudo").val(idEstudo);
     window.hideStatusLoading();
+
+    // Pré-preenche a data de ocorrência com hoje (o usuário pode alterar).
+    if (!$("#status_data_ocorrencia").val()) {
+        $("#status_data_ocorrencia").val(new Date().toISOString().slice(0, 10));
+    }
+
     // Limpa tabela enquanto carrega
     $("#status-historico-body").html(`
-        <tr><td colspan="5" class="text-center text-muted py-4">
+        <tr><td colspan="6" class="text-center text-muted py-4">
             Carregando histórico...
         </td></tr>
     `);
@@ -13,7 +19,7 @@ export function abrirStatus(idEstudo) {
 
             if (!historico.length) {
                 $("#status-historico-body").html(`
-                    <tr><td colspan="5" class="text-center text-muted py-4">
+                    <tr><td colspan="6" class="text-center text-muted py-4">
                         Nenhum status cadastrado
                     </td></tr>
                 `);
@@ -22,10 +28,11 @@ export function abrirStatus(idEstudo) {
 
             const rows = historico.map(s => `
                 <tr>
-                    <td>${s.data}</td>
+                    <td>${s.data_ocorrencia || "-"}</td>
                     <td>${s.status}</td>
                     <td>${s.observacao || "-"}</td>
                     <td>${s.criado_por}</td>
+                    <td>${s.data}</td>
                     <td class="text-center"></td>
                 </tr>
             `).join("");
@@ -51,6 +58,7 @@ export function configurarFormularioStatus() {
             id_estudo: $("#status_id_estudo").val(),
             id_status_tipo: $("#id_status_tipo").val(),
             observacao: $("#observacao").val(),
+            data_ocorrencia: $("#status_data_ocorrencia").val(),
         };
 
         $.ajax({

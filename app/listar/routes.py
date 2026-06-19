@@ -315,6 +315,7 @@ def api_status(id_estudo):
             "id": s.id_status,
             "status": s.status_tipo.status,
             "data": s.data.strftime("%d/%m/%Y %H:%M"),
+            "data_ocorrencia": s.data_ocorrencia.strftime("%d/%m/%Y") if s.data_ocorrencia else "-",
             "observacao": s.observacao,
             "criado_por": s.criado_por.nome if s.criado_por else "-"
         })
@@ -329,9 +330,19 @@ def salvar_status():
     id_estudo = data.get("id_estudo")
     id_status_tipo = data.get("id_status_tipo")
     observacao = data.get("observacao", "").strip()
+    data_ocorrencia = data.get("data_ocorrencia")
 
     if not id_estudo or not id_status_tipo:
         return jsonify({"error": "Dados incompletos."}), 400
+
+    # Data informada pelo usuário (quando o status ocorreu), separada da data
+    # de cadastro do registro.
+    data_ocorrencia_dt = None
+    if data_ocorrencia:
+        try:
+            data_ocorrencia_dt = datetime.strptime(data_ocorrencia, "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            data_ocorrencia_dt = None
 
     tz = pytz.timezone("America/Sao_Paulo")
     horario = datetime.now(tz)
@@ -341,7 +352,8 @@ def salvar_status():
         id_status_tipo=id_status_tipo,
         observacao=observacao,
         id_criado_por=g.user.id_usuario,  # quem criou
-        data=horario
+        data=horario,
+        data_ocorrencia=data_ocorrencia_dt
     )
     db.session.add(status)
     db.session.commit()

@@ -252,6 +252,7 @@ class StatusEstudo(db.Model):
 
     id_status = db.Column(db.BigInteger, primary_key=True)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
+    data_ocorrencia = db.Column(db.Date, nullable=True)
     id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False,
                                index=True)
     observacao = db.Column(db.Text)
