@@ -115,9 +115,15 @@ $(document).ready(function() {
         "Município Selecionado": layerMunicipio
     };
 
-    L.control.layers(null, overlayMaps, {
+    var layersControl = L.control.layers(null, overlayMaps, {
         collapsed: false
     }).addTo(map);
+
+    // circuitos atualmente plotados (cada um é uma layer própria, filtrável no controle)
+    var circuitoLayers = [];
+
+    // Já carrega os circuitos próximos da posição inicial do marcador
+    buscarCircuitosProximos(initialLat, initialLng);
 
     var redIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -140,6 +146,7 @@ $(document).ready(function() {
 
                 marker.setLatLng([lat, lng]);
                 map.setView([lat, lng], 15);
+                buscarCircuitosProximos(lat, lng);
             });
         }
     }
@@ -149,6 +156,7 @@ $(document).ready(function() {
         var pos = marker.getLatLng();
         $('#latitude').val(pos.lat.toFixed(8));
         $('#longitude').val(pos.lng.toFixed(8));
+        buscarCircuitosProximos(e.latlng.lat, e.latlng.lng);
     });
 
     // Atualiza marcador e campos ao clicar no mapa
@@ -156,6 +164,7 @@ $(document).ready(function() {
         marker.setLatLng(e.latlng);
         $('#latitude').val(e.latlng.lat.toFixed(8));
         $('#longitude').val(e.latlng.lng.toFixed(8));
+        buscarCircuitosProximos(e.latlng.lat, e.latlng.lng);
     });
 
     // Função para atualizar marcador a partir dos inputs
@@ -165,6 +174,7 @@ $(document).ready(function() {
         if (!isNaN(lat) && !isNaN(lng)) {
             marker.setLatLng([lat, lng]);
             map.setView([lat, lng], 13);
+            buscarCircuitosProximos(e.latlng.lat, e.latlng.lng);
         }
     }
 
@@ -637,5 +647,57 @@ $(document).ready(function() {
       };
     }
 
+    // Busca e plota os 3 circuitos mais próximos do ponto
+    function buscarCircuitosProximos(lat, lng) {
+        // descobre a regional pela EDP selecionada, se quiser filtrar
+        var regional = null; // ou derive de algum select, se aplicável
 
+        var url = '/circuitos-proximos?lat=' + lat + '&lon=' + lng
+                + (regional ? '&regional=' + encodeURIComponent(regional) : '');
+
+        $.getJSON(url, function(fc) {
+            // remove os circuitos da busca anterior (do mapa e do controle de camadas)
+            circuitoLayers.forEach(function(layer) {
+                map.removeLayer(layer);
+                layersControl.removeLayer(layer);
+            });
+            circuitoLayers = [];
+
+            if (!fc.features || fc.features.length === 0) {
+                return;
+            }
+
+            fc.features.forEach(function(feature) {
+                var p = feature.properties;
+                var cor = p.cor || '#16a34a';
+
+                var layer = L.geoJSON(feature, {
+                    style: {
+                        color: cor,
+                        weight: 4,
+                        opacity: 0.9
+                    }
+                });
+
+                layer.bindPopup(
+                    '<b>Circuito:</b> ' + p.cod_circuito_mt + '<br>' +
+                    '<b>Regional:</b> ' + p.regional + '<br>' +
+                    '<b>Distância:</b> ' + p.distancia_m + ' m'
+                );
+
+                layer.addTo(map);
+
+                // rótulo no filtro com bolinha da cor do circuito
+                var label = '<span style="display:inline-block;width:10px;height:10px;'
+                          + 'border-radius:50%;background:' + cor + ';margin-right:6px;'
+                          + 'vertical-align:middle;"></span>'
+                          + 'Circuito ' + p.cod_circuito_mt + ' (' + p.distancia_m + ' m)';
+
+                layersControl.addOverlay(layer, label);
+                circuitoLayers.push(layer);
+            });
+        }).fail(function() {
+            console.error("Erro ao buscar circuitos próximos");
+        });
+    }
 }); //fim do ready

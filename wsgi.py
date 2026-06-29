@@ -1,4 +1,4 @@
-from app.main import create_app
+from app.main import create_app, aquecer_circuitos
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import logging
@@ -46,6 +46,9 @@ app.config.update(
     SQLALCHEMY_ECHO=False,   # evita log de SQL
     DEBUG=False              # desativa debug do Flask
 )
+
+# Em produção não há reloader: pré-aquece aqui o índice de circuitos.
+aquecer_circuitos()
 
 if __name__ == "__main__":
     app.run()

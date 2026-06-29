@@ -1,11 +1,17 @@
-from flask import Blueprint, jsonify, flash, Response
+from flask import Blueprint, jsonify, flash, Response, request
 from app.models import db, Estudo, get_dashboard_stats, listar_estudos, obter_estudo, Municipio, TipoSolicitacao, \
     Regional, Circuito, RespRegiao, Usuario, Subestacao, Instalacao, Empresa, Socio, FatorK, Alternativa
 import requests
 import re
+import os
+import subprocess
 from datetime import datetime
 from sqlalchemy import func, and_, literal_column
 import base64
+
+from app.utils.circuito_geojson import get_index, GEOJSON_PATH
+from app.auth import requires_permission
+from app.utils.activity_log import registrar_log
 
 api_bp = Blueprint("api", __name__)
 
@@ -339,3 +345,85 @@ def imagem_alternativa(id_alt):
     base64_img = base64.b64encode(alt.blob_image).decode('utf-8')
     mime_type = "image/png"  # ou "image/jpeg" conforme o tipo real
     return jsonify({'imagem': f"data:{mime_type};base64,{base64_img}"})
+
+
+@api_bp.route("/circuitos-proximos")
+def proximos():
+    lat = float(request.args["lat"])
+    lon = float(request.args["lon"])
+    regional = request.args.get("regional")
+    idx = get_index()
+    res = idx.mais_proximos(lat, lon, k=3, regional=regional)
+
+    # cor distinta por circuito (do mais próximo ao mais distante)
+    CORES = ["#2563eb", "#f59e0b", "#7c3aed"]   # azul, laranja, roxo
+
+    # devolve uma FeatureCollection só com os 3, com distância/cor/ordem nas properties
+    feats = []
+    for ordem, (i, dist) in enumerate(res):
+        f = dict(idx.features[i])               # cópia rasa da feature
+        f["properties"] = {
+            **idx.features[i]["properties"],
+            "distancia_m": round(dist, 1),
+            "ordem": ordem,
+            "cor": CORES[ordem % len(CORES)],
+        }
+        feats.append(f)
+
+    return jsonify({"type": "FeatureCollection", "features": feats})
+
+
+def _redigir_sas(texto):
+    """Remove valores de parâmetros do SAS (sig, se, st, ...) da saída do azcopy
+    para não vazar o token nos logs / na resposta."""
+    if not texto:
+        return ""
+    return re.sub(r'(?i)\b(sig|se|st|sp|spr|sv|sr|sk[a-z]+)=[^&\s"\']+', r'\1=***', texto)
+
+
+@api_bp.route("/admin/circuitos/atualizar", methods=["POST"])
+@requires_permission('admin')
+def atualizar_circuitos_geojson():
+    """Admin: sincroniza o circuitos.geojson do Azure (download) via azcopy e
+    recarrega o índice em memória."""
+    dest_url = os.getenv("CIRCUITOS_SAS_URL")
+    if not dest_url:
+        return jsonify({"status": "error",
+                        "message": "CIRCUITOS_SAS_URL não configurada no ambiente (.env)."}), 500
+
+    azcopy = os.getenv("AZCOPY_PATH", "azcopy")
+    local_dir = os.path.dirname(os.path.abspath(GEOJSON_PATH))   # pasta data/
+
+    # Download: Azure (origem) -> local (destino). delete-destination=false p/ não
+    # apagar arquivos locais que não existam no container.
+    cmd = [azcopy, "sync", dest_url, local_dir,
+           "--recursive", "--delete-destination=false"]
+
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except FileNotFoundError:
+        return jsonify({"status": "error",
+                        "message": f"azcopy não encontrado em '{azcopy}'. "
+                                   f"Instale o azcopy ou ajuste AZCOPY_PATH."}), 500
+    except subprocess.TimeoutExpired:
+        return jsonify({"status": "error",
+                        "message": "azcopy excedeu o tempo limite (10 min)."}), 504
+
+    saida = _redigir_sas((proc.stdout or "") + "\n" + (proc.stderr or "")).strip()
+
+    if proc.returncode != 0:
+        registrar_log('atualizar_circuitos', 'circuitos', None,
+                      f'Falha no azcopy sync (rc={proc.returncode}).')
+        return jsonify({"status": "error",
+                        "message": "Falha no azcopy sync.",
+                        "saida": saida[-4000:]}), 500
+
+    # Recarrega o índice em memória com o arquivo recém-baixado.
+    idx = get_index(force=True)
+
+    registrar_log('atualizar_circuitos', 'circuitos', None,
+                  f'circuitos.geojson sincronizado via azcopy ({len(idx.features)} circuitos).')
+    return jsonify({"status": "success",
+                    "message": "circuitos.geojson atualizado com sucesso.",
+                    "circuitos": len(idx.features),
+                    "saida": saida[-4000:]})

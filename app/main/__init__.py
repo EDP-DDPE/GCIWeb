@@ -14,6 +14,8 @@ from json import JSONEncoder
 from decimal import Decimal
 
 
+
+
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):
@@ -24,6 +26,7 @@ class CustomJSONEncoder(JSONEncoder):
 def create_app():
 
     load_dotenv()
+    # O índice de circuitos é carregado sob demanda (lazy) em circuito_geojson.get_index()
     #app_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     app = Flask(__name__, instance_relative_config=True, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'), static_folder="static", static_url_path='/static')
@@ -166,4 +169,18 @@ def create_app():
     def inject_user():
         return dict(user=g.user)
 
+    # Pré-aquece o índice de circuitos em background (não bloqueia o startup).
+    # No modo debug o reloader cria 2 processos; só o FILHO que atende requests
+    # define WERKZEUG_RUN_MAIN='true' -> evita carregar 2x. Em produção (waitress
+    # via wsgi.py) o aquecimento é disparado lá, onde a var não existe.
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        aquecer_circuitos()
+
     return app
+
+
+def aquecer_circuitos():
+    """Carrega o índice de circuitos em uma thread de fundo (não bloqueia)."""
+    import threading
+    from app.utils.circuito_geojson import get_index
+    threading.Thread(target=get_index, daemon=True, name="warmup-circuitos").start()

@@ -53,7 +53,49 @@
         $('#tab-historico-btn').on('shown.bs.tab', function () {
             if (!$('#tabelaLogs').data('carregado')) carregarLogs(1);
         });
+
+        // ---------- Circuitos ----------
+        $('#btnAtualizarCircuitos').on('click', atualizarCircuitos);
     });
+
+    // ======================= CIRCUITOS =======================
+    function atualizarCircuitos() {
+        const $btn = $('#btnAtualizarCircuitos');
+        const htmlOriginal = $btn.html();
+        $btn.prop('disabled', true)
+            .html('<span class="spinner-border spinner-border-sm me-1"></span> Sincronizando...');
+        $('#circuitosResultado').addClass('d-none');
+
+        $.ajax({
+            url: '/admin/circuitos/atualizar',
+            method: 'POST',
+            timeout: 11 * 60 * 1000,   // > timeout do azcopy no servidor (10 min)
+            success: function (resp) {
+                const msg = (resp.circuitos != null)
+                    ? resp.message + ' (' + resp.circuitos + ' circuitos)'
+                    : resp.message;
+                showToast(msg, 'success');
+                mostrarResultadoCircuitos('success', msg, resp.saida);
+            },
+            error: function (xhr) {
+                const r = xhr.responseJSON || {};
+                const msg = r.message || 'Erro ao atualizar circuitos.';
+                showToast(msg, 'error');
+                mostrarResultadoCircuitos('danger', msg, r.saida);
+            },
+            complete: function () {
+                $btn.prop('disabled', false).html(htmlOriginal);
+            }
+        });
+    }
+
+    function mostrarResultadoCircuitos(tipo, msg, saida) {
+        $('#circuitosAlerta')
+            .attr('class', 'alert mb-2 alert-' + tipo)
+            .text(msg);
+        $('#circuitosSaida').text(saida || '(sem saída do azcopy)');
+        $('#circuitosResultado').removeClass('d-none');
+    }
 
     // ======================= USUÁRIOS =======================
     function abrirModalNovo() {
