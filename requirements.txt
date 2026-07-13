@@ -23,4 +23,5 @@ lxml==6.1.0
 pdfplumber==0.11.9
 shapely==2.1.2
 pyproj==3.7.2
+openai
 #pip install pdfplumber==0.11.9 --trusted-host pypi.org --trusted-host files.pythonhosted.org

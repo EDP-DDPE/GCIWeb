@@ -4,7 +4,6 @@ import re
 import matplotlib
 matplotlib.use("Agg")
 
-import requests
 import time
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,6 +12,7 @@ from flask import g
 import os
 
 from datetime import datetime
+from openai import OpenAI
 from sqlalchemy import text
 from app.models import db
 
@@ -22,6 +22,11 @@ class AtlasAgent:
     def __init__(self, llm_url, llm_token):
         self.url = llm_url
         self.token = llm_token
+        self.model = os.getenv("LLM_MODEL", "system.ai.claude-opus-4-8")
+        self.client = OpenAI(
+            api_key=llm_token,
+            base_url=llm_url
+        )
 
     # ---------------------------
     # 1. Classificar intenção
@@ -160,15 +165,10 @@ class AtlasAgent:
         -----------------------------------------
 
         '''
-        body = {
-            "messages": [
-                {
-                    "role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_message}
-            ]
-        }
-
-        response = self._call_llm(body)
+        response = self._chat_completion([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ])
         return json.loads(response)
 
     # ---------------------------
@@ -287,14 +287,10 @@ class AtlasAgent:
         --------------------------------------
         """
 
-        body = {
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": question}
-            ]
-        }
-
-        response = self._call_llm(body)
+        response = self._chat_completion([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": question}
+        ])
         # Remove bordas de markdown, se houver
         clean = response.strip()
         clean = clean.replace("```json", "").replace("```", "").strip()
@@ -361,13 +357,10 @@ class AtlasAgent:
                 --------------------------------------
                 """
 
-        body = {
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": pdf_text}
-            ]
-        }
-        response = self._call_llm(body)
+        response = self._chat_completion([
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": pdf_text}
+        ])
         # Remove bordas de markdown, se houver
         clean = response.strip()
         clean = clean.replace("```json", "").replace("```", "").strip()
@@ -385,22 +378,18 @@ class AtlasAgent:
     # ---------------------------
     # 3. Chamar LLM
     # ---------------------------
-    def _call_llm(self, body, max_attempts=3):
+    def _chat_completion(self, messages, max_tokens=4096, max_attempts=3):
         for attempt in range(max_attempts):
             try:
-                print(f"LLM: tentativa {attempt}" )
-                r = requests.post(
-                    self.url,
-                    headers={
-                        "Authorization": f"Bearer {self.token}",
-                        "Content-Type": "application/json"
-                    },
-                    json=body,
+                print(f"LLM: tentativa {attempt}")
+                chat_completion = self.client.chat.completions.create(
+                    messages=messages,
+                    model=self.model,
+                    max_tokens=max_tokens,
                     timeout=60
                 )
-                r.raise_for_status()
 
-                content = r.json()["choices"][0]["message"]["content"]
+                content = chat_completion.choices[0].message.content
                 content = content.replace("```json", "").replace("```", "").strip()
                 return content
 
@@ -409,6 +398,10 @@ class AtlasAgent:
                 time.sleep(1)
 
         raise Exception("Falha ao chamar LLM")
+
+    # Mantido por compatibilidade com chamadas externas que passam {"messages": [...]}
+    def _call_llm(self, body, max_attempts=3):
+        return self._chat_completion(body["messages"], max_attempts=max_attempts)
 
     # ---------------------------
     # 4. Executar query SQL
