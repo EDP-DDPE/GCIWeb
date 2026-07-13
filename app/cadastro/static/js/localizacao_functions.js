@@ -101,6 +101,9 @@ $(document).ready(function() {
 
     var map = L.map('map').setView([initialLat, initialLng], 13);
 
+    map.options.zoomDelta = 1;
+    map.options.wheelPxPerZoomLevel = 240;
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
