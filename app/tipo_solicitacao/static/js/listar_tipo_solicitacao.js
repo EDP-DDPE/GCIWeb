@@ -60,6 +60,21 @@ function setupEventListeners() {
 
     // Fechar dropdowns ao clicar fora
     $(document).on('click', closeDropdowns);
+
+    // Limpar input de arquivo ao fechar os modais de documento
+    const modalDoc = document.getElementById('modalDocumento');
+    if (modalDoc) {
+        modalDoc.addEventListener('hidden.bs.modal', function () {
+            $('#arquivoDocumento').val('');
+        });
+    }
+
+    const modalDocInverso = document.getElementById('modalDocumentoInverso');
+    if (modalDocInverso) {
+        modalDocInverso.addEventListener('hidden.bs.modal', function () {
+            $('#arquivoDocumentoInverso').val('');
+        });
+    }
 }
 
 
