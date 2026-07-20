@@ -1147,7 +1147,7 @@ function abrirModalDocumento(tipoId, fluxoReverso = 0) {
                 <hr>
                 <div class="mb-2">
                     <h6>Versões anteriores</h6>
-                    <div id="listaVersoesDoc">
+                    <div class="listaVersoesDoc">
                         Carregando versões...
                     </div>
                 </div>
@@ -1162,6 +1162,11 @@ function abrirModalDocumento(tipoId, fluxoReverso = 0) {
 
 function carregarVersoesDocumento(fluxoReverso = 0) {
     if (!tipoSolicitacaoIdDocumento) return;
+
+    const $modalBody = fluxoReverso === 0
+        ? $('#modalDocumentoBody')
+        : $('#modalDocumentoInversoBody');
+    const $lista = $modalBody.find('.listaVersoesDoc');
 
     $.get(`/tipo_solicitacao/${tipoSolicitacaoIdDocumento}/documento/versoes?fluxo_reverso=${fluxoReverso}`)
         .done(function(resp) {
@@ -1205,7 +1210,7 @@ function carregarVersoesDocumento(fluxoReverso = 0) {
             });
 
             html += '</tbody></table>';
-            $('#listaVersoesDoc').html(html);
+            $lista.html(html);
         })
         .fail(function() {
             $('#listaVersoesDoc').html('<div class="alert alert-danger">Erro ao carregar versões.</div>');
