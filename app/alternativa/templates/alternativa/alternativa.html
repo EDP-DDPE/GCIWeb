@@ -272,6 +272,12 @@
                                     Editar
                                 </a>
 
+                                <button type="button" class="btn btn-sm btn-outline-info me-2"
+                                    onclick="abrirStatus({{ estudo.id_estudo }})"
+                                    title="Gerenciar Status">
+                                    <i class="bi bi-clock-history me-1"></i>Status
+                                </button>
+
 <!--                            <button class="btn btn-sm btn-outline-success">-->
 <!--                                <i class="fas fa-download me-1"></i>Exportar-->
 <!--                            </button>-->
@@ -393,6 +399,8 @@
 
 {% include "alternativa/_form.html" %}
 
+{% include "listar/partials/status.html" %}
+
 {% endblock %}
 
 {% block extra_js %}
@@ -412,11 +420,13 @@ document.addEventListener('DOMContentLoaded', function() {
     import { inicializarEventosFormulario } from "{{ url_for('alternativa.static', filename='js/alternativa-form.js') }}";
     import { inicializarUploadImagem } from "{{ url_for('alternativa.static', filename='js/alternativa-upload.js') }}";
     import { inicializarExclusao } from "{{ url_for('alternativa.static', filename='js/alternativa-delete.js') }}";
+    import { configurarFormularioStatus } from "{{ url_for('listar.static', filename='js/listar/status.js') }}";
 
     // Inicializações
     inicializarEventosFormulario();
     inicializarUploadImagem();
     inicializarExclusao();
+    configurarFormularioStatus();
 
     // Botão Nova Alternativa
     document.querySelector(".btn-alternativa").addEventListener("click", abrirModalNovo);
