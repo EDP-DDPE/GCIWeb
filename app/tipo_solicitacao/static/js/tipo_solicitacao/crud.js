@@ -1,5 +1,6 @@
 // crud.js — editar, excluir e adicionar tipos de solicitação
-import { showLoading, hideLoading, showNotification } from "./utils.js";
+import { showNotification } from "./utils.js";
+import { loadData } from "./table.js";
 
 export function editarDetalhes(tipo_solicitacaoId) {
     const $modalBody = $("#modalEditarBody");
@@ -99,8 +100,8 @@ export function salvarEdicao() {
         contentType: "application/json",
         success: function () {
             bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
-            alert("Tipo de solicitação atualizado com sucesso!");
-            location.reload();
+            showNotification("Tipo de solicitação atualizado com sucesso!", "success");
+            loadData();
         },
         error: function (xhr, status, error) {
             console.error("Erro ao salvar:", error);
@@ -130,8 +131,8 @@ export function confirmarExclusao() {
         method: "POST",
         success: function () {
             bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
-            alert("✅ Tipo de solicitação excluído com sucesso!");
-            location.reload();
+            showNotification("✅ Tipo de solicitação excluído com sucesso!", "success");
+            loadData();
         },
         error: function (xhr, status, error) {
             let mensagemErro = "❌ Erro ao excluir o tipo de solicitação!";
@@ -285,8 +286,8 @@ export function salvarNovoTipoSolicitacao() {
         contentType: "application/json",
         success: function () {
             bootstrap.Modal.getInstance(document.getElementById("modalAdicionar")).hide();
-            alert("✅ Tipo de solicitação adicionado com sucesso!");
-            location.reload();
+            showNotification("✅ Tipo de solicitação adicionado com sucesso!", "success");
+            loadData();
         },
         error: function (xhr, status, error) {
             console.error("Erro:", error);
@@ -297,14 +298,9 @@ export function salvarNovoTipoSolicitacao() {
 }
 
 export function refreshData() {
-    showLoading();
-
-    // A forma mais simples de garantir dados e badges atualizados
-    setTimeout(() => {
-        hideLoading();
-        showNotification("Atualizando dados...", "info");
-        location.reload();
-    }, 300);
+    loadData().done(() => {
+        showNotification("Dados atualizados com sucesso!", "success");
+    });
 }
 
 // Expor para os onclick do HTML

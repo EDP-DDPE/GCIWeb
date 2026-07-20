@@ -1,76 +1,121 @@
-// table.js — leitura dos dados, renderização da tabela e paginação
+// table.js — carregamento via API, renderização da tabela e paginação
 import { state } from "./main.js";
 import { showLoading, hideLoading, initializeTooltips } from "./utils.js";
 import { applyColumnVisibility } from "./columns.js";
 
-// Inicializar dados a partir das linhas renderizadas pelo Jinja
-export function initializeData() {
-    const tableRows = $("#tableBody tr");
-    state.currentData = tableRows.map(function () {
-        const cells = $(this).find("td");
-        return {
-            id: cells.eq(0).text().trim(),
-            viabilidade: cells.eq(1).text().trim(),
-            viabilidade_abrev: cells.eq(2).text().trim(),
-            analise: cells.eq(3).text().trim(),
-            analise_abrev: cells.eq(4).text().trim(),
-            pedido: cells.eq(5).text().trim(),
-            pedido_abrev: cells.eq(6).text().trim(),
-            status_doc: cells.eq(7).text().trim(),
-            acoes: cells.eq(8).clone(),
-            element: this
-        };
-    }).get();
+// Busca os dados na API e re-renderiza a tabela (substitui o antigo initializeData)
+export function loadData() {
+    showLoading();
 
-    state.filteredData = [...state.currentData];
-    updatePagination();
-    renderTable();
+    return $.get("/tipo_solicitacao/api/listar")
+        .done(function (resp) {
+            state.permissoes = resp.permissoes || {};
+
+            state.currentData = (resp.items || []).map(item => ({
+                id: String(item.id),
+                viabilidade: item.viabilidade || "",
+                viabilidade_abrev: item.viabilidade_abrev || "",
+                analise: item.analise || "",
+                analise_abrev: item.analise_abrev || "",
+                pedido: item.pedido || "",
+                pedido_abrev: item.pedido_abrev || "",
+                status_doc: item.status.texto,   // texto puro (busca, filtro e ordenação)
+                status: item.status              // objeto completo (renderiza o badge)
+            }));
+
+            state.filteredData = [...state.currentData];
+
+            // Se a página atual ficou fora do alcance (ex.: após exclusão), ajusta
+            const totalPages = Math.max(1, Math.ceil(state.filteredData.length / state.pageSize));
+            if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+            updatePagination();
+            renderTable();
+        })
+        .fail(function () {
+            alert("Erro ao carregar dados do servidor.");
+        })
+        .always(hideLoading);
+}
+
+function buildStatusBadge(status) {
+    const title = (status.dias !== null && status.dias !== undefined)
+        ? `Próxima revisão: ${status.data_limite}`
+        : "Nenhum documento cadastrado";
+
+    return `
+        <span class="badge bg-${status.classe} d-flex align-items-center gap-1"
+              style="width: fit-content;"
+              data-bs-toggle="tooltip"
+              title="${title}">
+            <i class="bi ${status.icone}"></i>
+            ${status.texto}
+        </span>
+    `;
+}
+
+function buildActions(item) {
+    const podeEditar = state.permissoes && state.permissoes.editar;
+
+    let html = `
+        <div class="btn-group" role="group">
+            <button class="btn btn-sm btn-warning"
+                onclick="editarDetalhes(${item.id})"
+                data-bs-toggle="tooltip"
+                title="Editar Tipo de Solicitação"
+                ${podeEditar ? "" : "disabled"}>
+                <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <button class="btn btn-sm btn-info"
+                onclick="abrirModalDocumento(${item.id}, 0)"
+                data-bs-toggle="tooltip"
+                title="Documento Padrão">
+                <i class="bi bi-file-earmark-text"></i>
+            </button>
+    `;
+
+    if (item.analise && item.analise.includes("MMGD")) {
+        html += `
+            <button class="btn btn-sm btn-success"
+                onclick="abrirModalDocumento(${item.id}, 1)"
+                data-bs-toggle="tooltip"
+                title="Documento Padrão – Fluxo Inverso">
+                <i class="bi bi-file-earmark-text"></i>
+            </button>
+        `;
+    }
+
+    return html + "</div>";
 }
 
 // Renderizar tabela
 export function renderTable() {
-    showLoading();
+    const $tbody = $("#tableBody");
+    const start = (state.currentPage - 1) * state.pageSize;
+    const end = start + state.pageSize;
+    const pageData = state.filteredData.slice(start, end);
 
-    setTimeout(() => {
-        const $tbody = $("#tableBody");
-        const start = (state.currentPage - 1) * state.pageSize;
-        const end = start + state.pageSize;
-        const pageData = state.filteredData.slice(start, end);
+    $tbody.empty();
 
-        $tbody.empty();
+    pageData.forEach(item => {
+        const $row = $("<tr>");
 
-        pageData.forEach(item => {
-            const $row = $("<tr>");
+        $("<td>").attr("data-column", "id").text(item.id).appendTo($row);
+        $("<td>").attr("data-column", "viabilidade").text(item.viabilidade).appendTo($row);
+        $("<td>").attr("data-column", "viabilidade_abrev").text(item.viabilidade_abrev).appendTo($row);
+        $("<td>").attr("data-column", "analise").text(item.analise).appendTo($row);
+        $("<td>").attr("data-column", "analise_abrev").text(item.analise_abrev).appendTo($row);
+        $("<td>").attr("data-column", "pedido").text(item.pedido).appendTo($row);
+        $("<td>").attr("data-column", "pedido_abrev").text(item.pedido_abrev).appendTo($row);
+        $("<td>").attr("data-column", "status_doc").html(buildStatusBadge(item.status)).appendTo($row);
+        $("<td>").attr("data-column", "acoes").html(buildActions(item)).appendTo($row);
 
-            $("<td>").attr("data-column", "id").text(item.id).appendTo($row);
-            $("<td>").attr("data-column", "viabilidade").text(item.viabilidade).appendTo($row);
-            $("<td>").attr("data-column", "viabilidade_abrev").text(item.viabilidade_abrev).appendTo($row);
-            $("<td>").attr("data-column", "analise").text(item.analise).appendTo($row);
-            $("<td>").attr("data-column", "analise_abrev").text(item.analise_abrev).appendTo($row);
-            $("<td>").attr("data-column", "pedido").text(item.pedido).appendTo($row);
-            $("<td>").attr("data-column", "pedido_abrev").text(item.pedido_abrev).appendTo($row);
+        $tbody.append($row);
+    });
 
-            // status_doc: clona o TD original para preservar o badge colorido
-            const original = state.currentData.find(d => d.id === item.id);
-            if (original) {
-                const $originalRow = $(original.element);
-                const $statusCell = $originalRow.find('[data-column="status_doc"]').clone(true);
-                $row.append($statusCell);
-            } else {
-                $("<td>").attr("data-column", "status_doc").text(item.status_doc).appendTo($row);
-            }
-
-            const $tdAcoes = $("<td>").attr("data-column", "acoes");
-            $tdAcoes.append(item.acoes.clone(true));
-            $row.append($tdAcoes);
-
-            $tbody.append($row);
-        });
-
-        applyColumnVisibility();
-        initializeTooltips();
-        hideLoading();
-    }, 200);
+    applyColumnVisibility();
+    initializeTooltips();
 }
 
 // Atualizar paginação (versão com input)

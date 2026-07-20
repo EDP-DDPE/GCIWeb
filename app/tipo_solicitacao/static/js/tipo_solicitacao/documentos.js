@@ -1,4 +1,5 @@
 // documentos.js — Documentos Padronizados (fluxo normal e fluxo reverso)
+import { loadData } from "./table.js";
 
 let tipoSolicitacaoIdDocumento = null;
 
@@ -159,7 +160,7 @@ export function carregarVersoesDocumento(fluxoReverso = 0) {
                     <tr>
                         <td class="text-center">${v.versao}</td>
                         <td>${v.nome_doc}</td>
-                        <td>${v.data_atualizaocao || "-"}</td>
+                        <td>${v.data_atualizacao || "-"}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id})">
                                 <i class="bi bi-download"></i>
@@ -203,7 +204,14 @@ export function enviarDocumentoPadrao(fluxoReverso = 0) {
         success: function (resp) {
             if (resp.status === "success") {
                 alert("Documento enviado com sucesso.");
-                location.reload(); // atualiza badge de status e contadores
+
+                const modalEl = document.getElementById(
+                    fluxoReverso === 0 ? "modalDocumento" : "modalDocumentoInverso"
+                );
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide(); // o hidden.bs.modal já limpa o input de arquivo
+
+                loadData(); // atualiza o badge da coluna Doc. Padrão sem recarregar a página
             } else {
                 alert(resp.message || "Erro ao enviar documento.");
             }

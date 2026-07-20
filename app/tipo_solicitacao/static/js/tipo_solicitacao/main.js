@@ -1,6 +1,6 @@
 // main.js — ponto de entrada da página Tipos de Solicitação
 import { initializeTooltips } from "./utils.js";
-import { initializeData, changePageSize } from "./table.js";
+import { loadData, changePageSize } from "./table.js";
 import { setupFilters, clearAllFilters } from "./filters.js";
 import { setupSorting } from "./sorting.js";
 import { setupColumns, loadTableSettings, saveTableSettings } from "./columns.js";
@@ -17,12 +17,13 @@ export let state = {
     pageSize: 25,
     sortColumn: "",
     sortDirection: "asc",
-    columnFilters: {}
+    columnFilters: {},
+    permissoes: {}
 };
 
 // Inicialização
 $(document).ready(function () {
-    initializeData();
+    loadData();
     setupFilters();
     setupSorting();
     setupColumns();
