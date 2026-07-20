@@ -1196,7 +1196,7 @@ function carregarVersoesDocumento(fluxoReverso = 0) {
                         <td>${v.nome_doc}</td>
                         <td>${v.data_atualizaocao || '-'}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id},fluxoReverso)">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="baixarVersaoDocumento(${v.id})">
                                 <i class="bi bi-download"></i>
                             </button>
                         </td>
