@@ -269,7 +269,7 @@ def preencher_template(template_name: str, context: dict) -> BytesIO:
     if context["alternativa_unica"] == True:
         context["das_alternativas"] = "**DA** **ALTERNATIVA**"
         context["das_alternativas_2"] = "da alternativa estudada"
-        context["as_alternativas_viaveis"] = "a alternativa viável"
+        context["as_alternativas_viaveis"] = "a alternativa viável."
         context["das_alternativas_3"] = "da alternativa avaliada"
 
         idx = 1
@@ -283,6 +283,7 @@ def preencher_template(template_name: str, context: dict) -> BytesIO:
         ajustar_tamanho_tabela_alternativas(doc, idx, qtd_linhas_tabela_demanda)
 
         context["num_A4"] = "1"
+        context["num_A5"] = "1"
 
     # Para geração, manter texto de estudos
     if context["c_g"] == "G":
