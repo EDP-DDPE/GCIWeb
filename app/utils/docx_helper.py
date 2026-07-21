@@ -54,7 +54,7 @@ def ajustar_tamanho_tabela_alternativas(doc, indice_tabela, qtd_linhas):
     tabela = doc.tables[indice_tabela]
     linhas_atuais = len(tabela.rows)
 
-    mapa = {1: 5, 2: 13, 3: 20, 4: 27}
+    mapa = {1: 6, 2: 13, 3: 20, 4: 27}
     linhas_alvo = mapa.get(qtd_linhas, 33)
 
     while linhas_atuais > linhas_alvo:
