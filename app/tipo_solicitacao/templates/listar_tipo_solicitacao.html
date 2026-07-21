@@ -9,7 +9,7 @@
         <div class="d-flex gap-2">
             <button class="btn btn-success" onclick="refreshData()">
                 <i class="fas fa-sync-alt"></i> Atualizar
-            </button> 
+            </button>
             <button class="btn btn-sm btn-primary"
                     onclick="abrirModalAdicionar()"
                     {% if usuario.criar == 0 %}disabled{% endif %}>
@@ -54,31 +54,31 @@
                         <h6 class="mb-2">Selecionar Colunas</h6>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="id" id="col-id">
-                                <label class="form -check-label" for="col-id">ID</label>
+                                <label class="form-check-label" for="col-id">ID</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="viabilidade" id="col-viabilidade" checked>
-                                <label class="form-check-label" for="col-circuito">Viabilidade</label>
+                                <label class="form-check-label" for="col-viabilidade">Viabilidade</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="viabilidade_abrev" id="col-viabilidade_abrev">
-                                <label class="form -check-label" for="col-viabilidade_abrev">Viabilidade Abrev.</label>
+                                <label class="form-check-label" for="col-viabilidade_abrev">Viabilidade Abrev.</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="analise" id="col-analise" checked>
-                                <label class="form-check-label" for="col-subestacao">Análise</label>
+                                <label class="form-check-label" for="col-analise">Análise</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="analise_abrev" id="col-analise_abrev">
-                                <label class="form -check-label" for="col-analise_abrev">Análise Abrev.</label>
+                                <label class="form-check-label" for="col-analise_abrev">Análise Abrev.</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="pedido" id="col-pedido" checked>
-                                <label class="form-check-label" for="col-edp">Pedido</label>
+                                <label class="form-check-label" for="col-pedido">Pedido</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="pedido_abrev" id="col-pedido_abrev">
-                                <label class="form -check-label" for="col-pedido_abrev">Pedido Abrev.</label>
+                                <label class="form-check-label" for="col-pedido_abrev">Pedido Abrev.</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="status_doc" id="col-status_doc" checked>
@@ -235,55 +235,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        {% for doc in documentos %}
-                        <tr>
-                            <td data-column="id">{{ doc.id_tipo_solicitacao }}</td>
-                            <td data-column="viabilidade">{{ doc.viabilidade }}</td>
-                            <td data-column="viabilidade_abrev">{{ doc.viabilidade_abrev }}</td>
-                            <td data-column="analise">{{ doc.analise }}</td>
-                            <td data-column="analise_abrev">{{ doc.analise_abrev }}</td>
-                            <td data-column="pedido">{{ doc.pedido }}</td>
-                            <td data-column="pedido_abrev">{{ doc.pedido_abrev }}</td>
-                            {% set status = status_map.get(doc.id_tipo_solicitacao, {'classe': 'secondary', 'icone': 'bi-file-earmark-x', 'texto': 'Sem documento', 'dias': none}) %}
-                            <td data-column="status_doc">
-                                <span class="badge bg-{{ status.classe }} d-flex align-items-center gap-1"
-                                    style="width: fit-content;"
-                                    data-bs-toggle="tooltip"
-                                    title="{% if status.dias is not none %}Próxima revisão: {{ status.data_limite }}{% else %}Nenhum documento cadastrado{% endif %}">
-                                    <i class="bi {{ status.icone }}"></i>
-                                    {{ status.texto }}
-                                </span>
-                            </td>
-                            <td data-column="acoes">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-warning"
-                                        onclick="editarDetalhes({{ doc.id_tipo_solicitacao }})"
-                                        data-bs-toggle="tooltip"
-                                        title="Editar Tipo de Solicitação"
-                                        {% if usuario.editar == 0 %}disabled{% endif %}>
-                                    <i class="bi bi-pencil-square"></i>
-                                    </button>
-
-                                    <button class="btn btn-sm btn-info" 
-                                        onclick="abrirModalDocumento({{ doc.id_tipo_solicitacao }}, 0)" 
-                                        data-bs-toggle="tooltip"
-                                        title="Documento Padrão">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    </button>
-
-                                    {% if 'MMGD' in doc.analise %}
-                                    <button class="btn btn-sm btn-success"
-                                        onclick="abrirModalDocumento({{ doc.id_tipo_solicitacao }}, 1)"
-                                        data-bs-toggle="tooltip"
-                                        title="Documento Padrão – Fluxo Inverso">
-                                        <i class="bi bi-file-earmark-text"></i>
-                                    </button>
-                                    {% endif %}
-
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        <!-- Preenchido pelo JS via /tipo_solicitacao/api/listar -->
                     </tbody>
                 </table>
             </div>
@@ -293,8 +245,8 @@
         <div class="card-footer">
             <div class="table-actions">
                 <div class="pagination-info">
-                    Exibindo <span id="startRecord">1</span> a <span id="endRecord">25</span> de <span id="totalRecords">{{ documentos|length }}</span> registros
-                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ documentos|length }}</span> registros)</span>
+                    Exibindo <span id="startRecord">0</span> a <span id="endRecord">0</span> de <span id="totalRecords">0</span> registros
+                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">0</span> registros)</span>
                 </div>
 
                 <nav aria-label="Paginação da tabela">
@@ -307,7 +259,7 @@
     </div>
 </div>
 
-<!-- Modal para editar Circuito -->
+<!-- Modal para editar Tipo de Solicitação -->
 <div class="modal fade" id="modalEditar" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -329,7 +281,7 @@
     </div>
 </div>
 
-<!-- Modal para adicionar Circuito -->
+<!-- Modal para adicionar Tipo de Solicitação -->
 <div class="modal fade" id="modalAdicionar" tabindex="-1" aria-labelledby="modalAdicionarLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
@@ -368,18 +320,18 @@
           <input type="file" name="arquivo" id="arquivoDocumento" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt">
         </form>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="enviarDocumentoPadrao(0)">Enviar Documento</button>
+        <button type="button" class="btn btn-primary" onclick="enviarDocumentoPadrao(0)">Enviar Documento</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Modal Documento Padrão - Fluxo Inverso -->
-<div class="modal fade" id="modalDocumentoInverso" tabindex="-1" aria-labelledby="modalDocumentoLabel" aria-hidden="true">
+<div class="modal fade" id="modalDocumentoInverso" tabindex="-1" aria-labelledby="modalDocumentoInversoLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title" id="modalDocumentoLabel">
+        <h5 class="modal-title" id="modalDocumentoInversoLabel">
           <i class="bi bi-file-earmark-text me-2"></i>Documento Padrão - Fluxo Reverso
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
@@ -388,18 +340,17 @@
         <!-- Conteúdo via JS -->
       </div>
       <div class="modal-footer">
-        <form id="formUploadDocumento" enctype="multipart/form-data" class="me-auto">
+        <form id="formUploadDocumentoInverso" enctype="multipart/form-data" class="me-auto">
           <input type="file" name="arquivo" id="arquivoDocumentoInverso" class="form-control form-control-sm" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt">
         </form>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="enviarDocumentoPadrao(1)">Enviar Documento</button>
+        <button type="button" class="btn btn-primary" onclick="enviarDocumentoPadrao(1)">Enviar Documento</button>
       </div>
     </div>
   </div>
 </div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src=" {{ url_for('tipo_solicitacao.static', filename='js/listar_tipo_solicitacao.js') }}"></script>
+<script type="module" src="{{ url_for('tipo_solicitacao.static', filename='js/tipo_solicitacao/main.js') }}"></script>
 
 {% endblock %}
