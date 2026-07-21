@@ -6,35 +6,62 @@ from sqlalchemy.exc import IntegrityError
 
 subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates", static_folder="static", static_url_path='/subestacoes/static')
 
-@subestacao_bp.route("/subestacoes", methods=["GET", "POST"])
+@subestacao_bp.route("/subestacoes", methods=["GET"])
 @requires_permission('visualizar')
 def listar_subestacoes():
-
-    registros = Subestacao.query.options(
-        joinedload(Subestacao.municipio),
-        joinedload(Subestacao.circuitos)
-    ).all()
-    
     usuario = get_usuario_logado()
-    
-    return render_template("listar_subestacoes.html",documentos=registros,usuario=usuario)
+    return render_template("listar_subestacoes.html", usuario=usuario)
 
-@subestacao_bp.route('/subestacoes/<int:id>/api', methods=['GET'])
-def api_subestacao(id):
-    sub = Subestacao.query.get_or_404(id)
+
+@subestacao_bp.route("/subestacoes/api/listar", methods=["GET"])
+@requires_permission('visualizar')
+def api_listar():
+    usuario = get_usuario_logado()
+ 
+    subestacoes = (
+        db.session.query(Subestacao)
+        .outerjoin(Municipio, Subestacao.id_municipio == Municipio.id_municipio)
+        .outerjoin(EDP, Subestacao.id_edp == EDP.id_edp)
+        .order_by(Subestacao.nome)
+        .all()
+    )
+ 
+    items = [{
+        'id': s.id_subestacao,
+        'nome': s.nome,
+        'sigla': s.sigla,
+        'municipio': s.municipio.municipio if s.municipio else '',
+        'edp': s.edp.empresa if s.edp else '',
+        'lat': s.lat,
+        'longitude': s.long,          # atributo do model é "long"; no JSON vai como "longitude"
+    } for s in subestacoes]
+ 
     return jsonify({
-        "id": sub.id_subestacao,
-        "nome": sub.nome,
-        "sigla": sub.sigla,
-        "id_municipio": sub.id_municipio,
-        "id_edp": sub.id_edp,
-        "lat": sub.lat,
-        # Caso o campo correto seja 'long' e não 'longitude':
-        "longitude": getattr(sub, 'long', None),
-        "municipio": sub.municipio.municipio if hasattr(sub, 'municipio') else None,
-        "edp": sub.edp.empresa if hasattr(sub, 'edp') else None
+        'items': items,
+        'permissoes': {
+            'criar': bool(usuario.criar),
+            'editar': bool(usuario.editar),
+            'deletar': bool(usuario.deletar)
+        }
     })
 
+
+@subestacao_bp.route("/subestacoes/<int:id>/api", methods=["GET"])
+@requires_permission('visualizar')
+def api_subestacao(id):
+    s = Subestacao.query.get_or_404(id)
+ 
+    return jsonify({
+        'id': s.id_subestacao,
+        'nome': s.nome,
+        'sigla': s.sigla,
+        'lat': s.lat,
+        'longitude': s.long,
+        'id_municipio': s.id_municipio,
+        'id_edp': s.id_edp,
+        'municipio': s.municipio.municipio if s.municipio else '',
+        'edp': s.edp.empresa if s.edp else ''
+    })
 
 @subestacao_bp.route('/subestacoes/<int:id>/editar', methods=['POST'])
 @requires_permission('editar')

@@ -220,34 +220,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        {% for doc in documentos %}
-                        <tr>
-                            <td data-column="id">{{ doc.id_subestacao }}</td>
-                            <td data-column="nome">{{ doc.nome }}</td>
-                            <td data-column="sigla">{{ doc.sigla }}</td>
-                            <td data-column="municipio">{{ doc.municipio.municipio }}</td>
-                            <td data-column="edp">{{ doc.edp.empresa }}</td>
-                            <td data-column="lat">{{ doc.lat }}</td>
-                            <td data-column="longitude">{{ doc.long }}</td>
-                            <td data-column="acoes">
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-info"
-                                        onclick="verDetalhes({{ doc.id_subestacao }})"
-                                        data-bs-toggle="tooltip"
-                                        title="Ver detalhes">
-                                        <i class="bi bi-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning"
-                                        onclick="editarSubestacao({{ doc.id_subestacao }})"
-                                        data-bs-toggle="tooltip"
-                                        title="Editar subestação"
-                                        {% if usuario.editar == 0 %}disabled{% endif %}>
-                                    <i class="bi bi-pencil-square"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                        <!-- Preenchido pelo JS via /subestacoes/api/listar -->
                     </tbody>
                 </table>
             </div>
@@ -257,8 +230,8 @@
         <div class="card-footer">
             <div class="table-actions">
                 <div class="pagination-info">
-                    Exibindo <span id="startRecord">1</span> a <span id="endRecord">25</span> de <span id="totalRecords">{{ documentos|length }}</span> registros
-                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">{{ documentos|length }}</span> registros)</span>
+                    Exibindo <span id="startRecord">0</span> a <span id="endRecord">0</span> de <span id="totalRecords">0</span> registros
+                    <span id="filteredInfo" style="display: none;">(filtrados de <span id="originalTotal">0</span> registros)</span>
                 </div>
 
                 <nav aria-label="Paginação da tabela">
@@ -336,6 +309,6 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src=" {{ url_for('subestacoes.static', filename='js/listar_subestacoes.js') }}"></script>
+<script type="module" src="{{ url_for('subestacoes.static', filename='js/subestacoes/main.js') }}"></script>
 
 {% endblock %}
