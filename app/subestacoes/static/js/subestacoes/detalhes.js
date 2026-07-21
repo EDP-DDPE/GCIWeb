@@ -35,6 +35,7 @@ export function verDetalhes(id) {
                                 <p><strong>EDP:</strong> ${data.edp || "-"}</p>
                                 <p><strong>Latitude:</strong> ${data.longitude || "-"}</p>
                                 <p><strong>Longitude:</strong> ${data.lat || "-"}</p>
+                                <p><strong>Fronteira:</strong> ${data.fronteira ? "Sim" : "Não"}</p>
                             </div>
                         </div>
                     </div>

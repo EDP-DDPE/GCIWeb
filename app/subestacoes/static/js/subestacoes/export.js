@@ -14,7 +14,8 @@ export function exportData(format) {
         "Municipio": item.municipio,
         "EDP": item.edp,
         "Latitude": item.lat,
-        "Longitude": item.longitude
+        "Longitude": item.longitude,
+        "Fronteira": item.fronteira
     }));
 
     if (!dados.length) {

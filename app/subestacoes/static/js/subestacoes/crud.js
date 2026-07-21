@@ -48,6 +48,14 @@ export function editarSubestacao(id) {
                             </div>
 
                             <div class="mb-3">
+                                <label class="form-label"><strong>Fronteira:</strong></label>
+                                <select name="fronteira" class="form-select">
+                                    <option value="0" ${!data.fronteira ? "selected" : ""}>Não</option>
+                                    <option value="1" ${data.fronteira ? "selected" : ""}>Sim</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label"><strong>EDP (Estado):</strong></label>
                                 <select name="id_edp" class="form-select" id="edp-edit-select" required></select>
                             </div>
@@ -249,6 +257,15 @@ export function abrirModalAdicionar() {
                                 <label class="form-label"><strong>Longitude:</strong></label>
                                 <input type="text" name="longitude" class="form-control" placeholder="Ex: -40.987654">
                             </div>
+
+                            <div class="mb-3">
+                                <label class="form-label"><strong>Fronteira:</strong></label>
+                                <select name="fronteira" class="form-select">
+                                    <option value="0" selected>Não</option>
+                                    <option value="1">Sim</option>
+                                </select>
+                            </div>
+                            
                         </div>
                     </div>
                 </form>

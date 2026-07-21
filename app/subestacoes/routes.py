@@ -6,6 +6,10 @@ from sqlalchemy.exc import IntegrityError
 
 subestacao_bp = Blueprint("subestacoes", __name__, template_folder="templates", static_folder="static", static_url_path='/subestacoes/static')
 
+def para_bit(valor):
+    """ Converte o valor recebido do formulário em 0 ou 1"""
+    return str(valor).strip().lower() in ("1", "true", "sim", "on")
+
 @subestacao_bp.route("/subestacoes", methods=["GET"])
 @requires_permission('visualizar')
 def listar_subestacoes():
@@ -34,6 +38,7 @@ def api_listar():
         'edp': s.edp.empresa if s.edp else '',
         'lat': s.lat,
         'longitude': s.long,          # atributo do model é "long"; no JSON vai como "longitude"
+        'fronteira': bool(s.fronteira)
     } for s in subestacoes]
  
     return jsonify({
@@ -57,6 +62,7 @@ def api_subestacao(id):
         'sigla': s.sigla,
         'lat': s.lat,
         'longitude': s.long,
+        'fronteira': int(s.fronteira) if s.fronteira is not None else 0,
         'id_municipio': s.id_municipio,
         'id_edp': s.id_edp,
         'municipio': s.municipio.municipio if s.municipio else '',
@@ -83,12 +89,15 @@ def editar_subestacao(id):
         'id_municipio': 'id_municipio',
         'id_edp': 'id_edp',
         'lat': 'lat',
-        'longitude': 'long'  # ← MAPEAMENTO AQUI
+        'longitude': 'long',  # ← MAPEAMENTO AQUI
+        'fronteira': 'fronteira'
     }
     
     for campo_frontend, campo_banco in mapeamento_campos.items():
         if campo_frontend in data:
             valor = data[campo_frontend]
+            if campo_frontend == 'fronteira':
+                valor = para_bit(valor)
             if hasattr(sub, campo_banco):
                 print(f"✏️ Atualizando {campo_banco}: {getattr(sub, campo_banco)} -> {valor}")
                 setattr(sub, campo_banco, valor)
@@ -118,6 +127,7 @@ def nova_subestacao():
         id_edp = data.get("id_edp")
         lat = data.get("lat")
         longitude = data.get("longitude")
+        fronteira = para_bit(data.get("fronteira"))
 
         if not all([nome, sigla, id_municipio, id_edp]):
             return jsonify({"erro": "Campos obrigatórios ausentes."}), 400
@@ -128,7 +138,8 @@ def nova_subestacao():
             id_municipio=int(id_municipio),
             id_edp=int(id_edp),
             lat=lat.strip(),
-            long=longitude.strip()
+            long=longitude.strip(),
+            fronteira=fronteira
         )
         db.session.add(nova)
         db.session.commit()

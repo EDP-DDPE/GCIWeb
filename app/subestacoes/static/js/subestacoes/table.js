@@ -18,7 +18,8 @@ export function loadData() {
                 municipio: item.municipio || "",
                 edp: item.edp || "",
                 lat: item.lat || "",
-                longitude: item.longitude || ""
+                longitude: item.longitude || "",
+                fronteira: item.fronteira ? "Sim" : "Não"
             }));
 
             state.filteredData = [...state.currentData];
@@ -77,6 +78,7 @@ export function renderTable() {
         $("<td>").attr("data-column", "edp").text(item.edp).appendTo($row);
         $("<td>").attr("data-column", "lat").text(item.lat).appendTo($row);
         $("<td>").attr("data-column", "longitude").text(item.longitude).appendTo($row);
+        $("<td>").attr("data-column", "fronteira").text(item.fronteira).appendTo($row);
         $("<td>").attr("data-column", "acoes").html(buildActions(item)).appendTo($row);
 
         $tbody.append($row);

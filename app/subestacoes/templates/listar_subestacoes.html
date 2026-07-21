@@ -81,6 +81,10 @@
                                 <label class="form-check-label" for="col-longitude">Longitude</label>
                             </div>
                             <div class="form-check">
+                                <input class="form-check-input column-toggle" type="checkbox" value="fronteira" id="col-fronteira">
+                                <label class="form-check-label" for="col-fronteira">Fronteira</label>
+                            </div>
+                            <div class="form-check">
                                 <input class="form-check-input column-toggle" type="checkbox" value="acoes" id="col-acoes" checked>
                                 <label class="form-check-label" for="col-acoes">Ações</label>
                             </div>
@@ -184,6 +188,15 @@
                                     </div>
                                 </div>
                             </th>
+                            <th class="resizable-header" data-column="fronteira" style="min-width: 120px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span>Fronteira</span>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-sort sort-icon" data-sort="fronteira" style="cursor: pointer; margin-left: 5px;"></i>
+                                        <div class="resize-handle"></div>
+                                    </div>
+                                </div>
+                            </th>
                             <th class="resizable-header" data-column="acoes" style="min-width: 150px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <span>Ações</span>
@@ -213,6 +226,9 @@
                             </th>
                             <th data-column="longitude">
                                 <input type="text" class="filter-input" placeholder="Filtrar Longitude..." data-filter="longitude">
+                            </th>
+                            <th data-column="fronteira">
+                                <input type="text" class="filter-input" placeholder="Filtrar Fronteira..." data-filter="fronteira">
                             </th>
                             <th data-column="acoes">
                                 <!-- Sem filtro para ações -->
