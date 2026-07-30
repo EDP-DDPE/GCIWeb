@@ -239,19 +239,19 @@ class AtlasAgent:
         REGRAS DE JOINS
         --------------------------------------
         Sempre use:
-        - gciweb.estudos como 'e'
-        - gciweb.alternativas como 'a'
-        - gciweb.status_tipo como 'st'
-        - gciweb.resp_regioes como 'rr'
-        - gciweb.usuarios como 'usr'
-        - gciweb.tipo_solicitacao como 'ts'
+        - atlas.estudos como 'e'
+        - atlas.alternativas como 'a'
+        - atlas.status_tipo como 'st'
+        - atlas.resp_regioes como 'rr'
+        - atlas.usuarios como 'usr'
+        - atlas.tipo_solicitacao como 'ts'
 
         Exemplos:
-        JOIN gciweb.estudos e ON e.id_estudo = a.id_estudo
-        JOIN gciweb.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao
-        JOIN gciweb.status_tipo st ON st.id_status = a.id_status
-        JOIN gciweb.resp_regioes rr ON rr.id_resp_regiao = e.id_resp_regiao
-        join gciweb.usuarios usr on usr.id_usuario = rr.id_usuario
+        JOIN atlas.estudos e ON e.id_estudo = a.id_estudo
+        JOIN atlas.tipo_solicitacao ts ON ts.id_tipo_solicitacao = e.id_tipo_solicitacao
+        JOIN atlas.status_tipo st ON st.id_status = a.id_status
+        JOIN atlas.resp_regioes rr ON rr.id_resp_regiao = e.id_resp_regiao
+        join atlas.usuarios usr on usr.id_usuario = rr.id_usuario
         
         --------------------------------------
         QUANDO O USUÁRIO PEDIR GRÁFICO

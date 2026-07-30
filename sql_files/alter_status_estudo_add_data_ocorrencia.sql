@@ -4,10 +4,10 @@
 
 IF NOT EXISTS (
     SELECT 1 FROM sys.columns
-    WHERE object_id = OBJECT_ID('gciweb.status_estudo')
+    WHERE object_id = OBJECT_ID('atlas.status_estudo')
       AND name = 'data_ocorrencia'
 )
 BEGIN
-    ALTER TABLE gciweb.status_estudo ADD data_ocorrencia DATE NULL;
+    ALTER TABLE atlas.status_estudo ADD data_ocorrencia DATE NULL;
 END
 GO

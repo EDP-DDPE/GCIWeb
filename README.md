@@ -104,7 +104,7 @@ Edite o arquivo `.env` com suas configurações:
 # SQL Server
 SQLSERVER_HOST=localhost
 SQLSERVER_PORT=1433
-SQLSERVER_DATABASE=gciweb_db
+SQLSERVER_DATABASE=atlas_db
 SQLSERVER_USERNAME=sa
 SQLSERVER_PASSWORD=YourPassword123!
 
@@ -136,7 +136,7 @@ COMMAND_TIMEOUT=30
 
 ## 🗄️ Estrutura do Banco de Dados
 
-O sistema utiliza o schema `gciweb` no SQL Server com as seguintes tabelas principais:
+O sistema utiliza o schema `atlas` no SQL Server com as seguintes tabelas principais:
 
 - **estudos**: Estudos de viabilidade
 - **empresas**: Empresas solicitantes
@@ -150,11 +150,11 @@ O sistema utiliza o schema `gciweb` no SQL Server com as seguintes tabelas princ
 
 ```sql
 -- Execute no SQL Server
-CREATE DATABASE gciweb_db;
-USE gciweb_db;
+CREATE DATABASE atlas_db;
+USE atlas_db;
 
 -- O schema será criado automaticamente pelo Flask
--- Ou execute o arquivo gciweb_schema.sql
+-- Ou execute o arquivo atlas_schema.sql
 ```
 
 ## 🔧 Comandos Disponíveis
@@ -322,7 +322,7 @@ gci-web/
 ├── setup.py            # Script de instalação
 ├── requirements.txt    # Dependências Python
 ├── .env.example        # Exemplo de configuração
-├── gciweb_schema.sql   # Schema do banco
+├── atlas_schema.sql   # Schema do banco
 └── README.md          # Esta documentação
 
 
@@ -424,7 +424,7 @@ gci-web/
 │ ├── __init__.py
 │ ├── config.py
 │ ├── database.py
-│ ├── gciweb_schema.sql
+│ ├── atlas_schema.sql
 │ ├── insert into tables.sql
 │ ├── models.py
 │ ├── schema.sql
@@ -443,7 +443,7 @@ gci-web/
 # Em models.py
 class NovoModel(db.Model):
     __tablename__ = 'nova_tabela'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
     
     id = db.Column(db.BigInteger, primary_key=True)
     # ... outros campos

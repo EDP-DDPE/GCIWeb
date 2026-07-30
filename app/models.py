@@ -13,7 +13,7 @@ db = SQLAlchemy()
 
 class EDP(db.Model):
     __tablename__ = 'edp'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_edp = db.Column(db.BigInteger, primary_key=True)
     empresa = db.Column(db.String(2), nullable=False)
@@ -29,21 +29,21 @@ class EDP(db.Model):
 
 class FatorK(db.Model):
     __tablename__ = 'FATOR_K'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_k = db.Column(db.BigInteger, primary_key=True)
     k = db.Column(db.Numeric(6, 2), nullable=True)
     kg = db.Column(db.Numeric(6, 2), nullable=True)
     subgrupo_tarif = db.Column(db.String(3), nullable=False)
     data_ref = db.Column(db.Date)
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
 
     alternativas = db.relationship('Alternativa', back_populates='fatorK', lazy='select')
 
 
 class Instalacao(db.Model):
     __tablename__ = 'INSTALACOES'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     #ID_INSTALACAO = db.Column(db.BigInteger, primary_key=True)
     EMPRESA = db.Column(db.Text, nullable=True)
@@ -62,7 +62,7 @@ class Instalacao(db.Model):
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_usuario = db.Column(db.BigInteger, primary_key=True)
     matricula = db.Column(db.String(255), nullable=False, unique=True)
@@ -74,7 +74,7 @@ class Usuario(db.Model):
     editar = db.Column(db.Boolean, nullable=False)
     deletar = db.Column(db.Boolean, nullable=False)
     bloqueado = db.Column(db.Boolean, nullable=False, default=False)
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
     aprovar = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relacionamentos
@@ -90,11 +90,11 @@ class Usuario(db.Model):
 
 class RespRegiao(db.Model):
     __tablename__ = 'resp_regioes'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_resp_regiao = db.Column(db.BigInteger, primary_key=True)
-    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=False)
-    id_usuario = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('atlas.regionais.id_regional'), nullable=False)
+    id_usuario = db.Column(db.BigInteger, db.ForeignKey('atlas.usuarios.id_usuario'), nullable=False)
     ano_ref = db.Column(db.Integer, nullable=False)
 
     # Relacionamentos
@@ -105,7 +105,7 @@ class RespRegiao(db.Model):
 
 class Empresa(db.Model):
     __tablename__ = 'empresas'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_empresa = db.Column(db.BigInteger, primary_key=True)
     nome_empresa = db.Column(db.String(255), nullable=False)
@@ -140,7 +140,7 @@ class Empresa(db.Model):
 
 class Tensao(db.Model):
     __tablename__ = 'tensao'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_tensao = db.Column(db.BigInteger, primary_key=True)
     tensao = db.Column(db.String(2), nullable=False)
@@ -150,11 +150,11 @@ class Tensao(db.Model):
 
 class Regional(db.Model):
     __tablename__ = 'regionais'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_regional = db.Column(db.BigInteger, primary_key=True)
     regional = db.Column(db.String(255), nullable=False)
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
 
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='regionais', lazy='joined')
@@ -166,12 +166,12 @@ class Regional(db.Model):
 
 class Municipio(db.Model):
     __tablename__ = 'municipios'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_municipio = db.Column(db.BigInteger, primary_key=True)
     municipio = db.Column(db.String(255), nullable=False)
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
-    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=True)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('atlas.regionais.id_regional'), nullable=True)
 
     # Relacionamentos
     edp = db.relationship('EDP', back_populates='municipios', lazy='joined')
@@ -182,15 +182,15 @@ class Municipio(db.Model):
 
 class Subestacao(db.Model):
     __tablename__ = 'subestacoes'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_subestacao = db.Column(db.BigInteger, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
     sigla = db.Column(db.String(10), nullable=False)
     lat = db.Column(db.Numeric(10, 2), nullable=True)
     long = db.Column(db.Numeric(10, 2), nullable=True)
-    id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_municipio = db.Column(db.BigInteger, db.ForeignKey('atlas.municipios.id_municipio'), nullable=False)
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
 
     # Relacionamentos
     municipio = db.relationship('Municipio', back_populates='subestacoes', lazy='joined')
@@ -200,12 +200,12 @@ class Subestacao(db.Model):
 
 class Circuito(db.Model):
     __tablename__ = 'circuitos'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_circuito = db.Column(db.BigInteger, primary_key=True)
     circuito = db.Column(db.String(255), nullable=False)
-    id_subestacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.subestacoes.id_subestacao'))
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
+    id_subestacao = db.Column(db.BigInteger, db.ForeignKey('atlas.subestacoes.id_subestacao'))
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
     tensao = db.Column(db.String(20), nullable=False)
 
     # Relacionamentos
@@ -231,7 +231,7 @@ class TipoSolicitacao(db.Model):
     __tablename__ = 'tipo_solicitacao'
     __table_args__ = (
         UniqueConstraint('viabilidade', 'analise', 'pedido', name='UQ_tipo_solicitacao_combinacao'),
-        {'schema': 'gciweb'}
+        {'schema': 'atlas'}
     )
 
     id_tipo_solicitacao = db.Column(db.BigInteger, primary_key=True)
@@ -248,16 +248,16 @@ class TipoSolicitacao(db.Model):
 
 class StatusEstudo(db.Model):
     __tablename__ = 'status_estudo'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_status = db.Column(db.BigInteger, primary_key=True)
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True)
     data_ocorrencia = db.Column(db.Date, nullable=True)
-    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('gciweb.status_tipos.id_status_tipo'), nullable=False,
+    id_status_tipo = db.Column(db.BigInteger, db.ForeignKey('atlas.status_tipos.id_status_tipo'), nullable=False,
                                index=True)
     observacao = db.Column(db.Text)
-    id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
-    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
+    id_estudo = db.Column(db.BigInteger, db.ForeignKey('atlas.estudos.id_estudo'), nullable=False)
+    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('atlas.usuarios.id_usuario'), nullable=False)
 
     # Relacionamentos
 
@@ -277,7 +277,7 @@ class StatusEstudo(db.Model):
 
 class Estudo(db.Model):
     __tablename__ = 'estudos'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_estudo = db.Column(db.BigInteger, primary_key=True)
     num_doc = db.Column(db.String(255), nullable=False, index=True)
@@ -299,15 +299,15 @@ class Estudo(db.Model):
     longitude_cliente = db.Column(db.Numeric(11, 8))
     observacao = db.Column(db.Text)
 
-    id_edp = db.Column(db.BigInteger, db.ForeignKey('gciweb.edp.id_edp'), nullable=False)
-    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=False)
-    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
-    id_resp_alteracao = db.Column(db.BigInteger, db.ForeignKey('gciweb.usuarios.id_usuario'), nullable=False)
-    id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('gciweb.resp_regioes.id_resp_regiao'), nullable=True)
-    id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'))
-    id_municipio = db.Column(db.BigInteger, db.ForeignKey('gciweb.municipios.id_municipio'), nullable=False)
-    id_tensao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tensao.id_tensao'), nullable=False)
-    id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'),
+    id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('atlas.regionais.id_regional'), nullable=False)
+    id_criado_por = db.Column(db.BigInteger, db.ForeignKey('atlas.usuarios.id_usuario'), nullable=False)
+    id_resp_alteracao = db.Column(db.BigInteger, db.ForeignKey('atlas.usuarios.id_usuario'), nullable=False)
+    id_resp_regiao = db.Column(db.BigInteger, db.ForeignKey('atlas.resp_regioes.id_resp_regiao'), nullable=True)
+    id_empresa = db.Column(db.BigInteger, db.ForeignKey('atlas.empresas.id_empresa'))
+    id_municipio = db.Column(db.BigInteger, db.ForeignKey('atlas.municipios.id_municipio'), nullable=False)
+    id_tensao = db.Column(db.BigInteger, db.ForeignKey('atlas.tensao.id_tensao'), nullable=False)
+    id_tipo_solicitacao = db.Column(db.BigInteger, db.ForeignKey('atlas.tipo_solicitacao.id_tipo_solicitacao'),
                                     nullable=False)
     data_registro = db.Column(db.Date, nullable=False)
     data_abertura_cliente = db.Column(db.Date, nullable=False)
@@ -395,7 +395,7 @@ class Estudo(db.Model):
 
 class Anexo(db.Model):
     __tablename__ = 'anexos'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_anexo = db.Column(db.BigInteger, primary_key=True)
     nome_arquivo = db.Column(db.String(255), nullable=False)
@@ -403,7 +403,7 @@ class Anexo(db.Model):
     tamanho_arquivo = db.Column(db.BigInteger)
     tipo_mime = db.Column(db.String(100))
     data_upload = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
+    id_estudo = db.Column(db.BigInteger, db.ForeignKey('atlas.estudos.id_estudo'), nullable=False)
 
     # Relacionamentos
     estudo = db.relationship('Estudo', back_populates='anexos', lazy='joined')
@@ -412,12 +412,12 @@ class Anexo(db.Model):
 
 class Socio(db.Model):
     __tablename__ = 'socios'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_socios = db.Column(db.BigInteger, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
     cargo = db.Column(db.String(255))
-    id_empresa = db.Column(db.BigInteger, db.ForeignKey('gciweb.empresas.id_empresa'), nullable=False)
+    id_empresa = db.Column(db.BigInteger, db.ForeignKey('atlas.empresas.id_empresa'), nullable=False)
 
     # Relacionamentos
     empresa = db.relationship('Empresa', back_populates='socios', lazy='joined')
@@ -427,7 +427,7 @@ class Socio(db.Model):
 
 class StatusTipo(db.Model):
     __tablename__ = 'status_tipos'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_status_tipo = db.Column(db.BigInteger, primary_key=True)
     status = db.Column(db.String(100), nullable=False)
@@ -439,7 +439,7 @@ class StatusTipo(db.Model):
 
 class Kit(db.Model):
     __tablename__ = 'kits'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_kit = db.Column(db.BigInteger, primary_key=True)
     kit = db.Column(db.String(255), nullable=False)
@@ -455,10 +455,10 @@ class Kit(db.Model):
 
 class Alternativa(db.Model):
     __tablename__ = 'alternativas'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_alternativa = db.Column(db.BigInteger, primary_key=True)
-    id_circuito = db.Column(db.BigInteger, db.ForeignKey('gciweb.circuitos.id_circuito'), nullable=False)
+    id_circuito = db.Column(db.BigInteger, db.ForeignKey('atlas.circuitos.id_circuito'), nullable=False)
     descricao = db.Column(db.Text, nullable=False)
     dem_fp_ant = db.Column(db.Numeric(10, 2), nullable=False)
     dem_p_ant = db.Column(db.Numeric(10, 2), nullable=False)
@@ -469,7 +469,7 @@ class Alternativa(db.Model):
     flag_menor_custo_global = db.Column(db.Boolean, nullable=False, default=False)
     flag_alternativa_escolhida = db.Column(db.Boolean, nullable=False, default=False)
     custo_modular = db.Column(db.Numeric(15, 2), nullable=False)
-    id_estudo = db.Column(db.BigInteger, db.ForeignKey('gciweb.estudos.id_estudo'), nullable=False)
+    id_estudo = db.Column(db.BigInteger, db.ForeignKey('atlas.estudos.id_estudo'), nullable=False)
     blob_image = db.Column(db.LargeBinary)
     observacao = db.Column(db.Text)
     ERD = db.Column(db.Numeric(10, 3))
@@ -481,8 +481,8 @@ class Alternativa(db.Model):
     proporcionalidade = db.Column(db.Numeric(3, 2), nullable=True)
     subgrupo_tarifario = db.Column(db.String(3), nullable=True)
     etapa = db.Column(db.BigInteger, nullable=False, default=1)
-    id_k = db.Column(db.BigInteger, db.ForeignKey('gciweb.FATOR_K.id_k'), nullable=True)
-    id_img_anexo = db.Column(db.BigInteger, db.ForeignKey('gciweb.anexos.id_anexo'), nullable=True)
+    id_k = db.Column(db.BigInteger, db.ForeignKey('atlas.FATOR_K.id_k'), nullable=True)
+    id_img_anexo = db.Column(db.BigInteger, db.ForeignKey('atlas.anexos.id_anexo'), nullable=True)
 
 
     # Relacionamentos com lazy='select' — evita JOINs automáticos em operações de escrita
@@ -502,15 +502,15 @@ class Alternativa(db.Model):
 
 class Obra(db.Model):
     __tablename__ = 'obras'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_obra = db.Column(db.BigInteger, primary_key=True)
     quantidade = db.Column(db.Numeric(10, 3), nullable=False)
     descricao = db.Column(db.String(500), nullable=False)
     valor = db.Column(db.Numeric(15, 2), nullable=False)
-    id_regional = db.Column(db.BigInteger, db.ForeignKey('gciweb.regionais.id_regional'), nullable=False)
-    id_kit = db.Column(db.BigInteger, db.ForeignKey('gciweb.kits.id_kit'), nullable=False)
-    id_alternativa = db.Column(db.BigInteger, db.ForeignKey('gciweb.alternativas.id_alternativa'), nullable=False)
+    id_regional = db.Column(db.BigInteger, db.ForeignKey('atlas.regionais.id_regional'), nullable=False)
+    id_kit = db.Column(db.BigInteger, db.ForeignKey('atlas.kits.id_kit'), nullable=False)
+    id_alternativa = db.Column(db.BigInteger, db.ForeignKey('atlas.alternativas.id_alternativa'), nullable=False)
 
     # Relacionamentos simples - sem ambiguidade
     regional = db.relationship('Regional', back_populates='obras', lazy='joined')
@@ -521,7 +521,7 @@ class Obra(db.Model):
 
 class DocPadronizado(db.Model):
     __tablename__ = 'doc_padronizados'
-    __table_args__ = {'schema': 'gciweb'}
+    __table_args__ = {'schema': 'atlas'}
 
     id_doc_padronizado = db.Column(db.BigInteger, primary_key=True)
     nome_doc = db.Column(db.String(255), nullable=False)
@@ -533,7 +533,7 @@ class DocPadronizado(db.Model):
     fluxo_reverso = db.Column(db.Boolean)
     id_tipo_solicitacao = db.Column(
         db.BigInteger,
-        db.ForeignKey('gciweb.tipo_solicitacao.id_tipo_solicitacao'),
+        db.ForeignKey('atlas.tipo_solicitacao.id_tipo_solicitacao'),
         nullable=False
     )
 
@@ -778,7 +778,7 @@ def get_dashboard_stats():
 
 class ViewEstudos(db.Model):
     __tablename__ = "vw_estudos_completos"
-    __table_args__ = {"schema": "gciweb"}
+    __table_args__ = {"schema": "atlas"}
 
     id_estudo = db.Column(db.Integer, primary_key=True)
     num_doc = db.Column(db.String)

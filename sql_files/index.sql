@@ -1,5 +1,5 @@
 CREATE NONCLUSTERED INDEX idx_alt_escolhida
-ON gciweb.alternativas (id_estudo, flag_alternativa_escolhida, id_alternativa DESC)
+ON atlas.alternativas (id_estudo, flag_alternativa_escolhida, id_alternativa DESC)
 INCLUDE (
     dem_fp_ant,
     dem_p_ant,
@@ -15,25 +15,25 @@ INCLUDE (
     flag_geracao
 );
 
-DROP INDEX idx_status_estudo_id_data ON gciweb.status_estudo;
+DROP INDEX idx_status_estudo_id_data ON atlas.status_estudo;
 GO
 
 CREATE NONCLUSTERED INDEX idx_status_estudo_id_data_desc
-ON gciweb.status_estudo (id_estudo, data DESC)
+ON atlas.status_estudo (id_estudo, data DESC)
 INCLUDE (id_status_tipo);
 
 
-DROP INDEX idx_anexos_estudo ON gciweb.anexos;
+DROP INDEX idx_anexos_estudo ON atlas.anexos;
 GO
 
 CREATE NONCLUSTERED INDEX idx_anexos_estudo
-ON gciweb.anexos (id_estudo)
+ON atlas.anexos (id_estudo)
 INCLUDE (id_anexo);
 
 CREATE NONCLUSTERED INDEX idx_circuitos_id
-ON gciweb.circuitos (id_circuito)
+ON atlas.circuitos (id_circuito)
 INCLUDE (circuito, id_subestacao);
 
 CREATE NONCLUSTERED INDEX idx_subestacoes_id
-ON gciweb.subestacoes (id_subestacao)
+ON atlas.subestacoes (id_subestacao)
 INCLUDE (nome, sigla, fronteira);

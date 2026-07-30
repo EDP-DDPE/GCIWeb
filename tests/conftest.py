@@ -1,9 +1,9 @@
 """
-Configuração global de testes para GCIWeb.
+Configuração global de testes para atlas.
 
 Estratégia:
 - SQLite in-memory substitui o SQL Server (sem driver ODBC necessário)
-- Schema 'gciweb' é removido via interceptor de SQL para compatibilidade SQLite
+- Schema 'atlas' é removido via interceptor de SQL para compatibilidade SQLite
 - Autenticação Microsoft é bypassada via mock de get_usuario_logado
 - Flask-Session é substituída pela sessão cookie padrão do Flask
 """
@@ -15,7 +15,7 @@ from datetime import date
 from unittest.mock import MagicMock, patch
 
 # Variáveis de ambiente ANTES de qualquer import da app
-os.environ.setdefault("FLASK_SECRET", "test-gciweb-secret-key-pytest")
+os.environ.setdefault("FLASK_SECRET", "test-atlas-secret-key-pytest")
 os.environ.setdefault("CLIENT_ID", "test-client-id")
 os.environ.setdefault("CLIENT_SECRET", "test-client-secret")
 os.environ.setdefault("TENANT_ID", "test-tenant-id")
@@ -57,7 +57,7 @@ def app():
     flask_app.config.update({
         "TESTING": True,
         "WTF_CSRF_ENABLED": False,
-        "SECRET_KEY": "test-gciweb-secret-key-pytest",
+        "SECRET_KEY": "test-atlas-secret-key-pytest",
         "SERVER_NAME": None,
     })
 
@@ -84,9 +84,9 @@ def app():
             """Remove prefixo de schema para compatibilidade SQLite."""
             statement = (
                 statement
-                .replace('"gciweb".', "")
-                .replace("[gciweb].", "")
-                .replace("gciweb.", "")
+                .replace('"atlas".', "")
+                .replace("[atlas].", "")
+                .replace("atlas.", "")
             )
             return statement, params
 

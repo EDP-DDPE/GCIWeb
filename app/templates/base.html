@@ -694,6 +694,13 @@
         });
     </script>
 
+    <!-- Widget flutuante do Atlas GPT (todas as páginas, exceto a do próprio chat) -->
+    {% if session.user and request.endpoint != 'bot.atlas' %}
+        <link rel="stylesheet" href="{{ url_for('bot.static', filename='css/chat_widget.css') }}">
+        {% include 'bot/_chat_widget.html' %}
+        <script src="{{ url_for('bot.static', filename='js/chat_widget.js') }}"></script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
 
 </body>

@@ -1,4 +1,4 @@
-CREATE VIEW gciweb.vw_estudos_completos AS
+CREATE VIEW atlas.vw_estudos_completos AS
 SELECT
     e.id_estudo,
     e.num_doc,
@@ -66,16 +66,16 @@ SELECT
 	alt_escolhida.flag_geracao,
 	alt_escolhida.observacao as alternativa_observacao
 
-FROM gciweb.estudos e
-LEFT JOIN gciweb.edp edp ON e.id_edp = edp.id_edp
-LEFT JOIN gciweb.regionais r ON e.id_regional = r.id_regional
-LEFT JOIN gciweb.usuarios u_criador ON e.id_criado_por = u_criador.id_usuario
-LEFT JOIN gciweb.resp_regioes rr ON e.id_resp_regiao = rr.id_resp_regiao
-LEFT JOIN gciweb.usuarios u_resp ON rr.id_usuario = u_resp.id_usuario
-LEFT JOIN gciweb.empresas emp ON e.id_empresa = emp.id_empresa
-LEFT JOIN gciweb.municipios m ON e.id_municipio = m.id_municipio
-LEFT JOIN gciweb.tipo_solicitacao ts ON e.id_tipo_solicitacao = ts.id_tipo_solicitacao
-LEFT JOIN gciweb.tensao t ON e.id_tensao = t.id_tensao
+FROM atlas.estudos e
+LEFT JOIN atlas.edp edp ON e.id_edp = edp.id_edp
+LEFT JOIN atlas.regionais r ON e.id_regional = r.id_regional
+LEFT JOIN atlas.usuarios u_criador ON e.id_criado_por = u_criador.id_usuario
+LEFT JOIN atlas.resp_regioes rr ON e.id_resp_regiao = rr.id_resp_regiao
+LEFT JOIN atlas.usuarios u_resp ON rr.id_usuario = u_resp.id_usuario
+LEFT JOIN atlas.empresas emp ON e.id_empresa = emp.id_empresa
+LEFT JOIN atlas.municipios m ON e.id_municipio = m.id_municipio
+LEFT JOIN atlas.tipo_solicitacao ts ON e.id_tipo_solicitacao = ts.id_tipo_solicitacao
+LEFT JOIN atlas.tensao t ON e.id_tensao = t.id_tensao
 
 /* =======================================================
    ? CROSS APPLY — Alternativa Escolhida
@@ -103,9 +103,9 @@ OUTER APPLY (
 		sbt.nome,
 		sbt.sigla,
 		sbt.fronteira
-    FROM gciweb.alternativas alt
-    LEFT JOIN gciweb.circuitos circ ON circ.id_circuito = alt.id_circuito
-	LEFT JOIN gciweb.subestacoes sbt ON sbt.id_subestacao = circ.id_subestacao
+    FROM atlas.alternativas alt
+    LEFT JOIN atlas.circuitos circ ON circ.id_circuito = alt.id_circuito
+	LEFT JOIN atlas.subestacoes sbt ON sbt.id_subestacao = circ.id_subestacao
     WHERE alt.id_estudo = e.id_estudo
       AND alt.flag_alternativa_escolhida = 1
     ORDER BY alt.id_alternativa DESC
@@ -117,8 +117,8 @@ OUTER APPLY (
 OUTER APPLY (
     SELECT TOP 1
         st.status
-    FROM gciweb.status_estudo se
-    LEFT JOIN gciweb.status_tipos st
+    FROM atlas.status_estudo se
+    LEFT JOIN atlas.status_tipos st
         ON st.id_status_tipo = se.id_status_tipo
     WHERE se.id_estudo = e.id_estudo
     ORDER BY se.data DESC
@@ -129,6 +129,6 @@ OUTER APPLY (
    ======================================================= */
 OUTER APPLY (
     SELECT COUNT(*) AS qtd_anexos
-    FROM gciweb.anexos a
+    FROM atlas.anexos a
     WHERE a.id_estudo = e.id_estudo
 ) anexos;

@@ -38,7 +38,7 @@ def get_schema_from_sqlserver(force_refresh=False):
             DATA_TYPE,
             CHARACTER_MAXIMUM_LENGTH
         FROM INFORMATION_SCHEMA.COLUMNS
-        WHERE TABLE_SCHEMA = 'gciweb'
+        WHERE TABLE_SCHEMA = 'atlas'
         ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION;
     """
 
