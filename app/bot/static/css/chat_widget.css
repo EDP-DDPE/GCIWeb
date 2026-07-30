@@ -1,0 +1,348 @@
+/* ============================================
+   Widget flutuante do Atlas GPT
+   ============================================ */
+
+/* Botão flutuante */
+#atlas-widget-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    box-shadow: 0 4px 16px rgba(13, 60, 120, 0.4);
+    cursor: pointer;
+    z-index: 99990;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#atlas-widget-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(13, 60, 120, 0.5);
+}
+
+#atlas-widget-toggle img {
+    width: 34px;
+    height: 34px;
+    pointer-events: none;
+}
+
+/* Painel flutuante */
+#atlas-widget-panel {
+    position: fixed;
+    bottom: 92px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 540px;
+    max-height: calc(100vh - 120px);
+    background: #ffffff;
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    z-index: 99991;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: aw-slide-up 0.25s ease;
+}
+
+#atlas-widget-panel.aw-hidden {
+    display: none;
+}
+
+@keyframes aw-slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cabeçalho */
+#atlas-widget-panel .aw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    color: #fff;
+}
+
+#atlas-widget-panel .aw-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+#atlas-widget-panel .aw-header-title img {
+    width: 22px;
+    height: 22px;
+}
+
+#atlas-widget-panel .aw-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#atlas-widget-panel .aw-header-actions button,
+#atlas-widget-panel .aw-header-actions a {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+#atlas-widget-panel .aw-header-actions button:hover,
+#atlas-widget-panel .aw-header-actions a:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Área de mensagens */
+#atlas-widget-panel .aw-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #f8fafd;
+}
+
+#atlas-widget-panel .aw-message {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    animation: aw-slide-up 0.2s ease;
+}
+
+#atlas-widget-panel .aw-message .aw-message-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+#atlas-widget-panel .aw-message.user {
+    background: #4a90e2;
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+#atlas-widget-panel .aw-message.bot {
+    background: #ffffff;
+    color: #212529;
+    align-self: flex-start;
+    border: 1px solid rgba(74, 144, 226, 0.2);
+    border-bottom-left-radius: 4px;
+}
+
+/* Estado vazio */
+#atlas-widget-panel .aw-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7c93;
+    text-align: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+#atlas-widget-panel .aw-empty-icon {
+    font-size: 36px;
+    opacity: 0.5;
+}
+
+/* Indicador "digitando" */
+#atlas-widget-panel .aw-typing {
+    display: none;
+    gap: 4px;
+    padding: 8px 16px;
+    background: #f8fafd;
+}
+
+#atlas-widget-panel .aw-typing.active {
+    display: flex;
+}
+
+#atlas-widget-panel .aw-dot {
+    width: 7px;
+    height: 7px;
+    background: #4a90e2;
+    border-radius: 50%;
+    animation: aw-typing 1.4s infinite;
+}
+
+#atlas-widget-panel .aw-dot:nth-child(2) { animation-delay: 0.2s; }
+#atlas-widget-panel .aw-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes aw-typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+    30%           { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Área de input */
+#atlas-widget-panel .aw-input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fff;
+    border-top: 1px solid #e6e6e6;
+}
+
+#atlas-widget-panel .aw-input-area textarea {
+    flex: 1;
+    border: 1px solid #d8d8df;
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 18px;
+    resize: none;
+    outline: none;
+    max-height: 90px;
+    color: #333;
+}
+
+#atlas-widget-panel .aw-input-area textarea:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+#atlas-widget-panel .aw-input-area button {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+#atlas-widget-panel .aw-input-area button:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+#atlas-widget-panel .aw-input-area button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Conteúdo HTML do bot (tabelas, gráficos, SQL) — mesmos estilos do chat */
+#atlas-widget-panel .atlas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 12px;
+    background: #1f2937;
+    color: #e5e7eb;
+}
+
+#atlas-widget-panel .atlas-table th {
+    padding: 6px;
+    background-color: #374151;
+    color: #f3f4f6;
+    font-weight: bold;
+    border-bottom: 2px solid #4b5563;
+}
+
+#atlas-widget-panel .atlas-table td {
+    padding: 6px;
+    border-bottom: 1px solid #4b5563;
+}
+
+#atlas-widget-panel .atlas-table tr:nth-child(even) {
+    background-color: #111827;
+}
+
+#atlas-widget-panel .aw-html-content {
+    overflow-x: auto;
+    margin-top: 6px;
+}
+
+#atlas-widget-panel .download-csv {
+    margin-top: 8px;
+    padding: 5px 10px;
+    background: #2563eb;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+#atlas-widget-panel .download-csv:hover {
+    background: #1d4ed8;
+}
+
+#atlas-widget-panel .code-block {
+    margin-top: 8px;
+    background: #1e1e1e;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #444;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+#atlas-widget-panel .code-header {
+    background: #2d2d2d;
+    padding: 6px 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    color: #9cdcfe;
+    font-size: 12px;
+}
+
+#atlas-widget-panel .toggle-btn {
+    background: transparent;
+    border: none;
+    color: #9cdcfe;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+#atlas-widget-panel .code-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease;
+    padding: 0 10px;
+}
+
+#atlas-widget-panel .code-content.open {
+    max-height: 240px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+#atlas-widget-panel .code-content code {
+    white-space: pre-wrap;
+    font-size: 12px;
+    color: #dcdcdc;
+}
+
+@media (max-width: 480px) {
+    #atlas-widget-panel {
+        right: 16px;
+        width: calc(100vw - 32px);
+        height: 70vh;
+    }
+}
