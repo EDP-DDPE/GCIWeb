@@ -189,6 +189,7 @@ class Subestacao(db.Model):
     sigla = db.Column(db.String(10), nullable=False)
     lat = db.Column(db.Numeric(10, 2), nullable=True)
     long = db.Column(db.Numeric(10, 2), nullable=True)
+    fronteira = db.Column(db.Boolean, nullable=False, default=False)
     id_municipio = db.Column(db.BigInteger, db.ForeignKey('atlas.municipios.id_municipio'), nullable=False)
     id_edp = db.Column(db.BigInteger, db.ForeignKey('atlas.edp.id_edp'), nullable=False)
 

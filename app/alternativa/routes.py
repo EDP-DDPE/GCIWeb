@@ -5,7 +5,7 @@ from flask import Blueprint, render_template, request, jsonify, flash, redirect,
 from sqlalchemy.exc import IntegrityError
 from werkzeug.utils import secure_filename
 
-from app.models import Alternativa, Estudo, Circuito, db, FatorK, Anexo
+from app.models import Alternativa, Estudo, Circuito, db, FatorK, Anexo, StatusTipo
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
 from sqlalchemy import literal_column, and_
@@ -159,7 +159,8 @@ def listar(id_estudo):
         "alternativa/alternativa.html",
         estudo=estudo,
         alternativas=alternativas,
-        form=form
+        form=form,
+        status_tipos=StatusTipo.query.all()
     )
 
 

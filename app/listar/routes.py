@@ -523,7 +523,7 @@ def download_template(id_estudo):
         abort(500, description="Falha ao gerar documento")
 
     filename = (
-        f"{tipo_solicitacao.viabilidade_abrev}_DDPE-{estudo.empresa}_{primeiros_4}_{ultimos_2}"
+        f"DDPE_{primeiros_4}_{ultimos_2}_{estudo.empresa}_{tipo_solicitacao.viabilidade_abrev}"
         f"_{tipo_solicitacao.analise_abrev}_{tipo_solicitacao.pedido_abrev}_{int(demanda)}_kW_{estudo.nome_projeto}_ALIM.docx"
     )
 
