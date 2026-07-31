@@ -28,6 +28,10 @@ class DatabaseConfig:
     USERNAME = os.getenv('SQLSERVER_USERNAME', '')
     PASSWORD = os.getenv('SQLSERVER_PASSWORD', '')
     DRIVER = os.getenv('SQLSERVER_DRIVER')
+
+    # Modo de autenticação: 'sql' (usuário/senha - qualidade) ou
+    # 'windows' (autenticação integrada do Windows - produção/LocalDB).
+    AUTH_MODE = os.getenv('SQLSERVER_AUTH', 'sql').strip().lower()
     
     # Configurações de conexão
     TRUST_SERVER_CERTIFICATE = os.getenv('TRUST_SERVER_CERTIFICATE', 'no')
@@ -45,13 +49,15 @@ class DatabaseConfig:
     def get_connection_string(cls):
         """Gera a string de conexão para SQL Server com pyodbc"""
         
+        # LocalDB e instâncias nomeadas usam pipe/instância e não porta TCP.
+        # Só anexa ",PORT" quando a porta estiver definida.
+        server = f'{cls.SERVER},{cls.PORT}' if cls.PORT else cls.SERVER
+
         # Parâmetros da conexão
         params = {
             'driver': cls.DRIVER,
-            'server': f'{cls.SERVER},{cls.PORT}',
+            'server': server,
             'database': cls.DATABASE,
-            'uid': cls.USERNAME,
-            'pwd': cls.PASSWORD,
             'TrustServerCertificate': cls.TRUST_SERVER_CERTIFICATE,
             'Encrypt': cls.ENCRYPT,
             'Connection Timeout': cls.CONNECTION_TIMEOUT,
@@ -60,6 +66,15 @@ class DatabaseConfig:
             'ApplicationIntent': 'ReadWrite',
             'MultipleActiveResultSets': 'true'
         }
+
+        if cls.AUTH_MODE == 'windows':
+            # Autenticação integrada do Windows (produção/LocalDB): usa o
+            # usuário logado, sem uid/pwd.
+            params['Trusted_Connection'] = 'yes'
+        else:
+            # Autenticação SQL Server (qualidade): usuário e senha.
+            params['uid'] = cls.USERNAME
+            params['pwd'] = cls.PASSWORD
         
         # Monta a string de parâmetros
         conn_str = ';'.join([f'{k}={v}' for k, v in params.items()])
