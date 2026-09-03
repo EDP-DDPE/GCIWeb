@@ -588,10 +588,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Data de Vencimento DDPE -->
+                                    <!-- Data de Entrada DDPE -->
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             {{ form.data_vencimento_ddpe.label(class="form-label") }}
+                                            <span class="required">*</span>
                                             {{ form.data_vencimento_ddpe(class="form-control") }}
                                             {% if form.data_vencimento_ddpe.errors %}
                                                 <div class="text-danger small mt-1">

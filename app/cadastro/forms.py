@@ -66,7 +66,7 @@ class EstudoForm(FlaskForm):
     data_desejada_cliente = DateField('Data desejada do Cliente', validators=[Optional()])
     data_vencimento_cliente = DateField('Data de Vencimento Cliente', validators=[Optional()])
     data_prevista_conexao = DateField('Data prevista de Conexão', validators=[Optional()])
-    data_vencimento_ddpe = DateField('Data de Vencimento DDPE', validators=[Optional()])
+    data_vencimento_ddpe = DateField('Data de Entrada DDPE', validators=[DataRequired()])
 
     # data_transgressao = DateField('Data de Transgressão', validators=[Optional()])
     # data_vencimento = DateField('Data de Vencimento', validators=[Optional()])
