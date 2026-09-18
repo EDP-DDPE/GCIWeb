@@ -8,7 +8,8 @@ from werkzeug.utils import secure_filename
 from app.models import Alternativa, Estudo, Circuito, db, FatorK, Anexo, StatusTipo
 from app.alternativa.forms import AlternativaForm
 from app.auth import requires_permission
-from sqlalchemy import literal_column, and_
+from datetime import timedelta
+from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 
 
@@ -55,7 +56,9 @@ def get_fator_k(subgrupo, data, edp):
             FatorK.id_edp == edp,
             FatorK.subgrupo_tarif == subgrupo,
             FatorK.data_ref <= data,
-            literal_column("DATEADD(day, 365, data_ref)") >= data
+            # equivale a DATEADD(day, 365, data_ref) >= data, sem depender
+            # do dialeto (T-SQL DATEADD nao existe no Databricks)
+            FatorK.data_ref >= data - timedelta(days=365)
         )
     ).order_by(FatorK.data_ref.desc()).first()
 
