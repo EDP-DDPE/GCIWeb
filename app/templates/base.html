@@ -680,8 +680,12 @@
         });
 
         // Ao carregar a nova página, some com o overlay
-        window.addEventListener("pageshow", function () {
+        window.addEventListener("pageshow", function (e) {
             window.hidePageLoading();
+
+            // Volta pelo histórico: a página vem do cache do navegador e pode
+            // trazer o overlay de ação ligado de antes.
+            if (e.persisted) window.hideLoading();
         });
     </script>
 
