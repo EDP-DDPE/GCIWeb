@@ -482,6 +482,18 @@ from app.models import db
 
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "system.ai.claude-opus-4-8")
 
+# Os modelos de raciocínio removeram os parâmetros de amostragem: mandar
+# temperature devolve 400 ("Model ... does not support the temperature
+# parameter"). Nessa família já saímos sem o parâmetro; nos demais modelos
+# temperature=0 continua valendo, pela resposta determinística.
+_MODELOS_SEM_AMOSTRAGEM = re.compile(
+    r"claude-(?:opus-(?:4-7|4-8|5)|sonnet-5|fable-5|mythos-5)", re.IGNORECASE)
+
+_SEM_TEMPERATURE = re.compile(
+    r"temperature[^.]*(?:not support|unsupported|n[aã]o suporta)"
+    r"|(?:not support|unsupported|n[aã]o suporta)[^.]*temperature",
+    re.IGNORECASE)
+
 TASKS = {
     "intent": {"timeout": 60,  "max_tokens": 300},
     "sql":    {"timeout": 120, "max_tokens": 2000},
@@ -773,6 +785,8 @@ class AtlasAgent:
         self.client = OpenAI(api_key=llm_token, base_url=llm_url)
         # None = ainda não testado; True/False = capacidade do gateway
         self._suporta_json_schema = None
+        self._suporta_temperature = (
+            False if _MODELOS_SEM_AMOSTRAGEM.search(self.model) else None)
 
     # ---------- chamada unificada ----------
 
@@ -792,14 +806,34 @@ class AtlasAgent:
 
         raise RuntimeError(f"Falha ao chamar LLM na tarefa '{task}': {erro}")
 
+    def _criar(self, **kwargs):
+        """Uma chamada ao gateway, repetida sem temperature se ele recusar.
+
+        O tratamento fica aqui, antes da detecção de json_schema: um 400 de
+        temperature chegando lá desligaria o json_schema por engano.
+        """
+        try:
+            return self.client.chat.completions.create(**kwargs)
+        except Exception as e:
+            if "temperature" not in kwargs or not _SEM_TEMPERATURE.search(str(e)):
+                raise
+
+            print(f"[LLM] {self.model} não aceita temperature; repetindo sem ela")
+            self._suporta_temperature = False
+            kwargs.pop("temperature")
+            return self.client.chat.completions.create(**kwargs)
+
     def _completar(self, cfg, system, messages, schema, nome_schema):
         full = [{"role": "system", "content": system}] + messages
         kwargs = dict(model=self.model, max_tokens=cfg["max_tokens"],
-                      temperature=0, timeout=cfg["timeout"])
+                      timeout=cfg["timeout"])
+
+        if self._suporta_temperature is not False:
+            kwargs["temperature"] = 0
 
         if self._suporta_json_schema is not False:
             try:
-                r = self.client.chat.completions.create(
+                r = self._criar(
                     messages=full,
                     response_format={
                         "type": "json_schema",
@@ -827,7 +861,7 @@ aderente a este JSON Schema (respeite a ORDEM das chaves):
 
 {json.dumps(schema, ensure_ascii=False, indent=2)}"""}
 
-        r = self.client.chat.completions.create(messages=full, **kwargs)
+        r = self._criar(messages=full, **kwargs)
         return r.choices[0].message.content
 
     # ---------- contexto dinâmico ----------
