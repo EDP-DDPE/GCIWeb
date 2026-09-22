@@ -850,7 +850,9 @@ $(document).ready(function() {
     var initialLat = parseFloat($('#latitude').val()) || -23.550520;
     var initialLng = parseFloat($('#longitude').val()) || -46.633309;
 
-    var map = L.map('map').setView([initialLat, initialLng], 13);
+    // doubleClickZoom desligado: o duplo clique passa a posicionar o pino
+    var map = L.map('map', {doubleClickZoom: false})
+               .setView([initialLat, initialLng], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
@@ -875,14 +877,15 @@ $(document).ready(function() {
     }
 
     // Atualiza campos ao arrastar marcador
-    marker.on('dragend', function(e) {
+    marker.on('dragend', function() {
         var pos = marker.getLatLng();
         $('#latitude').val(pos.lat.toFixed(8));
         $('#longitude').val(pos.lng.toFixed(8));
     });
 
-    // Atualiza marcador e campos ao clicar no mapa
-    map.on('click', function(e) {
+    // Duplo clique para mover o marcador: com clique simples, qualquer clique
+    // no mapa descartava a coordenada que o usuário tinha digitado.
+    map.on('dblclick', function(e) {
         marker.setLatLng(e.latlng);
         $('#latitude').val(e.latlng.lat.toFixed(8));
         $('#longitude').val(e.latlng.lng.toFixed(8));
