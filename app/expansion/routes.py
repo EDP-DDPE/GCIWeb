@@ -17,7 +17,8 @@ import os
 import time
 from urllib.parse import urlencode, urlparse
 
-from flask import Blueprint, current_app, redirect, request, session
+from flask import Blueprint, current_app, render_template_string, request, session
+from markupsafe import escape
 
 from app.auth import get_usuario_logado
 
@@ -33,18 +34,44 @@ def _assinar(payload: dict, segredo: str) -> str:
 
 
 def _retorno_confiavel(retorno: str) -> bool:
-    """Só aceita voltar para o endereço configurado do Expansion (mesmo host e porta)."""
+    """Só aceita voltar para o endereço configurado do Expansion.
+
+    Confere esquema, host e porta. O esquema entra na comparação de propósito: mandar o ticket
+    para https numa porta que responde em http devolve "resposta inválida" no navegador, e é
+    melhor recusar aqui, com mensagem clara, do que produzir esse endereço quebrado.
+    """
     permitido = os.getenv("EXPANSION_URL", "").strip()
     if not retorno or not permitido:
         return False
     alvo, base = urlparse(retorno), urlparse(permitido)
-    return bool(alvo.scheme in ("http", "https") and alvo.netloc and alvo.netloc == base.netloc)
+    return bool(alvo.scheme in ("http", "https") and alvo.netloc
+                and alvo.netloc == base.netloc and alvo.scheme == base.scheme)
+
+
+PAGINA_VOLTA = """<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>Entrando no Expansion 3D</title>
+<meta http-equiv="refresh" content="0;url={{ destino }}"></head>
+<body style="font:14px system-ui,sans-serif;color:#555;padding:24px">
+<p>Entrando no Expansion 3D&hellip;</p>
+<p><a href="{{ destino }}">Continuar</a></p>
+<script>location.replace({{ destino|tojson }});</script>
+</body></html>"""
 
 
 def _voltar(retorno: str, **parametros):
-    """Volta ao Expansion preservando a query que ele já tenha mandado no `retorno`."""
+    """Volta ao Expansion por uma página, e não pelo cabeçalho Location.
+
+    O nginx à frente do Atlas reescreve `http://` para `https://` no Location (proxy_redirect).
+    Como o Expansion responde em HTTP puro na porta 8010, o endereço reescrito dava
+    "a conexão com este site não é segura / resposta inválida" no navegador. Uma navegação
+    disparada pela própria página não passa por essa reescrita.
+
+    O `retorno` já foi conferido contra EXPANSION_URL antes de chegar aqui, e o Jinja escapa o
+    endereço tanto no HTML quanto no JSON do script.
+    """
     separador = "&" if "?" in retorno else "?"
-    return redirect(f"{retorno}{separador}{urlencode(parametros)}")
+    destino = f"{retorno}{separador}{urlencode(parametros)}"
+    return render_template_string(PAGINA_VOLTA, destino=destino)
 
 
 @expansion_bp.route("/api/expansion/ticket")
@@ -52,8 +79,14 @@ def ticket():
     retorno = request.args.get("retorno", "")
     auto = request.args.get("auto", "0")
     if not _retorno_confiavel(retorno):
-        current_app.logger.warning("Expansion: retorno recusado (%s)", retorno[:120])
-        return "Endereço de retorno não autorizado. Confira EXPANSION_URL no .env do Atlas.", 400
+        permitido = os.getenv("EXPANSION_URL", "").strip() or "(não configurado)"
+        current_app.logger.warning("Expansion: retorno recusado (%s); EXPANSION_URL=%s",
+                                   retorno[:120], permitido)
+        # escape(): a mensagem volta como HTML e o retorno vem da URL
+        return (f"Endereço de retorno não autorizado.<br>Recebido: {escape(retorno[:200])}"
+                f"<br>Esperado começar com: {escape(permitido)}"
+                "<br>Acerte EXPANSION_URL no .env do Atlas e url_publica no conf.ini do "
+                "Expansion — os dois precisam ter o mesmo esquema, host e porta."), 400
 
     segredo = os.getenv("EXPANSION_SECRET", "").strip()
     if not segredo:
